@@ -530,6 +530,10 @@
     trainerLiveText: document.getElementById('trainerLiveText'),
     trainerSelectDropdown: document.getElementById('trainerSelectDropdown'),
     trainerThemeToggleBtn: document.getElementById('trainerThemeToggleBtn'),
+    btnSwitchTrainerModal: document.getElementById('btnSwitchTrainerModal'),
+    trainerSelectModal: document.getElementById('trainerSelectModal'),
+    trainerSelectModalList: document.getElementById('trainerSelectModalList'),
+    trainerSelectModalCloseBtn: document.getElementById('trainerSelectModalCloseBtn'),
 
     // Views
     trainerTabTeam: document.getElementById('trainerTabTeam'),
@@ -694,10 +698,25 @@
     // Populate trainer dropdown
     populateTrainerDropdown();
 
-    // If active trainer is not set, default to first trainer or preserve selection
-    if (!state.activeTrainerId && state.trainers.length > 0) {
-      state.activeTrainerId = state.trainers[0].id;
-    } else if (state.activeTrainerId && !state.trainers.some(t => t.id === state.activeTrainerId)) {
+    // Determine active trainer: URL query param -> localStorage -> first trainer
+    const urlTrainerId = new URLSearchParams(window.location.search).get('t');
+    const storedTrainerId = localStorage.getItem('pokemon_selected_trainer');
+
+    if (!state.activeTrainerId) {
+      if (urlTrainerId && state.trainers.some(t => t.id === urlTrainerId)) {
+        state.activeTrainerId = urlTrainerId;
+        localStorage.setItem('pokemon_selected_trainer', urlTrainerId);
+      } else if (storedTrainerId && state.trainers.some(t => t.id === storedTrainerId)) {
+        state.activeTrainerId = storedTrainerId;
+      } else if (state.trainers.length > 0) {
+        state.activeTrainerId = state.trainers[0].id;
+        // Prompt player to select if multiple trainers or first visit
+        if (!hasPromptedTrainerSelect) {
+          hasPromptedTrainerSelect = true;
+          setTimeout(() => openTrainerSelectModal(), 200);
+        }
+      }
+    } else if (!state.trainers.some(t => t.id === state.activeTrainerId)) {
       if (state.trainers.length > 0) state.activeTrainerId = state.trainers[0].id;
     }
 
@@ -849,6 +868,116 @@
   }
 
   // --- TRAINER SELECTION & HEADER ---
+  let hasPromptedTrainerSelect = false;
+
+  function openTrainerSelectModal() {
+    renderTrainerSelectModal();
+    if (elements.trainerSelectModal) {
+      elements.trainerSelectModal.style.display = 'flex';
+    }
+  }
+
+  function closeTrainerSelectModal() {
+    if (elements.trainerSelectModal) {
+      elements.trainerSelectModal.style.display = 'none';
+    }
+  }
+
+  function renderTrainerSelectModal() {
+    if (!elements.trainerSelectModalList) return;
+    elements.trainerSelectModalList.innerHTML = '';
+
+    if (!state.trainers || state.trainers.length === 0) {
+      elements.trainerSelectModalList.innerHTML = `
+        <div style="text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.85rem;">
+          Noch keine Trainer registriert.<br>
+          Dein Spielleiter (DM) muss erst einen Trainer im DM Screen anlegen!
+        </div>
+      `;
+      return;
+    }
+
+    state.trainers.forEach(trainer => {
+      const isSelected = trainer.id === state.activeTrainerId;
+      const card = document.createElement('div');
+      card.style.cssText = `
+        background: ${isSelected ? 'rgba(59,130,246,0.15)' : 'var(--bg-tertiary)'};
+        border: 1px solid ${isSelected ? 'var(--accent-blue)' : 'var(--border-color)'};
+        border-radius: var(--radius-lg);
+        padding: 0.85rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      `;
+
+      // Preview team sprites
+      let previewSprites = '';
+      if (trainer.pokemon && trainer.pokemon.length > 0) {
+        previewSprites = trainer.pokemon.slice(0, 4).map(p => `
+          <img src="${p.sprite}" alt="${p.nickname || p.name_de}" title="${p.nickname || p.name_de}" class="pixelated" style="width:28px; height:28px; object-fit:contain;">
+        `).join('');
+      } else {
+        previewSprites = '<span style="font-size:0.7rem; color:var(--text-muted);">(Keine Pokémon)</span>';
+      }
+
+      card.innerHTML = `
+        <div style="display:flex; align-items:center; gap:0.75rem; min-width:0;">
+          <div style="width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">
+            🧢
+          </div>
+          <div style="min-width:0;">
+            <div style="font-weight:800; font-size:0.95rem; color:var(--text-highlight); display:flex; align-items:center; gap:0.4rem;">
+              <span>${trainer.name}</span>
+              ${isSelected ? '<span style="font-size:0.65rem; background:var(--accent-blue); color:#fff; padding:0.1rem 0.4rem; border-radius:9999px;">Aktiv</span>' : ''}
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.25rem;">
+              ${trainer.role || 'Pokémon-Trainer'} • ${trainer.pokemon?.length || 0} Pokémon
+            </div>
+            <div style="display:flex; align-items:center; gap:0.2rem;">
+              ${previewSprites}
+            </div>
+          </div>
+        </div>
+        <div>
+          <button class="${isSelected ? 'btn-primary' : 'btn-secondary'}" style="font-size:0.75rem; font-weight:700; padding:0.4rem 0.75rem; white-space:nowrap; pointer-events:none;">
+            ${isSelected ? 'Ausgewählt ✓' : 'Spielen →'}
+          </button>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        selectTrainer(trainer.id);
+      });
+
+      elements.trainerSelectModalList.appendChild(card);
+    });
+  }
+
+  function selectTrainer(trainerId) {
+    state.activeTrainerId = trainerId;
+    localStorage.setItem('pokemon_selected_trainer', trainerId);
+
+    // Update URL parameter
+    const url = new URL(window.location.href);
+    url.searchParams.set('t', trainerId);
+    window.history.replaceState({}, '', url);
+
+    if (elements.trainerSelectDropdown) {
+      elements.trainerSelectDropdown.value = trainerId;
+    }
+
+    renderActiveTrainerHeader();
+    renderTrainerTeam();
+    renderTrainerBackpack();
+    renderTrainerBattleGrid();
+    closeTrainerSelectModal();
+
+    const t = state.trainers.find(x => x.id === trainerId);
+    showToast(`Charakter gewechselt zu: ${t?.name || 'Trainer'}`);
+  }
   function populateTrainerDropdown() {
     elements.trainerSelectDropdown.innerHTML = '';
     state.trainers.forEach(t => {
@@ -2649,17 +2778,22 @@
       });
     });
 
-    // Trainer Select Dropdown
+    // Trainer Select Dropdown & Modal
     elements.trainerSelectDropdown.addEventListener('change', (e) => {
-      state.activeTrainerId = e.target.value;
-      const url = new URL(window.location.href);
-      url.searchParams.set('t', state.activeTrainerId);
-      window.history.replaceState({}, '', url);
-      renderActiveTrainerHeader();
-      renderTrainerTeam();
-      renderTrainerBackpack();
-      renderTrainerBattleGrid();
+      selectTrainer(e.target.value);
     });
+
+    if (elements.btnSwitchTrainerModal) {
+      elements.btnSwitchTrainerModal.addEventListener('click', () => {
+        openTrainerSelectModal();
+      });
+    }
+
+    if (elements.trainerSelectModalCloseBtn) {
+      elements.trainerSelectModalCloseBtn.addEventListener('click', () => {
+        closeTrainerSelectModal();
+      });
+    }
 
     // Theme Toggle
     elements.trainerThemeToggleBtn.addEventListener('click', toggleTheme);

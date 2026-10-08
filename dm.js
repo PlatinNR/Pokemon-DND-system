@@ -639,10 +639,46 @@
     bindEvents();
     populateItemsCatalog();
     renderPokedexGrid();
+    checkDmAuth();
     connectSseStream();
     fetchGameState();
     setInterval(fetchGameState, 2500);
   }
+
+  // --- DM AUTHENTICATION (PASSWORD GATE) ---
+  const DM_PASSWORD = 'Ni00JeLuna';
+
+  function checkDmAuth() {
+    const isAuth = sessionStorage.getItem('dm_authenticated') === 'true';
+    const overlay = document.getElementById('dmAuthOverlay');
+    if (overlay) {
+      if (isAuth) {
+        overlay.style.display = 'none';
+      } else {
+        overlay.style.display = 'flex';
+        setTimeout(() => document.getElementById('dmPasswordInput')?.focus(), 150);
+      }
+    }
+  }
+
+  function submitDmLogin() {
+    const pwdInput = document.getElementById('dmPasswordInput');
+    const errEl = document.getElementById('dmLoginError');
+    if (pwdInput && pwdInput.value.trim() === DM_PASSWORD) {
+      sessionStorage.setItem('dm_authenticated', 'true');
+      const overlay = document.getElementById('dmAuthOverlay');
+      if (overlay) overlay.style.display = 'none';
+      if (errEl) errEl.style.display = 'none';
+      showToast('Willkommen, Spielleiter!');
+    } else {
+      if (errEl) errEl.style.display = 'block';
+      if (pwdInput) {
+        pwdInput.value = '';
+        pwdInput.focus();
+      }
+    }
+  }
+  window.submitDmLogin = submitDmLogin;
 
   // --- LIVE SYNC & SSE ---
   function connectSseStream() {
@@ -876,6 +912,16 @@
     // Pokedex Search
     elements.dmPokedexSearch.addEventListener('input', () => renderPokedexGrid());
     elements.dmPokedexSort.addEventListener('change', () => renderPokedexGrid());
+
+    // DM Logout
+    const btnLogout = document.getElementById('btnDmLogout');
+    if (btnLogout) {
+      btnLogout.addEventListener('click', () => {
+        sessionStorage.removeItem('dm_authenticated');
+        checkDmAuth();
+        showToast('Spielleiter abgemeldet.');
+      });
+    }
   }
 
   // --- TRAINERS VIEW (LIVE TEAM MONITORING) ---

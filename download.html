@@ -156,6 +156,16 @@
           </div>
         </div>
 
+        <!-- Registered Trainers Selection Section -->
+        <div style="margin-top:1.25rem; background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.25); border-radius:var(--radius-md); padding:1rem;">
+          <div style="font-size:0.8rem; font-weight:800; color:#93c5fd; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.4rem;">
+            <span>👥</span> Registrierte Trainer (Direkt beitreten):
+          </div>
+          <div id="portalTrainersList" style="display:flex; flex-direction:column; gap:0.5rem;">
+            <div style="font-size:0.75rem; color:var(--text-muted); font-style:italic;">Lade Trainer aus dem DM-Stand...</div>
+          </div>
+        </div>
+
         <!-- Android APK / PWA Instructions -->
         <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1rem; margin-top:1.25rem;">
           <div style="font-size:0.8rem; font-weight:800; color:var(--accent-blue); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.4rem;">
@@ -237,9 +247,9 @@
       </div>
 
       <div style="margin-top:1.5rem; display:flex; flex-direction:column; gap:0.5rem;">
-        <a href="dm.html" class="btn-primary" style="background:linear-gradient(135deg, #7c3aed, #4f46e5); text-align:center; text-decoration:none; padding:0.75rem; font-weight:800; font-size:0.95rem; justify-content:center;">
-          🎮 DM Screen (Spielleiter) starten
-        </a>
+        <button id="btnOpenDmScreen" class="btn-primary" style="background:linear-gradient(135deg, #7c3aed, #4f46e5); text-align:center; padding:0.75rem; font-weight:800; font-size:0.95rem; justify-content:center; border:none; cursor:pointer;">
+          🎮 DM Screen (Spielleiter) starten 🔒
+        </button>
         <a href="index.html" class="btn-secondary" style="text-align:center; text-decoration:none; padding:0.6rem; font-size:0.8rem; justify-content:center;">
           📖 Ursprüngliches Kompendium (Archiv)
         </a>
@@ -264,6 +274,36 @@
       </div>
     </div>
   </section>
+
+  <!-- DM Login Modal in Portal -->
+  <div id="portalDmModal" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:var(--bg-card); border:1px solid rgba(124,58,237,0.5); border-radius:var(--radius-xl); padding:2rem; max-width:400px; width:100%; box-shadow:0 20px 50px rgba(0,0,0,0.8); text-align:center;">
+      <div style="width:56px; height:56px; margin:0 auto 1rem auto; background:linear-gradient(135deg, #7c3aed, #4f46e5); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" alt="Masterball" class="pixelated" style="width:32px; height:32px;">
+      </div>
+      <h3 style="font-size:1.35rem; font-weight:900; color:var(--text-highlight); margin-bottom:0.35rem;">
+        🔒 DM-Passwort
+      </h3>
+      <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1.25rem;">
+        Bitte gib das Spielleiter-Passwort ein, um den DM Screen zu öffnen.
+      </p>
+      <form id="portalDmForm" onsubmit="event.preventDefault(); window.verifyPortalDmPassword();">
+        <input type="password" id="portalDmPasswordInput" placeholder="Passwort eingeben..." required autofocus autocomplete="current-password"
+          style="width:100%; padding:0.75rem 1rem; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); font-size:0.95rem; font-family:var(--font-mono); outline:none; margin-bottom:0.5rem;" />
+        <div id="portalDmError" style="display:none; color:#f87171; font-size:0.8rem; font-weight:700; margin-bottom:0.75rem;">
+          ⚠️ Falsches Passwort!
+        </div>
+        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+          <button type="button" class="btn-secondary" onclick="window.closePortalDmModal()" style="flex:1; justify-content:center; padding:0.65rem;">
+            Abbrechen
+          </button>
+          <button type="submit" class="btn-primary" style="flex:2; justify-content:center; background:linear-gradient(135deg, #7c3aed, #4f46e5); padding:0.65rem; font-weight:800;">
+            Öffnen
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Toast -->
   <div id="toastNotice" class="toast-notice"></div>
@@ -318,6 +358,108 @@
       el.classList.add('visible');
       setTimeout(() => el.classList.remove('visible'), 3200);
     }
+
+    // --- LOAD REGISTERED TRAINERS FROM DM STATE ---
+    function loadPortalTrainers() {
+      fetch('/api/state')
+        .then(r => r.json())
+        .then(st => {
+          const listEl = document.getElementById('portalTrainersList');
+          if (!listEl) return;
+          if (st.trainers && st.trainers.length > 0) {
+            listEl.innerHTML = '';
+            st.trainers.forEach(t => {
+              const btn = document.createElement('a');
+              btn.href = `trainer.html?t=${encodeURIComponent(t.id)}`;
+              btn.className = 'btn-secondary';
+              btn.style.cssText = 'display:flex; align-items:center; justify-content:space-between; text-decoration:none; padding:0.6rem 0.85rem; font-size:0.85rem; background:rgba(255,255,255,0.04); border-radius:var(--radius-md); border:1px solid var(--border-color); transition:all 0.2s ease;';
+              btn.onmouseenter = () => btn.style.borderColor = 'var(--accent-blue)';
+              btn.onmouseleave = () => btn.style.borderColor = 'var(--border-color)';
+
+              const count = t.pokemon ? t.pokemon.length : 0;
+              let spritesHtml = '';
+              if (t.pokemon && t.pokemon.length > 0) {
+                spritesHtml = t.pokemon.slice(0, 3).map(p => `
+                  <img src="${p.sprite}" class="pixelated" style="width:22px; height:22px;" alt="${p.nickname || p.name_de}">
+                `).join('');
+              }
+
+              btn.innerHTML = `
+                <div style="display:flex; align-items:center; gap:0.6rem;">
+                  <span style="font-size:1.2rem;">🧢</span>
+                  <div>
+                    <div style="font-weight:800; color:var(--text-highlight);">${t.name}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">${t.role || 'Pokémon-Trainer'}</div>
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                  <div style="display:flex; align-items:center;">${spritesHtml}</div>
+                  <span style="font-size:0.75rem; background:rgba(59,130,246,0.15); color:#93c5fd; padding:0.2rem 0.6rem; border-radius:9999px; font-weight:700;">
+                    ${count} Pokémon →
+                  </span>
+                </div>
+              `;
+              listEl.appendChild(btn);
+            });
+          } else {
+            listEl.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); font-style:italic;">Noch keine Trainer vom DM registriert.</div>';
+          }
+        })
+        .catch(e => {
+          console.warn('[Portal] Failed to fetch state for trainers list:', e);
+        });
+    }
+    loadPortalTrainers();
+    setInterval(loadPortalTrainers, 5000);
+
+    // --- DM PASSWORD PROTECTION ---
+    const DM_PASSWORD = 'Ni00JeLuna';
+
+    const btnOpenDm = document.getElementById('btnOpenDmScreen');
+    if (btnOpenDm) {
+      btnOpenDm.addEventListener('click', () => {
+        if (sessionStorage.getItem('dm_authenticated') === 'true') {
+          window.location.href = 'dm.html';
+        } else {
+          openPortalDmModal();
+        }
+      });
+    }
+
+    function openPortalDmModal() {
+      const modal = document.getElementById('portalDmModal');
+      const input = document.getElementById('portalDmPasswordInput');
+      const err = document.getElementById('portalDmError');
+      if (modal) modal.style.display = 'flex';
+      if (err) err.style.display = 'none';
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 150);
+      }
+    }
+    window.openPortalDmModal = openPortalDmModal;
+
+    function closePortalDmModal() {
+      const modal = document.getElementById('portalDmModal');
+      if (modal) modal.style.display = 'none';
+    }
+    window.closePortalDmModal = closePortalDmModal;
+
+    function verifyPortalDmPassword() {
+      const input = document.getElementById('portalDmPasswordInput');
+      const err = document.getElementById('portalDmError');
+      if (input && input.value.trim() === DM_PASSWORD) {
+        sessionStorage.setItem('dm_authenticated', 'true');
+        window.location.href = 'dm.html';
+      } else {
+        if (err) err.style.display = 'block';
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+      }
+    }
+    window.verifyPortalDmPassword = verifyPortalDmPassword;
   </script>
 </body>
 </html>

@@ -198,8 +198,13 @@
             Verbinde mit Spielleiter-Server...
           </div>
         </div>
-        <div id="teamCountPill" class="level-badge-large" style="font-size:0.8rem; padding:0.3rem 0.75rem;">
-          0 Pokémon
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <button id="btnSwitchTrainerModal" class="btn-secondary" style="font-size:0.75rem; font-weight:700; padding:0.35rem 0.65rem;">
+            👤 Charakter wechseln
+          </button>
+          <div id="teamCountPill" class="level-badge-large" style="font-size:0.8rem; padding:0.3rem 0.75rem;">
+            0 Pokémon
+          </div>
         </div>
       </div>
 
@@ -461,6 +466,36 @@
         <button class="btn-primary" id="btnSaveManagedMoves">Speichern</button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Trainer / Character Selection Modal -->
+  <div id="trainerSelectModal" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:var(--bg-card); border:1px solid rgba(59,130,246,0.4); border-radius:var(--radius-xl); padding:1.75rem 1.5rem; max-width:480px; width:100%; box-shadow:0 25px 60px rgba(0,0,0,0.9); max-height:90vh; display:flex; flex-direction:column;">
+      <div style="text-align:center; margin-bottom:1.25rem;">
+        <div style="width:52px; height:52px; margin:0 auto 0.75rem auto; background:linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(59,130,246,0.4);">
+          <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="Pokéball" class="pixelated" style="width:30px; height:30px;">
+        </div>
+        <h2 style="font-size:1.35rem; font-weight:900; color:var(--text-highlight); margin-bottom:0.25rem;">
+          Wähle deinen Charakter
+        </h2>
+        <p style="font-size:0.8rem; color:var(--text-secondary);">
+          Wähle einen der vom Spielleiter (DM) registrierten Trainer aus:
+        </p>
+      </div>
+
+      <div id="trainerSelectModalList" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.6rem; padding-right:0.25rem; margin-bottom:1.25rem;">
+        <!-- Filled by trainer.js -->
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <a href="download.html" class="btn-secondary" style="font-size:0.78rem; text-decoration:none; padding:0.4rem 0.75rem;">
+          ← Zurück zum Portal
+        </a>
+        <button id="trainerSelectModalCloseBtn" class="btn-secondary" style="font-size:0.78rem; padding:0.4rem 0.75rem;">
+          Schließen
+        </button>
+      </div>
     </div>
   </div>
 
