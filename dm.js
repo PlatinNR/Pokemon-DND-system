@@ -771,6 +771,20 @@
     fetch('/api/state')
       .then(r => r.json())
       .then(gameState => {
+        if (gameState.version) {
+          try {
+            const localCached = localStorage.getItem('pnp_saved_gamestate');
+            if (localCached) {
+              const cached = JSON.parse(localCached);
+              if (cached && cached.version && cached.version > gameState.version) {
+                console.log('[DM] Restoring newer state to server...');
+                sendAction('SYNC_STATE', cached);
+                return;
+              }
+            }
+            localStorage.setItem('pnp_saved_gamestate', JSON.stringify(gameState));
+          } catch (e) {}
+        }
         state.trainers = gameState.trainers || [];
         state.diceHistory = gameState.diceHistory || [];
         state.battleState = gameState.battleState || { active: true, gridWidth: 20, gridHeight: 14, turnNumber: 1, tokens: [] };
@@ -3164,7 +3178,9 @@
       moves: moveObjects,
       moveAps: poke.moveAps || {},
       ability: poke.ability || getPokemonDefaultAbility(poke.pokemonId),
-      statStages: poke.statStages || { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0 }
+      statStages: poke.statStages || { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0 },
+      customStats: poke.customStats || {},
+      nature: poke.nature || 'Neutral'
     };
 
     sendAction('BATTLE_SPAWN_TOKEN', { token });

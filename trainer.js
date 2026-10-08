@@ -692,6 +692,22 @@
 
   function handleStateUpdate(newState) {
     if (!newState) return;
+
+    if (newState.version) {
+      try {
+        const localCached = localStorage.getItem('pnp_saved_gamestate');
+        if (localCached) {
+          const cached = JSON.parse(localCached);
+          if (cached && cached.version && cached.version > newState.version) {
+            console.log('[Trainer] Restoring newer state to server...');
+            sendAction('SYNC_STATE', cached);
+            return;
+          }
+        }
+        localStorage.setItem('pnp_saved_gamestate', JSON.stringify(newState));
+      } catch (e) {}
+    }
+
     if (newState.trainers) state.trainers = newState.trainers;
     if (newState.battleState) state.battleState = newState.battleState;
 
@@ -847,6 +863,12 @@
             }
           }
 
+          fetchGameState();
+        }
+        break;
+
+      case 'STAT_ALLOCATED':
+        if (payload.trainerId === state.activeTrainerId) {
           fetchGameState();
         }
         break;
@@ -1072,9 +1094,13 @@
             </div>
           </div>
 
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.25rem;">
-            <span class="level-badge-large" style="font-size:0.95rem; padding:0.3rem 0.75rem;">Lv. ${poke.level}</span>
-            <span style="font-size:0.68rem; color:var(--text-muted); font-weight:600;">(Level durch DM)</span>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.35rem;">
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <span class="level-badge-large" style="font-size:0.95rem; padding:0.3rem 0.75rem;">Lv. ${poke.level}</span>
+              <button class="btn-primary btn-trainer-lvl-up" data-puid="${poke.uid}" style="padding:0.25rem 0.65rem; font-size:0.75rem; font-weight:800; background:linear-gradient(135deg, #10b981, #059669); border-radius:var(--radius-sm); border:none; cursor:pointer; color:#fff; display:flex; align-items:center; gap:0.25rem; box-shadow:0 2px 6px rgba(16,185,129,0.3);" title="Level um 1 erhöhen (+2 freie Trainingspunkte)">
+                ⬆️ Level-Up
+              </button>
+            </div>
             ${mapToken ? `
               <span class="status-badge" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); font-size:0.68rem; margin-top:0.2rem;">
                 📍 Auf Karte (${String.fromCharCode(65 + mapToken.x)}${mapToken.y + 1})
@@ -1264,18 +1290,40 @@
   function bindCardActions(card, poke, pData) {
     const puid = poke.uid;
 
+    // Trainer Level Up Button
+    const lvlUpBtn = card.querySelector('.btn-trainer-lvl-up');
+    if (lvlUpBtn) {
+      lvlUpBtn.addEventListener('click', () => {
+        triggerLevelUp(poke, pData);
+      });
+    }
+
     // Allocate Stat Point
     card.querySelectorAll('.btn-allocate-stat').forEach(btn => {
       btn.addEventListener('click', () => {
         const statKey = btn.dataset.stat;
-        sendAction('ALLOCATE_STAT_POINT', { trainerId: state.activeTrainerId, pokemonUid: puid, statKey });
+        if ((poke.freePoints || 0) <= 0) return;
+
         // Optimistic update
-        if (poke.freePoints > 0) {
-          poke.freePoints -= 1;
-          poke.customStats = poke.customStats || {};
-          poke.customStats[statKey] = (poke.customStats[statKey] || 0) + 1;
-          renderTrainerTeam();
+        poke.freePoints = (poke.freePoints || 0) - 1;
+        poke.customStats = poke.customStats || {};
+        poke.customStats[statKey] = (poke.customStats[statKey] || 0) + 1;
+        if (statKey === 'hp') {
+          poke.maxHp = (poke.maxHp || 0) + 1;
+          poke.currentHp = Math.min(poke.maxHp, (poke.currentHp || 0) + 1);
         }
+
+        const statCfg = ATTR_CONFIG.find(a => a.key === statKey);
+        const statName = statCfg ? statCfg.name_de : statKey.toUpperCase();
+        showToast(`✨ +1 Punkt in ${statName} investiert! (Noch ${poke.freePoints} freie Punkte)`);
+
+        renderTrainerTeam();
+
+        sendAction('ALLOCATE_STAT_POINT', {
+          trainerId: state.activeTrainerId,
+          pokemonUid: puid,
+          statKey
+        });
       });
     });
 
@@ -1363,23 +1411,27 @@
       return;
     }
 
+    const oldMaxHp = poke.maxHp || 20;
     // Calculate new Max HP
     const newMaxHp = calculateStat(pData.base_stats.hp, 'hp', newLevel, 31, 0, poke.nature) + ((poke.customStats && poke.customStats.hp) || 0);
+    const hpGain = Math.max(0, newMaxHp - oldMaxHp);
 
     // Update locally
     poke.level = newLevel;
     poke.freePoints = (poke.freePoints || 0) + 2;
     poke.maxHp = newMaxHp;
-    poke.currentHp = Math.min(newMaxHp, poke.currentHp + Math.max(0, newMaxHp - poke.maxHp));
+    poke.currentHp = Math.min(newMaxHp, (poke.currentHp || 0) + hpGain);
 
     // Send action to server
     sendAction('LEVEL_UP_POKEMON', {
       trainerId: state.activeTrainerId,
       pokemonUid: poke.uid,
+      delta: 1,
       newMaxHp: newMaxHp
     });
 
-    showToast(`🎉 Level Up! ${poke.nickname} ist jetzt Level ${newLevel}! (+2 freie Attributspunkte)`);
+    const hpMsg = hpGain > 0 ? ` (+${hpGain} KP geheilt)` : '';
+    showToast(`🎉 Level-Up! ${poke.nickname} ist jetzt Level ${newLevel}! (+2 freie Trainingspunkte${hpMsg})`);
 
     // Check if new moves are unlocked at newLevel!
     const newlyLearnedMoveEntries = (pData.moves.level_up || []).filter(([lvl, mid]) => lvl === newLevel);

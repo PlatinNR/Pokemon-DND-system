@@ -43,12 +43,28 @@ if (fs.existsSync(POKEDEX_FILE)) {
   }
 }
 
+let isStateLoaded = false;
+
 function loadState() {
+  if (isStateLoaded && gameState && gameState.trainers && gameState.trainers.length > 0) {
+    if (fs.existsSync(RUNTIME_STATE_FILE)) {
+      try {
+        const raw = fs.readFileSync(RUNTIME_STATE_FILE, 'utf8');
+        const parsed = JSON.parse(raw);
+        if (parsed && (!gameState.version || (parsed.version && parsed.version >= gameState.version))) {
+          gameState = parsed;
+        }
+      } catch (e) {}
+    }
+    return;
+  }
+
   const target = (isVercel && fs.existsSync(RUNTIME_STATE_FILE)) ? RUNTIME_STATE_FILE : BUNDLED_STATE_FILE;
   if (fs.existsSync(target)) {
     try {
       const raw = fs.readFileSync(target, 'utf8');
       gameState = JSON.parse(raw);
+      if (!gameState.version) gameState.version = 1;
       if (!gameState.battleState) {
         gameState.battleState = { active: true, gridWidth: 20, gridHeight: 14, turnNumber: 1, tokens: [] };
       }
@@ -69,6 +85,7 @@ function loadState() {
           }
         });
       }
+      isStateLoaded = true;
     } catch (e) {
       console.error('[Server] Fehler beim Laden des Spielstands:', e);
     }
@@ -86,13 +103,22 @@ function loadState() {
         pokemon: []
       }
     ];
+    gameState.version = 1;
+    isStateLoaded = true;
     saveState();
   }
 }
 
 function saveState() {
   try {
+    gameState.version = (gameState.version || 1) + 1;
+    gameState.lastModified = Date.now();
     fs.writeFileSync(RUNTIME_STATE_FILE, JSON.stringify(gameState, null, 2), 'utf8');
+    if (!isVercel) {
+      try {
+        fs.writeFileSync(BUNDLED_STATE_FILE, JSON.stringify(gameState, null, 2), 'utf8');
+      } catch (e) {}
+    }
   } catch (e) {
     console.error('[Server] Fehler beim Speichern des Spielstands:', e);
   }
@@ -157,7 +183,7 @@ function handleRequest(req, res) {
   const pathname = url.pathname;
 
   // 1. API: Server-Sent Events (Live Sync Stream)
-  if (pathname === '/api/events') {
+  if (pathname === '/api/events' || pathname.endsWith('/events')) {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
@@ -173,7 +199,7 @@ function handleRequest(req, res) {
   }
 
   // 2. API: Get Game State
-  if (pathname === '/api/state' && req.method === 'GET') {
+  if ((pathname === '/api/state' || pathname.endsWith('/state')) && req.method === 'GET') {
     loadState();
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(gameState));
@@ -181,7 +207,7 @@ function handleRequest(req, res) {
   }
 
   // 3. API: Network info (for QR code & links)
-  if (pathname === '/api/network' && req.method === 'GET') {
+  if ((pathname === '/api/network' || pathname.endsWith('/network')) && req.method === 'GET') {
     const isVercelEnv = Boolean(process.env.VERCEL);
     const hostHeader = req.headers['x-forwarded-host'] || req.headers.host;
     const protoHeader = req.headers['x-forwarded-proto'] || (isVercelEnv ? 'https' : 'http');
@@ -202,7 +228,7 @@ function handleRequest(req, res) {
   }
 
   // 4. API: Post Action (State Updates)
-  if (pathname === '/api/action' && req.method === 'POST') {
+  if ((pathname === '/api/action' || pathname.endsWith('/action')) && req.method === 'POST') {
     const executeAction = (action) => {
       try {
         loadState();
@@ -975,7 +1001,18 @@ function handleAction(action) {
 
   switch (type) {
     case 'SYNC_STATE':
-      if (payload.trainers) gameState.trainers = payload.trainers;
+      if (payload.trainers && Array.isArray(payload.trainers)) {
+        payload.trainers.forEach(incomingTrainer => {
+          const idx = gameState.trainers.findIndex(t => t.id === incomingTrainer.id);
+          if (idx >= 0) {
+            gameState.trainers[idx] = incomingTrainer;
+          } else {
+            gameState.trainers.push(incomingTrainer);
+          }
+        });
+      }
+      if (payload.battleState) gameState.battleState = payload.battleState;
+      if (payload.version) gameState.version = Math.max(gameState.version || 0, payload.version);
       saveState();
       broadcastEvent('STATE_UPDATED', gameState);
       break;
@@ -1093,6 +1130,7 @@ function handleAction(action) {
               mapToken.level = poke.level;
               mapToken.maxHp = poke.maxHp;
               mapToken.currentHp = poke.currentHp;
+              mapToken.customStats = poke.customStats;
             }
           }
 
@@ -1116,16 +1154,21 @@ function handleAction(action) {
       const statTrainer = gameState.trainers.find(t => t.id === payload.trainerId);
       if (statTrainer) {
         const poke = statTrainer.pokemon.find(p => p.uid === payload.pokemonUid);
-        if (poke && poke.freePoints > 0) {
-          poke.freePoints -= 1;
+        if (poke) {
+          if ((poke.freePoints || 0) > 0) {
+            poke.freePoints = (poke.freePoints || 0) - 1;
+          }
           poke.customStats = poke.customStats || {};
           poke.customStats[payload.statKey] = (poke.customStats[payload.statKey] || 0) + 1;
           if (payload.statKey === 'hp') {
             poke.maxHp = (poke.maxHp || 0) + 1;
             poke.currentHp = Math.min(poke.maxHp, (poke.currentHp || 0) + 1);
-            if (gameState.battleState && gameState.battleState.tokens) {
-              const mapToken = gameState.battleState.tokens.find(t => t.pokemonUid === payload.pokemonUid);
-              if (mapToken) {
+          }
+          if (gameState.battleState && gameState.battleState.tokens) {
+            const mapToken = gameState.battleState.tokens.find(t => t.pokemonUid === payload.pokemonUid);
+            if (mapToken) {
+              mapToken.customStats = poke.customStats;
+              if (payload.statKey === 'hp') {
                 mapToken.maxHp = poke.maxHp;
                 mapToken.currentHp = poke.currentHp;
               }
