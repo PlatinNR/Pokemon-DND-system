@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pokémon Pen & Paper – Trainer App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=2.2">
+  <link rel="manifest" href="manifest-trainer.json">
+  <meta name="theme-color" content="#0b0e14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PKMN Trainer">
+  <link rel="icon" href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" type="image/png">
+  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png">
+  <style>
+    /* Trainer Mobile App Specific Polish */
+    .trainer-mobile-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 14, 20, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.6rem 1rem;
+    }
+    .trainer-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .trainer-select-pill {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+    }
+    .trainer-bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 62px;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .bottom-nav-item {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: var(--text-secondary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .bottom-nav-item.active {
+      color: var(--accent-blue);
+    }
+    .bottom-nav-item.active .nav-icon {
+      transform: translateY(-2px);
+      filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+    }
+    .nav-icon {
+      font-size: 1.25rem;
+      transition: transform 0.2s;
+    }
+    .trainer-app-content {
+      padding: 1rem 1rem 80px 1rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .skill-roll-badge {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: #93c5fd;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      transition: all 0.15s;
+    }
+    .skill-roll-badge:hover {
+      background: var(--accent-blue);
+      color: #fff;
+      transform: scale(1.05);
+    }
+    .move-card-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+    @media (min-width: 600px) {
+      .move-card-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .move-item-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0.6rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      transition: border-color 0.15s;
+    }
+    .move-item-card:hover {
+      border-color: var(--accent-blue);
+    }
+    .selectable-move-option {
+      cursor: pointer;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
+      background: var(--bg-tertiary);
+      transition: all 0.2s;
+    }
+    .selectable-move-option.selected {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.12);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Mobile Header -->
+  <header class="trainer-mobile-header">
+    <div class="trainer-header-row">
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="Pokéball" style="width:28px; height:28px;" class="pixelated">
+        <div>
+          <div style="font-weight:900; font-size:0.95rem; line-height:1.1; color:var(--text-highlight);">
+            Trainer-Pass
+          </div>
+          <div style="font-size:0.68rem; color:var(--text-muted);">
+            Pokémon Pen &amp; Paper (Gen 1-5)
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <!-- Live Connection Status -->
+        <div id="trainerLivePill" style="display:flex; align-items:center; gap:0.35rem; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#34d399; padding:0.25rem 0.55rem; border-radius:9999px; font-size:0.7rem; font-weight:700;">
+          <span style="display:inline-block; width:6px; height:6px; background:#10b981; border-radius:50%; box-shadow:0 0 6px #10b981;"></span>
+          <span id="trainerLiveText">Live Sync</span>
+        </div>
+
+        <!-- Switch Trainer Dropdown -->
+        <select id="trainerSelectDropdown" class="select-control" style="padding:0.25rem 0.5rem; font-size:0.75rem; font-weight:800; max-width:130px;"></select>
+
+        <button class="icon-btn" id="trainerThemeToggleBtn" title="Farbschema" style="width:32px; height:32px;">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="trainer-app-content">
+
+    <!-- TAB 1: MEIN TEAM -->
+    <section id="trainerTabTeam" class="view-panel active">
+      <div id="trainerHeaderBanner" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h2 id="activeTrainerNameDisplay" style="font-size:1.3rem; font-weight:900; color:var(--text-highlight);">
+            Trainer wird geladen...
+          </h2>
+          <div id="activeTrainerRoleDisplay" style="font-size:0.75rem; color:var(--text-muted);">
+            Verbinde mit Spielleiter-Server...
+          </div>
+        </div>
+        <div id="teamCountPill" class="level-badge-large" style="font-size:0.8rem; padding:0.3rem 0.75rem;">
+          0 Pokémon
+        </div>
+      </div>
+
+      <!-- Pokémon List Container -->
+      <div id="trainerPokemonList" style="display:flex; flex-direction:column; gap:1.25rem;">
+        <!-- Filled by trainer.js -->
+      </div>
+    </section>
+
+    <!-- TAB 2: MEIN RUCKSACK (ITEMS) -->
+    <section id="trainerTabBackpack" class="view-panel">
+      <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:1rem; margin-bottom:1rem;">
+        <h2 style="font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+          🎒 Mein Rucksack
+        </h2>
+        <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem;">
+          Items, die dir der Spielleiter (DM) ins Inventar gelegt hat.
+        </p>
+      </div>
+
+      <!-- Inventory Grid -->
+      <div id="trainerInventoryGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:0.75rem;">
+        <!-- Filled by trainer.js -->
+      </div>
+    </section>
+
+    <!-- TAB 3: WÜRFEL & PROBEN -->
+    <section id="trainerTabDice" class="view-panel">
+      <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:1rem; margin-bottom:1rem;">
+        <h2 style="font-size:1.2rem; font-weight:800;">🎲 Würfel &amp; P&amp;P Proben</h2>
+        <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem;">
+          Alle Würfe werden live an den Spielleiter (DM Screen) übertragen!
+        </p>
+      </div>
+
+      <!-- Quick Roller Display -->
+      <div class="tool-card" style="margin-bottom:1rem;">
+        <div class="dice-result-box">
+          <div id="playerDiceResult" class="dice-result-value">-</div>
+          <div id="playerDiceLabel" class="dice-result-label">Tippe auf einen Würfel</div>
+        </div>
+
+        <div style="margin-top:0.75rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+          <span style="font-size:0.8rem; font-weight:700; color:var(--text-secondary);">Zusatzbonus:</span>
+          <input type="number" id="playerDiceModifier" value="0" style="width:60px; text-align:center; padding:0.3rem; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:#fff; font-weight:800; font-family:var(--font-mono);">
+        </div>
+
+        <div class="dice-roller-buttons" style="margin-top:1rem;">
+          <button class="dice-btn player-dice-btn" data-sides="20">D20 <span>Fertigkeit</span></button>
+          <button class="dice-btn player-dice-btn" data-sides="100">D100 <span>Genauigkeit</span></button>
+          <button class="dice-btn player-dice-btn" data-sides="6">D6 <span>Schaden</span></button>
+          <button class="dice-btn player-dice-btn" data-sides="8">D8 <span>Schaden</span></button>
+          <button class="dice-btn player-dice-btn" data-sides="10">D10 <span>Schaden</span></button>
+          <button class="dice-btn player-dice-btn" data-sides="12">D12 <span>Kritisch</span></button>
+        </div>
+      </div>
+
+      <!-- Recent Rolls History -->
+      <div class="tool-card">
+        <h3 style="font-size:1rem; font-weight:800; margin-bottom:0.5rem;">📜 Meine letzten Würfe</h3>
+        <div id="playerRollsHistory" class="dice-history-list" style="max-height:240px;">
+          <div class="history-item">Noch keine Würfe durchgeführt.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: TAKTISCHE KAMPFKARTE -->
+    <section id="trainerTabBattle" class="view-panel">
+      <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:0.75rem 1rem; margin-bottom:0.6rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h2 style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.4rem; margin:0;">
+            🗺️ D&amp;D Taktikkarte (Live)
+          </h2>
+          <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:0.15rem;">
+            Tippe auf ein Pokémon, um Reichweiten und Attacken zu sehen.
+          </div>
+        </div>
+        <div id="trainerBattleTokensBadge" style="font-size:0.75rem; font-weight:800; color:#93c5fd; background:var(--bg-tertiary); padding:0.2rem 0.5rem; border-radius:4px;">
+          0 Einheiten
+        </div>
+      </div>
+
+      <!-- Turn & Round Control Toolbar for Trainer -->
+      <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.55rem 0.85rem; margin-bottom:0.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <span style="font-weight:900; font-size:0.95rem; color:var(--text-highlight);">
+            ⚔️ Kampfrunde: <span id="trainerRoundNumber" style="color:#60a5fa; font-family:var(--font-mono);">1</span>
+          </span>
+        </div>
+        <button class="btn-primary" id="btnTrainerEndTurn" style="background:#2563eb; border-color:#1d4ed8; font-size:0.8rem; font-weight:800; padding:0.35rem 0.75rem;">
+          🏁 Runde beenden (Bewegung auffüllen)
+        </button>
+      </div>
+
+      <!-- Scrollable Mobile Board -->
+      <div class="battlemap-board-wrapper" style="min-height:420px; margin-bottom:1rem;">
+        <div id="trainerBattleGrid" class="battlemap-grid">
+          <!-- Rendered by trainer.js -->
+        </div>
+      </div>
+
+      <!-- Selected Token on Mobile -->
+      <div id="trainerSelectedTokenBox" class="tool-card" style="background:var(--bg-card); border:1px solid var(--border-color); padding:0.85rem;">
+        <div style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.35rem;">
+          AUSGEWÄHLTE EINHEIT:
+        </div>
+        <div id="trainerSelectedTokenContent">
+          <div style="font-size:0.8rem; color:var(--text-muted); font-style:italic;">
+            Tippe auf ein Token auf der Karte, um Werte und Attacken-Reichweiten anzuzeigen.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: POKÉDEX NACHSCHLAGEWERK -->
+    <section id="trainerTabPokedex" class="view-panel">
+      <div class="controls-card" style="margin-bottom:1rem;">
+        <div class="search-row">
+          <div class="search-input-wrapper">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="trainerPokedexSearch" class="search-input" placeholder="Pokédex durchsuchen...">
+          </div>
+        </div>
+      </div>
+      <div id="trainerPokedexGrid" class="pokemon-grid"></div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar for Mobile -->
+  <nav class="trainer-bottom-nav">
+    <button class="bottom-nav-item active" data-trainertab="team">
+      <span class="nav-icon">⚔️</span>
+      <span>Mein Team</span>
+    </button>
+    <button class="bottom-nav-item" data-trainertab="battle">
+      <span class="nav-icon">🗺️</span>
+      <span>Kampfkarte</span>
+    </button>
+    <button class="bottom-nav-item" data-trainertab="backpack">
+      <span class="nav-icon">🎒</span>
+      <span>Rucksack</span>
+    </button>
+    <button class="bottom-nav-item" data-trainertab="dice">
+      <span class="nav-icon">🎲</span>
+      <span>Würfel</span>
+    </button>
+    <button class="bottom-nav-item" data-trainertab="pokedex">
+      <span class="nav-icon">📖</span>
+      <span>Pokédex</span>
+    </button>
+  </nav>
+
+  <!-- ==================== HEAL TARGET MODAL (ITEM VERWENDEN) ==================== -->
+  <div id="healTargetModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 480px;">
+      
+      <div class="modal-header" style="background:linear-gradient(135deg, #059669, #10b981); color:#fff;">
+        <h3 style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+          ❤️ Heilitem anwenden
+        </h3>
+        <button class="modal-close-btn" id="healTargetCloseBtn">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:1.25rem; gap:1rem;">
+        <div style="font-size:0.85rem; color:var(--text-secondary);">
+          Wähle ein Pokémon aus deinem Team, das mit <strong id="healItemNameDisplay" style="color:#6ee7b7;"></strong> geheilt werden soll:
+        </div>
+
+        <div id="healTeamMembersList" style="display:flex; flex-direction:column; gap:0.5rem;">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== MOVE LEARNING ON LEVEL-UP MODAL ==================== -->
+  <div id="moveLearnModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 540px;">
+      
+      <div class="modal-header" style="background:linear-gradient(135deg, #1e3a8a, #3b82f6); color:#fff;">
+        <h3 style="font-size:1.15rem; font-weight:900; display:flex; align-items:center; gap:0.5rem;">
+          ✨ Neue Attacke erlernen!
+        </h3>
+        <button class="modal-close-btn" id="moveLearnCloseBtn">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:1.25rem; gap:1rem;">
+        
+        <div style="display:flex; align-items:center; gap:0.75rem; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.75rem;">
+          <img id="moveLearnPokeSprite" src="" alt="" style="width:52px; height:52px;" class="pixelated">
+          <div>
+            <div id="moveLearnPokeName" style="font-weight:900; font-size:1.05rem; color:var(--text-highlight);"></div>
+            <div id="moveLearnSubtitle" style="font-size:0.75rem; color:var(--text-secondary);"></div>
+          </div>
+        </div>
+
+        <!-- The Newly Offered Move -->
+        <div style="background:rgba(59,130,246,0.1); border:2px dashed var(--accent-blue); border-radius:var(--radius-md); padding:0.85rem;">
+          <div style="font-size:0.7rem; font-weight:800; color:var(--accent-blue); text-transform:uppercase; margin-bottom:0.25rem;">
+            NEU VERFÜGBARE ATTACKE:
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.25rem;">
+            <div id="newMoveName" style="font-size:1.15rem; font-weight:900; color:#93c5fd;"></div>
+            <span id="newMoveTypeBadge" class="type-badge"></span>
+          </div>
+          <div id="newMoveStats" style="font-size:0.78rem; font-family:var(--font-mono); color:var(--text-secondary); margin-bottom:0.35rem;"></div>
+          <div id="newMoveDesc" style="font-size:0.75rem; color:var(--text-muted); font-style:italic;"></div>
+        </div>
+
+        <div style="font-size:0.82rem; color:var(--text-secondary); line-height:1.4;">
+          Dein Pokémon beherrscht bereits <strong>4 Attacken</strong>! Wähle eine Attacke aus, die <strong>vergessen werden soll</strong>, um Platz für die neue Attacke zu machen:
+        </div>
+
+        <!-- 4 Current Moves to choose from -->
+        <div id="currentMovesToForgetList" style="display:flex; flex-direction:column; gap:0.5rem;">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-top:0.5rem; border-top:1px solid var(--border-color); padding-top:0.75rem;">
+          <button class="btn-secondary" id="btnDeclineLearnMove" style="font-size:0.8rem;">
+            Nicht lernen (Abbrechen)
+          </button>
+          <button class="btn-primary" id="btnConfirmLearnMove" style="background:linear-gradient(135deg, #ef4444, #dc2626); font-size:0.8rem; font-weight:800;" disabled>
+            Vergessen &amp; Erlernen
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== MOVE MANAGEMENT (SWAP UNLOCKED MOVES) MODAL ==================== -->
+  <div id="manageMovesModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 600px; max-height:90vh; display:flex; flex-direction:column;">
+      
+      <div class="modal-header">
+        <h3 style="font-size:1.15rem; font-weight:800;">
+          🔄 Attacken-Set anpassen (Max. 4)
+        </h3>
+        <button class="modal-close-btn" id="manageMovesCloseBtn">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:1.25rem; overflow-y:auto; flex:1; gap:1rem;">
+        <div style="font-size:0.82rem; color:var(--text-secondary);">
+          Wähle genau bis zu 4 Attacken aus allen Attacken, die dieses Pokémon bis zu seinem aktuellen Level erlernt hat:
+        </div>
+
+        <div id="manageMovesCheckboxList" style="display:flex; flex-direction:column; gap:0.5rem;">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <div style="padding:1rem; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
+        <div id="manageMovesSelectedCount" style="font-size:0.85rem; font-weight:800;">0 / 4 ausgewählt</div>
+        <button class="btn-primary" id="btnSaveManagedMoves">Speichern</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notice -->
+  <div id="toastNotice" class="toast-notice"></div>
+
+  <!-- Scripts -->
+  <script src="data/pokedex_data.js?v=2.2"></script>
+  <script src="trainer.js?v=2.2"></script>
+  <script>
+    // Register Service Worker for PWA / APK Home Screen Installability
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.log('[SW] Service Worker Registration skipped:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

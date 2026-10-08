@@ -1,0 +1,700 @@
+{
+  "trainers": [
+    {
+      "id": "trainer_rot",
+      "name": "Rot",
+      "role": "Pokémon-Trainer",
+      "items": [
+        {
+          "id": "poke_ball",
+          "name_de": "Pokéball",
+          "count": 4,
+          "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+        },
+        {
+          "id": "potion",
+          "name_de": "Trank",
+          "count": 1,
+          "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/potion.png"
+        }
+      ],
+      "pokemon": [
+        {
+          "uid": "tpoke_starter_glumanda",
+          "pokemonId": 5,
+          "name_de": "Glutexo",
+          "nickname": "Flammi",
+          "level": 17,
+          "nature": "Frech",
+          "freePoints": 0,
+          "customStats": {
+            "hp": 0,
+            "atk": 0,
+            "def": 2,
+            "spa": 2,
+            "spd": 0,
+            "spe": 0
+          },
+          "currentHp": 43,
+          "maxHp": 51,
+          "selectedMoves": [
+            33,
+            82,
+            52,
+            10
+          ],
+          "moveAps": {
+            "52": 24
+          }
+        },
+        {
+          "uid": "tpoke_1791384899554_iab63",
+          "pokemonId": 447,
+          "name_de": "Riolu",
+          "nickname": "Kidi",
+          "level": 17,
+          "nature": "Mutig",
+          "freePoints": 0,
+          "customStats": {
+            "hp": 5,
+            "atk": 0,
+            "def": 3,
+            "spa": 0,
+            "spd": 0,
+            "spe": 0
+          },
+          "currentHp": 45,
+          "maxHp": 45,
+          "selectedMoves": [
+            203,
+            68,
+            395,
+            364
+          ],
+          "isConfused": false,
+          "moveAps": {}
+        }
+      ]
+    },
+    {
+      "id": "trainer_blau",
+      "name": "Blau",
+      "role": "Rivale & Ass-Trainer",
+      "items": [
+        {
+          "id": "great_ball",
+          "name_de": "Superball",
+          "count": 3,
+          "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png"
+        },
+        {
+          "id": "water_stone",
+          "name_de": "Wasserstein",
+          "count": 1,
+          "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/water-stone.png"
+        }
+      ],
+      "pokemon": [
+        {
+          "uid": "tpoke_starter_schiggy",
+          "pokemonId": 7,
+          "name_de": "Schiggy",
+          "nickname": "Panzer",
+          "level": 15,
+          "nature": "Kühn",
+          "freePoints": 2,
+          "customStats": {
+            "hp": 0,
+            "atk": 0,
+            "def": 0,
+            "spa": 0,
+            "spd": 0,
+            "spe": 0
+          },
+          "currentHp": 39,
+          "maxHp": 42,
+          "selectedMoves": [
+            33,
+            39,
+            145,
+            110
+          ],
+          "status": []
+        }
+      ]
+    }
+  ],
+  "itemsCatalog": [],
+  "diceHistory": [
+    {
+      "time": "22:25:38",
+      "character": "Konter-Reaktion",
+      "sides": "Konter (2× Schaden)",
+      "roll": "💥 KONTER! Machomei kontert Glurak mit 60 KP Schaden (2× 30 KP)!"
+    },
+    {
+      "time": "22:25:38",
+      "character": "Machomei",
+      "sides": "Konter",
+      "roll": "⚔️ Machomei geht in Konter-Stellung! Greift den nächsten Angreifer automatisch mit 2× Schaden an!"
+    },
+    {
+      "time": "22:25:38",
+      "character": "Spielleiter",
+      "sides": "Runde 12",
+      "roll": "🔄 Runde 12 begonnen! Bewegung aller Einheiten zurückgesetzt."
+    },
+    {
+      "time": "22:25:38",
+      "character": "Machomei",
+      "sides": "Konter",
+      "roll": "⚔️ Machomei geht in Konter-Stellung! Greift den nächsten Angreifer automatisch mit 2× Schaden an!"
+    },
+    {
+      "time": "22:25:38",
+      "character": "Glurak",
+      "sides": "Drachenwut",
+      "roll": "⚔️ Machomei (-19 KP (Fixer Schaden: 40 KP 🐉)) (💪 Überlebt mit 1 KP dank Ausdauer!), 💥 KONTER! Machomei kontert Glurak mit 38 KP Schaden (2× 19 KP)!"
+    },
+    {
+      "time": "22:25:38",
+      "character": "Machomei",
+      "sides": "Konter",
+      "roll": "⚔️ Machomei geht in Konter-Stellung! Greift den nächsten Angreifer automatisch mit 2× Schaden an!"
+    },
+    {
+      "time": "22:25:38",
+      "character": "Machomei",
+      "sides": "Ausdauer",
+      "roll": "💪 Machomei aktiviert Ausdauer! Übersteht fatale Treffer in dieser Runde mit mindestens 1 KP! ⚡ Volle Bewegung zurückerhalten (Hit & Run)!"
+    },
+    {
+      "time": "22:25:38",
+      "character": "Glurak",
+      "sides": "Drachenwut",
+      "roll": "⚔️ Machomei (-40 KP (Fixer Schaden: 40 KP 🐉)), 💥 Machomei wurde besiegt und konnte keinen Konter mehr ausführen."
+    },
+    {
+      "time": "22:25:38",
+      "character": "Machomei",
+      "sides": "Konter",
+      "roll": "⚔️ Machomei geht in Konter-Stellung! Greift den nächsten Angreifer automatisch mit 2× Schaden an!"
+    },
+    {
+      "time": "22:25:38",
+      "character": "Glurak",
+      "sides": "Drachenwut",
+      "roll": "⚔️ Machomei (-40 KP (Fixer Schaden: 40 KP 🐉)), 💥 KONTER! Machomei kontert Glurak mit 80 KP Schaden (2× 40 KP)!"
+    },
+    {
+      "time": "22:25:38",
+      "character": "Machomei",
+      "sides": "Konter",
+      "roll": "⚔️ Machomei geht in Konter-Stellung! Greift den nächsten Angreifer automatisch mit 2× Schaden an!"
+    },
+    {
+      "time": "22:25:11",
+      "character": "Glurak",
+      "sides": "Drachenwut",
+      "roll": "⚔️ Machomei (-40 KP (Fixer Schaden: 40 KP 🐉)), 💥 KONTER! Machomei kontert Glurak mit 80 KP Schaden (2× 40 KP)!, 💀 Glurak wurde durch den Konter besiegt!"
+    },
+    {
+      "time": "22:25:11",
+      "character": "Machomei",
+      "sides": "Konter",
+      "roll": "⚔️ Machomei geht in Konter-Stellung! Greift den nächsten Angreifer automatisch mit 2× Schaden an!"
+    },
+    {
+      "time": "22:25:11",
+      "character": "Glurak",
+      "sides": "Drachenwut",
+      "roll": "⚔️ Machomei (-40 KP (Fixer Schaden: 40 KP 🐉)), 💥 KONTER! Machomei kontert Glurak mit 80 KP Schaden (2× 40 KP)!"
+    },
+    {
+      "time": "22:25:11",
+      "character": "Machomei",
+      "sides": "Konter",
+      "roll": "⚔️ Machomei geht in Konter-Stellung! Greift den nächsten Angreifer automatisch mit 2× Schaden an!"
+    },
+    {
+      "time": "22:12:10",
+      "character": "Höhlen-Zubat",
+      "sides": "Flügelschlag",
+      "roll": "⚔️ Trifft: Flammi (-7 KP)"
+    },
+    {
+      "time": "22:12:05",
+      "character": "Spielleiter",
+      "sides": "Runde 11",
+      "roll": "🔄 Runde 11 begonnen! Bewegung aller Einheiten zurückgesetzt."
+    },
+    {
+      "time": "22:11:56",
+      "character": "Höhlen-Zubat",
+      "sides": "Blutsauger",
+      "roll": "⚔️ Trifft: Flammi (-1 KP (Nicht sehr effektiv... 0.5× 🛡️))"
+    },
+    {
+      "time": "22:11:39",
+      "character": "Flammi",
+      "sides": "Glut",
+      "roll": "⚔️ Höhlen-Zubat (-22 KP)"
+    },
+    {
+      "time": "22:11:22",
+      "character": "Flammi",
+      "sides": "Bewegung",
+      "roll": "🏃 [13,5] (5 F., 0 übrig)"
+    },
+    {
+      "time": "22:11:02",
+      "character": "Rot",
+      "sides": "Runde 10",
+      "roll": "🔄 Runde 10 begonnen! Bewegung aller Einheiten zurückgesetzt."
+    },
+    {
+      "time": "22:09:41",
+      "character": "Pikachu",
+      "sides": "Ausdauer",
+      "roll": "💪 Pikachu aktiviert Ausdauer! Übersteht fatale Treffer in dieser Runde mit mindestens 1 KP! ⚡ Volle Bewegung zurückerhalten (Hit & Run)!"
+    },
+    {
+      "time": "22:09:41",
+      "character": "Spielleiter",
+      "sides": "Runde 9",
+      "roll": "🔄 Runde 9 begonnen! Bewegung aller Einheiten zurückgesetzt."
+    },
+    {
+      "time": "22:09:41",
+      "character": "Pikachu",
+      "sides": "Schutzschild",
+      "roll": "🛡️ Pikachu aktiviert Schutzschild! Wehrt alle Treffer in Runde 8 vollständig ab! ⚡ Volle Bewegung zurückerhalten (Hit & Run)!"
+    },
+    {
+      "time": "22:09:41",
+      "character": "Spielleiter",
+      "sides": "Runde 8",
+      "roll": "🔄 Runde 8 begonnen! Bewegung aller Einheiten zurückgesetzt."
+    },
+    {
+      "time": "22:09:41",
+      "character": "Pikachu",
+      "sides": "Schutzschild",
+      "roll": "❌ Schutzschild von Pikachu ist fehlgeschlagen! (Abklingzeit: nur alle 2 Runden – wieder ab Runde 8 bereit)"
+    },
+    {
+      "time": "22:09:41",
+      "character": "Spielleiter",
+      "sides": "Runde 7",
+      "roll": "🔄 Runde 7 begonnen! Bewegung aller Einheiten zurückgesetzt."
+    },
+    {
+      "time": "22:09:41",
+      "character": "Pikachu",
+      "sides": "Schutzschild",
+      "roll": "🛡️ Pikachu aktiviert Schutzschild! Wehrt alle Treffer in dieser Runde vollständig ab! ⚡ Volle Bewegung zurückerhalten (Hit & Run)!"
+    },
+    {
+      "time": "21:49:30",
+      "character": "Ash",
+      "sides": "Runde 6",
+      "roll": "🔄 Runde 6 begonnen! Bewegung aller Einheiten zurückgesetzt. [Status-Effekte: 💫 Kidi ist nicht mehr verwirrt!]"
+    },
+    {
+      "time": "21:49:30",
+      "character": "Spielleiter",
+      "sides": "Runde 5",
+      "roll": "🔄 Runde 5 begonnen! Bewegung aller Einheiten zurückgesetzt."
+    },
+    {
+      "time": "21:38:26",
+      "character": "Ash",
+      "sides": "Pokéball",
+      "roll": "🔴 Glumanda (Test) wurde vom Feld in den Pokéball zurückgerufen!"
+    },
+    {
+      "time": "21:25:57",
+      "character": "Flammi",
+      "sides": "Tackle",
+      "roll": "⚔️ Schatten-Hunduster (-12 KP)"
+    },
+    {
+      "time": "21:25:48",
+      "character": "Flammi",
+      "sides": "Tackle",
+      "roll": "⚔️ Höhlen-Zubat (-16 KP)"
+    },
+    {
+      "time": "21:20:00",
+      "character": "Höhlen-Zubat",
+      "sides": "Superschall",
+      "roll": "⚔️ Trifft: Kidi (-0 KP (🌀 Verwirrung) [🌀 Verwirrt!])"
+    },
+    {
+      "time": "21:19:37",
+      "character": "Schatten-Hunduster",
+      "sides": "Brüller",
+      "roll": "⚔️ Trifft: Flammi (-0 KP (Status-Attacke))"
+    },
+    {
+      "time": "21:16:16",
+      "character": "Flammi",
+      "sides": "Bewegung",
+      "roll": "🏃 [6,7] (2 F., 3 übrig)"
+    },
+    {
+      "time": "21:14:57",
+      "character": "Höhlen-Zubat",
+      "sides": "Blutsauger",
+      "roll": "⚔️ Trifft: Flammi (-1 KP (Nicht sehr effektiv... 0.5× 🛡️))"
+    },
+    {
+      "time": "21:13:38",
+      "character": "Höhlen-Zubat",
+      "sides": "Flügelschlag",
+      "roll": "⚔️ Trifft: Flammi (-6 KP)"
+    },
+    {
+      "time": "20:32:25",
+      "character": "Spielleiter",
+      "sides": "Runde 4",
+      "roll": "🔄 Runde 4 begonnen! [Status-Effekte: 🔥 Flammi (-3 KP Verbrennung)]"
+    },
+    {
+      "time": "20:10:46",
+      "character": "Glumanda",
+      "sides": "Geowurf",
+      "roll": "⚔️ Rattfratz (-25 KP (Fixer Level-Schaden: 25 KP ⚖️))"
+    },
+    {
+      "time": "20:10:46",
+      "character": "Glumanda",
+      "sides": "Ultraschall (Schallwelle)",
+      "roll": "⚔️ Rattfratz (-20 KP (Fixer Schaden: 20 KP 🔊))"
+    },
+    {
+      "time": "20:10:46",
+      "character": "Glumanda",
+      "sides": "Drachenwut",
+      "roll": "⚔️ Rattfratz (-40 KP (Fixer Schaden: 40 KP 🐉))"
+    },
+    {
+      "time": "20:04:26",
+      "character": "Flammi",
+      "sides": "Drachenwut",
+      "roll": "⚔️ Trifft: Höhlen-Zubat (-0 KP (Status-Attacke))"
+    },
+    {
+      "time": "20:04:19",
+      "character": "Flammi",
+      "sides": "Drachenwut",
+      "roll": "⚔️ Höhlen-Zubat (-0 KP (Status-Attacke))"
+    },
+    {
+      "time": "20:03:59",
+      "character": "Flammi",
+      "sides": "Drachenwut",
+      "roll": "⚔️ Höhlen-Zubat (-0 KP (Status-Attacke))"
+    },
+    {
+      "time": "20:03:58",
+      "character": "Flammi",
+      "sides": "Bewegung",
+      "roll": "🏃 [5,5] (1 F., 0 übrig)"
+    },
+    {
+      "time": "20:03:32",
+      "character": "Flammi",
+      "sides": "Bewegung",
+      "roll": "🏃 [6,5] (2 F., 1 übrig)"
+    },
+    {
+      "time": "17:43:50",
+      "character": "Flammi",
+      "sides": "Ruckzuckhieb",
+      "roll": "⚔️ Höhlen-Zubat (-12 KP) ⚡ Erstschlag! Volle Bewegung zurückerhalten (Hit & Run)!"
+    },
+    {
+      "time": "17:43:50",
+      "character": "Flammi",
+      "sides": "Bewegung",
+      "roll": "🏃 [8,6] (1 F., 4 übrig)"
+    },
+    {
+      "time": "17:23:39",
+      "character": "Höhlen-Zubat",
+      "sides": "Blutsauger",
+      "roll": "⚔️ Trifft: Flammi (-8 KP)"
+    }
+  ],
+  "activeEvents": [],
+  "battleState": {
+    "active": true,
+    "gridWidth": 20,
+    "gridHeight": 15,
+    "tokens": [
+      {
+        "id": "token_enemy_1791407444606_512a",
+        "maxMovement": 5,
+        "remainingMovement": 0,
+        "hasAttacked": false,
+        "statStages": {
+          "atk": 0,
+          "def": 0,
+          "spa": 0,
+          "spd": 0,
+          "spe": 0,
+          "acc": 0
+        },
+        "ability": {
+          "id": 0,
+          "name_de": "Menschlicher Wille",
+          "name_en": "Human Spirit",
+          "desc_de": "Standhafter Geist: 50 KP und alle Basis-Statuswerte auf 70.",
+          "is_hidden": false
+        },
+        "pokemonId": 0,
+        "nickname": "Standard-Mensch",
+        "name_de": "Mensch",
+        "level": 15,
+        "isEnemy": true,
+        "x": 8,
+        "y": 0,
+        "currentHp": 50,
+        "maxHp": 50,
+        "sprite": "https://play.pokemonshowdown.com/sprites/trainers/acetrainer.png",
+        "moves": [
+          {
+            "id": 5,
+            "name_de": "Megahieb",
+            "name_en": "Mega Punch",
+            "type_id": 1,
+            "type_name": "normal",
+            "type_de": "Normal",
+            "category": "physical",
+            "category_de": "Physisch",
+            "power": 80,
+            "accuracy": 85,
+            "pp": 20,
+            "priority": 0,
+            "target_id": 10,
+            "range_type": "single_physical",
+            "range_distance": 2,
+            "is_hit_and_run": false,
+            "range_desc": "Reichweite: 2 Felder (Einzelziel)",
+            "desc_de": "Ein unglaublich kräftiger Hieb.",
+            "desc_en": "The target is slugged by a punch thrown with muscle-packed power.",
+            "tm": null
+          },
+          {
+            "id": 33,
+            "name_de": "Tackle",
+            "name_en": "Tackle",
+            "type_id": 1,
+            "type_name": "normal",
+            "type_de": "Normal",
+            "category": "physical",
+            "category_de": "Physisch",
+            "power": 50,
+            "accuracy": 100,
+            "pp": 35,
+            "priority": 0,
+            "target_id": 10,
+            "range_type": "single_physical",
+            "range_distance": 2,
+            "is_hit_and_run": false,
+            "range_desc": "Reichweite: 2 Felder (Einzelziel)",
+            "desc_de": "Trifft das Ziel mit vollem Körpereinsatz.",
+            "desc_en": "A physical attack in which the user charges and slams into the target with its whole body.",
+            "tm": null
+          },
+          {
+            "id": 98,
+            "name_de": "Ruckzuckhieb",
+            "name_en": "Quick Attack",
+            "type_id": 1,
+            "type_name": "normal",
+            "type_de": "Normal",
+            "category": "physical",
+            "category_de": "Physisch",
+            "power": 40,
+            "accuracy": 100,
+            "pp": 30,
+            "priority": 1,
+            "target_id": 10,
+            "range_type": "priority",
+            "range_distance": 3,
+            "is_hit_and_run": true,
+            "range_desc": "Reichweite: 3 Felder (Einzelziel) • Hit & Run (Darf danach noch ziehen)",
+            "desc_de": "Sehr schneller Angriff mit Erstschlaggarantie.",
+            "desc_en": "The user lunges at the target at a speed that makes it almost invisible. It is sure to strike first.",
+            "tm": null
+          },
+          {
+            "id": 182,
+            "name_de": "Schutzschild",
+            "name_en": "Protect",
+            "type_id": 1,
+            "type_name": "normal",
+            "type_de": "Normal",
+            "category": "status",
+            "category_de": "Status",
+            "power": null,
+            "accuracy": null,
+            "pp": 10,
+            "priority": 4,
+            "target_id": 7,
+            "range_type": "priority",
+            "range_distance": 3,
+            "is_hit_and_run": true,
+            "range_desc": "Reichweite: 3 Felder (Einzelziel) • Hit & Run (Darf danach noch ziehen)",
+            "desc_de": "Anwender weicht jeder Attacke aus. Scheitert eventuell bei Wiederholung.",
+            "desc_en": "It enables the user to evade all attacks. Its chance of failing rises if it is used in succession.",
+            "tm": "TM17"
+          }
+        ],
+        "moveAps": {},
+        "isHuman": true
+      }
+    ],
+    "turnNumber": 12
+  },
+  "enemyPresets": [
+    {
+      "id": "enemy_human_standard",
+      "pokemonId": 0,
+      "name_de": "Mensch",
+      "nickname": "Standard-Mensch",
+      "level": 15,
+      "nature": "Neutral",
+      "category": "Menschen & NPCs",
+      "currentHp": 50,
+      "maxHp": 50,
+      "selectedMoves": [
+        5,
+        33,
+        98,
+        182
+      ],
+      "sprite": "https://play.pokemonshowdown.com/sprites/trainers/acetrainer.png",
+      "ability": {
+        "id": 0,
+        "name_de": "Menschlicher Wille",
+        "name_en": "Human Spirit",
+        "desc_de": "Standhafter Geist: 50 KP und alle Basis-Statuswerte auf 70.",
+        "is_hidden": false
+      },
+      "stats": {
+        "hp": 50,
+        "atk": 70,
+        "def": 70,
+        "spa": 70,
+        "spd": 70,
+        "spe": 70
+      }
+    },
+    {
+      "id": "enemy_zubat_1",
+      "pokemonId": 41,
+      "name_de": "Zubat",
+      "nickname": "Höhlen-Zubat",
+      "level": 12,
+      "nature": "Hastig",
+      "currentHp": 32,
+      "maxHp": 32,
+      "selectedMoves": [
+        141,
+        109,
+        48,
+        17
+      ],
+      "category": "Wildes Pokémon"
+    },
+    {
+      "id": "enemy_rettan_1",
+      "pokemonId": 23,
+      "name_de": "Rettan",
+      "nickname": "Gift-Rettan",
+      "level": 14,
+      "nature": "Frech",
+      "currentHp": 36,
+      "maxHp": 36,
+      "selectedMoves": [
+        40,
+        103,
+        44,
+        35
+      ],
+      "category": "Wildes Pokémon"
+    },
+    {
+      "id": "enemy_hunduster_1",
+      "pokemonId": 228,
+      "name_de": "Hunduster",
+      "nickname": "Schatten-Hunduster",
+      "level": 15,
+      "nature": "Hitzig",
+      "currentHp": 41,
+      "maxHp": 41,
+      "selectedMoves": [
+        52,
+        44,
+        98,
+        46
+      ],
+      "category": "Team Rocket"
+    },
+    {
+      "id": "enemy_kiesling_1",
+      "pokemonId": 524,
+      "name_de": "Kiesling",
+      "nickname": "Felsen-Kiesling",
+      "level": 13,
+      "nature": "Hart",
+      "currentHp": 43,
+      "maxHp": 43,
+      "selectedMoves": [
+        33,
+        88,
+        157,
+        106
+      ],
+      "category": "Wildes Pokémon"
+    },
+    {
+      "id": "enemy_zurrokex_1",
+      "pokemonId": 559,
+      "name_de": "Zurrokex",
+      "nickname": "Gossen-Zurrokex",
+      "level": 16,
+      "nature": "Mutig",
+      "currentHp": 48,
+      "maxHp": 48,
+      "selectedMoves": [
+        154,
+        43,
+        67,
+        184
+      ],
+      "category": "Wildes Pokémon"
+    },
+    {
+      "id": "enemy_1791400645986_kyog",
+      "pokemonId": 6,
+      "name_de": "Glurak",
+      "nickname": "Ritter Glurak",
+      "level": 39,
+      "nature": "Still",
+      "category": "Trainer-Pokémon",
+      "currentHp": 121,
+      "maxHp": 121,
+      "selectedMoves": [
+        184,
+        424,
+        481,
+        17
+      ]
+    }
+  ],
+  "pendingRequests": []
+}

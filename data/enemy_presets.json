@@ -1,0 +1,120 @@
+[
+  {
+    "id": "enemy_human_standard",
+    "pokemonId": 0,
+    "name_de": "Mensch",
+    "nickname": "Standard-Mensch",
+    "level": 15,
+    "nature": "Neutral",
+    "category": "Menschen & NPCs",
+    "currentHp": 50,
+    "maxHp": 50,
+    "selectedMoves": [
+      5,
+      33,
+      98,
+      182
+    ],
+    "sprite": "https://play.pokemonshowdown.com/sprites/trainers/acetrainer.png",
+    "ability": {
+      "id": 0,
+      "name_de": "Menschlicher Wille",
+      "name_en": "Human Spirit",
+      "desc_de": "Standhafter Geist: 50 KP und alle Basis-Statuswerte auf 70.",
+      "is_hidden": false
+    },
+    "stats": {
+      "hp": 50,
+      "atk": 70,
+      "def": 70,
+      "spa": 70,
+      "spd": 70,
+      "spe": 70
+    }
+  },
+  {
+    "id": "enemy_zubat_1",
+    "pokemonId": 41,
+    "name_de": "Zubat",
+    "nickname": "Höhlen-Zubat",
+    "level": 12,
+    "nature": "Hastig",
+    "currentHp": 32,
+    "maxHp": 32,
+    "selectedMoves": [
+      141,
+      109,
+      48,
+      17
+    ],
+    "category": "Wildes Pokémon"
+  },
+  {
+    "id": "enemy_rettan_1",
+    "pokemonId": 23,
+    "name_de": "Rettan",
+    "nickname": "Gift-Rettan",
+    "level": 14,
+    "nature": "Frech",
+    "currentHp": 36,
+    "maxHp": 36,
+    "selectedMoves": [
+      40,
+      103,
+      44,
+      35
+    ],
+    "category": "Wildes Pokémon"
+  },
+  {
+    "id": "enemy_hunduster_1",
+    "pokemonId": 228,
+    "name_de": "Hunduster",
+    "nickname": "Schatten-Hunduster",
+    "level": 15,
+    "nature": "Hitzig",
+    "currentHp": 41,
+    "maxHp": 41,
+    "selectedMoves": [
+      52,
+      44,
+      98,
+      46
+    ],
+    "category": "Team Rocket"
+  },
+  {
+    "id": "enemy_kiesling_1",
+    "pokemonId": 524,
+    "name_de": "Kiesling",
+    "nickname": "Felsen-Kiesling",
+    "level": 13,
+    "nature": "Hart",
+    "currentHp": 43,
+    "maxHp": 43,
+    "selectedMoves": [
+      33,
+      88,
+      157,
+      106
+    ],
+    "category": "Wildes Pokémon"
+  },
+  {
+    "id": "enemy_zurrokex_1",
+    "pokemonId": 559,
+    "name_de": "Zurrokex",
+    "nickname": "Gossen-Zurrokex",
+    "level": 16,
+    "nature": "Mutig",
+    "currentHp": 48,
+    "maxHp": 48,
+    "selectedMoves": [
+      154,
+      43,
+      67,
+      184
+    ],
+    "category": "Wildes Pokémon"
+  }
+]

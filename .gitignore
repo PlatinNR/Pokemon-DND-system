@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Raw CSV datasets (19MB, offline generation only)
+data_raw/
+
+# Vercel & build artifacts
+.vercel
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

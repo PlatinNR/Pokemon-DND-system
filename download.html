@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokémon Pen & Paper – Download & App Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=2.2">
+  <link rel="icon" href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" type="image/png">
+  <style>
+    .portal-hero {
+      text-align: center;
+      padding: 3rem 1rem 2rem 1rem;
+      background: radial-gradient(circle at 50% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 60%);
+    }
+    .portal-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 1rem 3rem 1rem;
+    }
+    @media (min-width: 768px) {
+      .portal-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .app-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .app-card:hover {
+      border-color: var(--accent-blue);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    }
+    .app-card.dm-card:hover {
+      border-color: #8b5cf6;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .qr-container {
+      background: #ffffff;
+      padding: 0.75rem;
+      border-radius: var(--radius-md);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      margin: 1rem 0;
+    }
+    .qr-container img {
+      width: 160px;
+      height: 160px;
+      display: block;
+    }
+    .instruction-step {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      color: var(--text-secondary);
+    }
+    .step-number {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-highlight);
+      font-weight: 800;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Hero Header -->
+  <header class="portal-hero">
+    <div style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); padding:0.35rem 0.85rem; border-radius:9999px; margin-bottom:1rem;">
+      <span style="font-size:0.8rem; font-weight:800; color:#93c5fd;">GEN 1–5 SCHWARZ &amp; WEISS EDITION</span>
+    </div>
+    <h1 style="font-size:2.4rem; font-weight:900; color:var(--text-highlight); letter-spacing:-0.5px; margin-bottom:0.5rem;">
+      Pokémon Pen &amp; Paper App-Portal
+    </h1>
+    <p style="font-size:1.05rem; color:var(--text-secondary); max-width:650px; margin:0 auto; line-height:1.5;">
+      Wähle deine Anwendung: Der Spielleiter steuert die Welt auf dem <strong>DM Screen</strong>, während die Spieler ihr Team und ihre Items in der mobilen <strong>Trainer-App</strong> verwalten.
+    </p>
+
+    <!-- Network Server Status Pill -->
+    <div style="margin-top:1.25rem; display:inline-flex; align-items:center; gap:0.75rem; background:var(--bg-card); border:1px solid var(--border-color); padding:0.5rem 1rem; border-radius:var(--radius-full); font-size:0.85rem;">
+      <span style="display:inline-block; width:10px; height:10px; background:#10b981; border-radius:50%; box-shadow:0 0 8px #10b981;"></span>
+      <span style="color:var(--text-secondary);">Server- / Online-Adresse:</span>
+      <strong id="serverHostDisplay" style="font-family:var(--font-mono); color:#93c5fd;">Wird ermittelt...</strong>
+    </div>
+  </header>
+
+  <!-- Two Apps Grid -->
+  <main class="portal-grid">
+
+    <!-- ==================== CARD 1: TRAINER APP (SPIELER) ==================== -->
+    <div class="app-card" style="border-top: 4px solid var(--accent-blue);">
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+          <div style="width:56px; height:56px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center;">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="Pokéball" style="width:36px; height:36px;" class="pixelated">
+          </div>
+          <span class="badge-pill" style="background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3);">
+            📱 FÜR SPIELER / HANDY
+          </span>
+        </div>
+
+        <h2 style="font-size:1.6rem; font-weight:900; color:var(--text-highlight); margin-bottom:0.4rem;">
+          Trainer-App
+        </h2>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.25rem; line-height:1.45;">
+          Perfekt für Smartphones optimiert. Verwalte dein Pokémon-Team, verfolge deine KP in Echtzeit, steuere Attacken beim Level-Up, verteile Attributspunkte und führe P&amp;P Fertigkeitsproben durch.
+        </p>
+
+        <!-- QR Code for Mobile Scanning -->
+        <div style="text-align:center;">
+          <div style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">
+            Mit dem Handy-Kamera scannen:
+          </div>
+          <div class="qr-container">
+            <img id="trainerQrCodeImg" src="" alt="Trainer App QR Code">
+          </div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.25rem;">
+            (Beide Geräte müssen im selben WLAN sein)
+          </div>
+        </div>
+
+        <!-- Android APK / PWA Instructions -->
+        <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1rem; margin-top:1.25rem;">
+          <div style="font-size:0.8rem; font-weight:800; color:var(--accent-blue); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.4rem;">
+            <span>🤖</span> Auf Android als vollwertige App (APK) installieren:
+          </div>
+          <div class="instruction-step">
+            <div class="step-number">1</div>
+            <div>Scanne den QR-Code oder öffne den Trainer-Link in <strong>Google Chrome</strong> auf deinem Android-Handy.</div>
+          </div>
+          <div class="instruction-step">
+            <div class="step-number">2</div>
+            <div>Tippe oben rechts auf die drei Punkte <strong>(⋮)</strong> und wähle <strong>"App installieren"</strong> oder <strong>"Zum Startbildschirm hinzufügen"</strong>.</div>
+          </div>
+          <div class="instruction-step" style="margin-bottom:0;">
+            <div class="step-number">3</div>
+            <div>Die App erscheint nun mit <strong>Pokéball-Icon</strong> auf deinem Startbildschirm – im Vollbild ohne Browser-Adressleiste!</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+        <a id="btnOpenTrainerApp" href="trainer.html" class="btn-primary" style="text-align:center; text-decoration:none; padding:0.75rem; font-weight:800; font-size:0.95rem; justify-content:center;">
+          📱 Trainer-App im Browser öffnen
+        </a>
+        <button id="btnCopyTrainerLink" class="btn-secondary" style="padding:0.6rem; font-size:0.8rem; justify-content:center;">
+          📋 Link für Spieler kopieren
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== CARD 2: DM SCREEN (SPIELLEITER) ==================== -->
+    <div class="app-card dm-card" style="border-top: 4px solid #8b5cf6;">
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+          <div style="width:56px; height:56px; background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center;">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" alt="Masterball" style="width:36px; height:36px;" class="pixelated">
+          </div>
+          <span class="badge-pill" style="background:rgba(139,92,246,0.15); color:#c4b5fd; border:1px solid rgba(139,92,246,0.3);">
+            🎮 FÜR SPIELLEITER / DM
+          </span>
+        </div>
+
+        <h2 style="font-size:1.6rem; font-weight:900; color:var(--text-highlight); margin-bottom:0.4rem;">
+          DM Screen (Spielleiter)
+        </h2>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.25rem; line-height:1.45;">
+          Die Steuerzentrale für den Spielleiter (am Laptop oder Tablet). Behalte alle Spieler-Teams und KP im Blick, entscheide über Entwicklungen mit Sicherheitsabfrage, vergib Items live und empfange Würfelwürfe.
+        </p>
+
+        <!-- DM Features Highlights -->
+        <div style="display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.5rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; color:var(--text-primary); background:rgba(255,255,255,0.03); padding:0.5rem 0.75rem; border-radius:var(--radius-sm);">
+            <span>✨</span> <strong>Entwicklungs-Zentrum:</strong> Volle DM-Kontrolle (Level, Item, Tausch, Ort) mit Bestätigungsdialog.
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; color:var(--text-primary); background:rgba(255,255,255,0.03); padding:0.5rem 0.75rem; border-radius:var(--radius-sm);">
+            <span>🎒</span> <strong>Live-Item-Vergabe:</strong> Lege Spielern mit einem Klick Bälle, Tränke &amp; Steine in den Rucksack.
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; color:var(--text-primary); background:rgba(255,255,255,0.03); padding:0.5rem 0.75rem; border-radius:var(--radius-sm);">
+            <span>📜</span> <strong>Live-Würfellog:</strong> Alle Proben und Attacken treffen in Echtzeit ein.
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; color:var(--text-primary); background:rgba(255,255,255,0.03); padding:0.5rem 0.75rem; border-radius:var(--radius-sm);">
+            <span>📖</span> <strong>Pokédex 1–5:</strong> Alle 649 Pokémon mit Schwarz/Weiß Sprites und Level 50 Standardwerten.
+          </div>
+        </div>
+
+        <!-- Online & Remote Play Guidance -->
+        <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1rem;">
+          <div style="font-size:0.8rem; font-weight:800; color:#c4b5fd; margin-bottom:0.4rem; display:flex; align-items:center; gap:0.4rem;">
+            <span>🌐</span> Über das Internet spielen (Remote P&amp;P):
+          </div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+            Sitzen deine Spieler nicht im selben WLAN? Nutze einen kostenlosen Tunnel wie <strong>Cloudflare Tunnel</strong> oder <strong>ngrok</strong>:
+            <div style="font-family:var(--font-mono); font-size:0.75rem; background:rgba(0,0,0,0.4); padding:0.35rem 0.6rem; border-radius:4px; margin-top:0.35rem; color:#a7f3d0;">
+              npx localtunnel --port 3000
+            </div>
+            Die generierte HTTPS-URL gibst du einfach deinen Spielern – funktioniert weltweit live!
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+        <a href="dm.html" class="btn-primary" style="background:linear-gradient(135deg, #7c3aed, #4f46e5); text-align:center; text-decoration:none; padding:0.75rem; font-weight:800; font-size:0.95rem; justify-content:center;">
+          🎮 DM Screen (Spielleiter) starten
+        </a>
+        <a href="index.html" class="btn-secondary" style="text-align:center; text-decoration:none; padding:0.6rem; font-size:0.8rem; justify-content:center;">
+          📖 Ursprüngliches Kompendium (Archiv)
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- APK Packaging Batch Notice -->
+  <section style="max-width:1000px; margin:0 auto 3rem auto; padding:0 1rem;">
+    <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h3 style="font-size:1.1rem; font-weight:800; color:var(--text-highlight); margin-bottom:0.25rem;">
+          📦 Standalone Android APK bauen
+        </h3>
+        <p style="font-size:0.82rem; color:var(--text-secondary); max-width:650px;">
+          Im Projektordner liegt die Datei <strong>build_apk.bat</strong>. Damit kannst du eine native <code>.apk</code> Datei für Android generieren, falls du sie als echte Installationsdatei per WhatsApp / Discord verschicken möchtest.
+        </p>
+      </div>
+      <div style="font-family:var(--font-mono); font-size:0.8rem; background:var(--bg-tertiary); padding:0.5rem 0.85rem; border-radius:var(--radius-sm); border:1px solid var(--border-color); color:#60a5fa;">
+        build_apk.bat
+      </div>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <div id="toastNotice" class="toast-notice"></div>
+
+  <script>
+    // Fetch network information and setup QR code
+    let currentTrainerUrl = `${window.location.origin}/trainer.html`;
+    const isOnline = window.location.protocol === 'https:' || (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1');
+
+    if (isOnline) {
+      currentTrainerUrl = `${window.location.origin}/trainer.html`;
+      document.getElementById('serverHostDisplay').textContent = window.location.origin;
+      document.getElementById('btnOpenTrainerApp').href = currentTrainerUrl;
+      const qrImg = document.getElementById('trainerQrCodeImg');
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(currentTrainerUrl)}`;
+    } else {
+      fetch('/api/network')
+        .then(r => r.json())
+        .then(net => {
+          const localIp = net.localIp || window.location.hostname;
+          const port = net.port || window.location.port || 3000;
+          const hostStr = `http://${localIp}:${port}`;
+          currentTrainerUrl = `${hostStr}/trainer.html`;
+
+          document.getElementById('serverHostDisplay').textContent = hostStr;
+          document.getElementById('btnOpenTrainerApp').href = currentTrainerUrl;
+
+          // Generate QR code pointing directly to local IP
+          const qrImg = document.getElementById('trainerQrCodeImg');
+          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(currentTrainerUrl)}`;
+          qrImg.src = qrUrl;
+        })
+        .catch(e => {
+          document.getElementById('serverHostDisplay').textContent = window.location.origin;
+          const qrImg = document.getElementById('trainerQrCodeImg');
+          qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(currentTrainerUrl)}`;
+        });
+    }
+
+    // Copy link handler
+    document.getElementById('btnCopyTrainerLink').addEventListener('click', () => {
+      navigator.clipboard.writeText(currentTrainerUrl).then(() => {
+        showToast('Link zur Trainer-App in die Zwischenablage kopiert!');
+      }).catch(() => {
+        prompt('Hier ist der Link für deine Spieler:', currentTrainerUrl);
+      });
+    });
+
+    function showToast(msg) {
+      const el = document.getElementById('toastNotice');
+      el.textContent = msg;
+      el.classList.add('visible');
+      setTimeout(() => el.classList.remove('visible'), 3200);
+    }
+  </script>
+</body>
+</html>

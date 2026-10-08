@@ -1,0 +1,2848 @@
+{
+  "1": [
+    {
+      "target_id": 2,
+      "target_name_de": "Bisaknosp",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "2": [
+    {
+      "target_id": 3,
+      "target_name_de": "Bisaflor",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "4": [
+    {
+      "target_id": 5,
+      "target_name_de": "Glutexo",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "5": [
+    {
+      "target_id": 6,
+      "target_name_de": "Glurak",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "7": [
+    {
+      "target_id": 8,
+      "target_name_de": "Schillok",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "8": [
+    {
+      "target_id": 9,
+      "target_name_de": "Turtok",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "10": [
+    {
+      "target_id": 11,
+      "target_name_de": "Safcon",
+      "type": "level",
+      "min_level": 7,
+      "desc": "Level-Entwicklung (Ab Lv. 7)"
+    }
+  ],
+  "11": [
+    {
+      "target_id": 12,
+      "target_name_de": "Smettbo",
+      "type": "level",
+      "min_level": 10,
+      "desc": "Level-Entwicklung (Ab Lv. 10)"
+    }
+  ],
+  "13": [
+    {
+      "target_id": 14,
+      "target_name_de": "Kokuna",
+      "type": "level",
+      "min_level": 7,
+      "desc": "Level-Entwicklung (Ab Lv. 7)"
+    }
+  ],
+  "14": [
+    {
+      "target_id": 15,
+      "target_name_de": "Bibor",
+      "type": "level",
+      "min_level": 10,
+      "desc": "Level-Entwicklung (Ab Lv. 10)"
+    }
+  ],
+  "16": [
+    {
+      "target_id": 17,
+      "target_name_de": "Tauboga",
+      "type": "level",
+      "min_level": 18,
+      "desc": "Level-Entwicklung (Ab Lv. 18)"
+    }
+  ],
+  "17": [
+    {
+      "target_id": 18,
+      "target_name_de": "Tauboss",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "19": [
+    {
+      "target_id": 20,
+      "target_name_de": "Rattikarl",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "21": [
+    {
+      "target_id": 22,
+      "target_name_de": "Ibitak",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "23": [
+    {
+      "target_id": 24,
+      "target_name_de": "Arbok",
+      "type": "level",
+      "min_level": 22,
+      "desc": "Level-Entwicklung (Ab Lv. 22)"
+    }
+  ],
+  "172": [
+    {
+      "target_id": 25,
+      "target_name_de": "Pikachu",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "25": [
+    {
+      "target_id": 26,
+      "target_name_de": "Raichu",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Donnerstein)"
+    }
+  ],
+  "27": [
+    {
+      "target_id": 28,
+      "target_name_de": "Sandamer",
+      "type": "level",
+      "min_level": 22,
+      "desc": "Level-Entwicklung (Ab Lv. 22)"
+    }
+  ],
+  "29": [
+    {
+      "target_id": 30,
+      "target_name_de": "Nidorina",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "30": [
+    {
+      "target_id": 31,
+      "target_name_de": "Nidoqueen",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Mondstein)"
+    }
+  ],
+  "32": [
+    {
+      "target_id": 33,
+      "target_name_de": "Nidorino",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "33": [
+    {
+      "target_id": 34,
+      "target_name_de": "Nidoking",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Mondstein)"
+    }
+  ],
+  "173": [
+    {
+      "target_id": 35,
+      "target_name_de": "Piepi",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "35": [
+    {
+      "target_id": 36,
+      "target_name_de": "Pixi",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Mondstein)"
+    }
+  ],
+  "37": [
+    {
+      "target_id": 38,
+      "target_name_de": "Vulnona",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Feuerstein)"
+    }
+  ],
+  "174": [
+    {
+      "target_id": 39,
+      "target_name_de": "Pummeluff",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "39": [
+    {
+      "target_id": 40,
+      "target_name_de": "Knuddeluff",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Mondstein)"
+    }
+  ],
+  "41": [
+    {
+      "target_id": 42,
+      "target_name_de": "Golbat",
+      "type": "level",
+      "min_level": 22,
+      "desc": "Level-Entwicklung (Ab Lv. 22)"
+    }
+  ],
+  "43": [
+    {
+      "target_id": 44,
+      "target_name_de": "Duflor",
+      "type": "level",
+      "min_level": 21,
+      "desc": "Level-Entwicklung (Ab Lv. 21)"
+    }
+  ],
+  "44": [
+    {
+      "target_id": 45,
+      "target_name_de": "Giflor",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Blattstein)"
+    },
+    {
+      "target_id": 182,
+      "target_name_de": "Blubella",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Sonnenstein)"
+    }
+  ],
+  "46": [
+    {
+      "target_id": 47,
+      "target_name_de": "Parasek",
+      "type": "level",
+      "min_level": 24,
+      "desc": "Level-Entwicklung (Ab Lv. 24)"
+    }
+  ],
+  "48": [
+    {
+      "target_id": 49,
+      "target_name_de": "Omot",
+      "type": "level",
+      "min_level": 31,
+      "desc": "Level-Entwicklung (Ab Lv. 31)"
+    }
+  ],
+  "50": [
+    {
+      "target_id": 51,
+      "target_name_de": "Digdri",
+      "type": "level",
+      "min_level": 26,
+      "desc": "Level-Entwicklung (Ab Lv. 26)"
+    }
+  ],
+  "52": [
+    {
+      "target_id": 53,
+      "target_name_de": "Snobilikat",
+      "type": "level",
+      "min_level": 28,
+      "desc": "Level-Entwicklung (Ab Lv. 28)"
+    }
+  ],
+  "54": [
+    {
+      "target_id": 55,
+      "target_name_de": "Entoron",
+      "type": "level",
+      "min_level": 33,
+      "desc": "Level-Entwicklung (Ab Lv. 33)"
+    }
+  ],
+  "56": [
+    {
+      "target_id": 57,
+      "target_name_de": "Rasaff",
+      "type": "level",
+      "min_level": 28,
+      "desc": "Level-Entwicklung (Ab Lv. 28)"
+    }
+  ],
+  "58": [
+    {
+      "target_id": 59,
+      "target_name_de": "Arkani",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Feuerstein)"
+    }
+  ],
+  "60": [
+    {
+      "target_id": 61,
+      "target_name_de": "Quaputzi",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "61": [
+    {
+      "target_id": 62,
+      "target_name_de": "Quappo",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Wasserstein)"
+    },
+    {
+      "target_id": 186,
+      "target_name_de": "Quaxo",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (King-Stein)"
+    }
+  ],
+  "63": [
+    {
+      "target_id": 64,
+      "target_name_de": "Kadabra",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "64": [
+    {
+      "target_id": 65,
+      "target_name_de": "Simsala",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch-Entwicklung"
+    }
+  ],
+  "66": [
+    {
+      "target_id": 67,
+      "target_name_de": "Maschock",
+      "type": "level",
+      "min_level": 28,
+      "desc": "Level-Entwicklung (Ab Lv. 28)"
+    }
+  ],
+  "67": [
+    {
+      "target_id": 68,
+      "target_name_de": "Machomei",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch-Entwicklung"
+    }
+  ],
+  "69": [
+    {
+      "target_id": 70,
+      "target_name_de": "Ultrigaria",
+      "type": "level",
+      "min_level": 21,
+      "desc": "Level-Entwicklung (Ab Lv. 21)"
+    }
+  ],
+  "70": [
+    {
+      "target_id": 71,
+      "target_name_de": "Sarzenia",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Blattstein)"
+    }
+  ],
+  "72": [
+    {
+      "target_id": 73,
+      "target_name_de": "Tentoxa",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "74": [
+    {
+      "target_id": 75,
+      "target_name_de": "Georok",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "75": [
+    {
+      "target_id": 76,
+      "target_name_de": "Geowaz",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch-Entwicklung"
+    }
+  ],
+  "77": [
+    {
+      "target_id": 78,
+      "target_name_de": "Gallopa",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "79": [
+    {
+      "target_id": 80,
+      "target_name_de": "Lahmus",
+      "type": "level",
+      "min_level": 37,
+      "desc": "Level-Entwicklung (Ab Lv. 37)"
+    },
+    {
+      "target_id": 199,
+      "target_name_de": "Laschoking",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (King-Stein)"
+    }
+  ],
+  "81": [
+    {
+      "target_id": 82,
+      "target_name_de": "Magneton",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "84": [
+    {
+      "target_id": 85,
+      "target_name_de": "Dodri",
+      "type": "level",
+      "min_level": 31,
+      "desc": "Level-Entwicklung (Ab Lv. 31)"
+    }
+  ],
+  "86": [
+    {
+      "target_id": 87,
+      "target_name_de": "Jugong",
+      "type": "level",
+      "min_level": 34,
+      "desc": "Level-Entwicklung (Ab Lv. 34)"
+    }
+  ],
+  "88": [
+    {
+      "target_id": 89,
+      "target_name_de": "Sleimok",
+      "type": "level",
+      "min_level": 38,
+      "desc": "Level-Entwicklung (Ab Lv. 38)"
+    }
+  ],
+  "90": [
+    {
+      "target_id": 91,
+      "target_name_de": "Austos",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Wasserstein)"
+    }
+  ],
+  "92": [
+    {
+      "target_id": 93,
+      "target_name_de": "Alpollo",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "93": [
+    {
+      "target_id": 94,
+      "target_name_de": "Gengar",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch-Entwicklung"
+    }
+  ],
+  "96": [
+    {
+      "target_id": 97,
+      "target_name_de": "Hypno",
+      "type": "level",
+      "min_level": 26,
+      "desc": "Level-Entwicklung (Ab Lv. 26)"
+    }
+  ],
+  "98": [
+    {
+      "target_id": 99,
+      "target_name_de": "Kingler",
+      "type": "level",
+      "min_level": 28,
+      "desc": "Level-Entwicklung (Ab Lv. 28)"
+    }
+  ],
+  "100": [
+    {
+      "target_id": 101,
+      "target_name_de": "Lektrobal",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "102": [
+    {
+      "target_id": 103,
+      "target_name_de": "Kokowei",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Blattstein)"
+    }
+  ],
+  "104": [
+    {
+      "target_id": 105,
+      "target_name_de": "Knogga",
+      "type": "level",
+      "min_level": 28,
+      "desc": "Level-Entwicklung (Ab Lv. 28)"
+    }
+  ],
+  "236": [
+    {
+      "target_id": 106,
+      "target_name_de": "Kicklee",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    },
+    {
+      "target_id": 107,
+      "target_name_de": "Nockchan",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    },
+    {
+      "target_id": 237,
+      "target_name_de": "Kapoera",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "109": [
+    {
+      "target_id": 110,
+      "target_name_de": "Smogmog",
+      "type": "level",
+      "min_level": 35,
+      "desc": "Level-Entwicklung (Ab Lv. 35)"
+    }
+  ],
+  "111": [
+    {
+      "target_id": 112,
+      "target_name_de": "Rizeros",
+      "type": "level",
+      "min_level": 42,
+      "desc": "Level-Entwicklung (Ab Lv. 42)"
+    }
+  ],
+  "440": [
+    {
+      "target_id": 113,
+      "target_name_de": "Chaneira",
+      "type": "special",
+      "min_level": null,
+      "desc": "Spezielle Entwicklung"
+    }
+  ],
+  "116": [
+    {
+      "target_id": 117,
+      "target_name_de": "Seemon",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "118": [
+    {
+      "target_id": 119,
+      "target_name_de": "Golking",
+      "type": "level",
+      "min_level": 33,
+      "desc": "Level-Entwicklung (Ab Lv. 33)"
+    }
+  ],
+  "120": [
+    {
+      "target_id": 121,
+      "target_name_de": "Starmie",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Wasserstein)"
+    }
+  ],
+  "439": [
+    {
+      "target_id": 122,
+      "target_name_de": "Pantimos",
+      "type": "move",
+      "min_level": null,
+      "desc": "Attacken-basiert (Kennt Mimikry)"
+    }
+  ],
+  "238": [
+    {
+      "target_id": 124,
+      "target_name_de": "Rossana",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "239": [
+    {
+      "target_id": 125,
+      "target_name_de": "Elektek",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "240": [
+    {
+      "target_id": 126,
+      "target_name_de": "Magmar",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "129": [
+    {
+      "target_id": 130,
+      "target_name_de": "Garados",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "133": [
+    {
+      "target_id": 134,
+      "target_name_de": "Aquana",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Wasserstein)"
+    },
+    {
+      "target_id": 135,
+      "target_name_de": "Blitza",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Donnerstein)"
+    },
+    {
+      "target_id": 136,
+      "target_name_de": "Flamara",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Feuerstein)"
+    },
+    {
+      "target_id": 196,
+      "target_name_de": "Psiana",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    },
+    {
+      "target_id": 197,
+      "target_name_de": "Nachtara",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    },
+    {
+      "target_id": 470,
+      "target_name_de": "Folipurba",
+      "type": "location",
+      "min_level": null,
+      "desc": "Orts-basiert (Besonderer Ort wie Moos-/Eisfelsen/Kraterberg)"
+    },
+    {
+      "target_id": 471,
+      "target_name_de": "Glaziola",
+      "type": "location",
+      "min_level": null,
+      "desc": "Orts-basiert (Besonderer Ort wie Moos-/Eisfelsen/Kraterberg)"
+    }
+  ],
+  "138": [
+    {
+      "target_id": 139,
+      "target_name_de": "Amoroso",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "140": [
+    {
+      "target_id": 141,
+      "target_name_de": "Kabutops",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "446": [
+    {
+      "target_id": 143,
+      "target_name_de": "Relaxo",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "147": [
+    {
+      "target_id": 148,
+      "target_name_de": "Dragonir",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "148": [
+    {
+      "target_id": 149,
+      "target_name_de": "Dragoran",
+      "type": "level",
+      "min_level": 55,
+      "desc": "Level-Entwicklung (Ab Lv. 55)"
+    }
+  ],
+  "152": [
+    {
+      "target_id": 153,
+      "target_name_de": "Lorblatt",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "153": [
+    {
+      "target_id": 154,
+      "target_name_de": "Meganie",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "155": [
+    {
+      "target_id": 156,
+      "target_name_de": "Igelavar",
+      "type": "level",
+      "min_level": 14,
+      "desc": "Level-Entwicklung (Ab Lv. 14)"
+    }
+  ],
+  "156": [
+    {
+      "target_id": 157,
+      "target_name_de": "Tornupto",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "158": [
+    {
+      "target_id": 159,
+      "target_name_de": "Tyracroc",
+      "type": "level",
+      "min_level": 18,
+      "desc": "Level-Entwicklung (Ab Lv. 18)"
+    }
+  ],
+  "159": [
+    {
+      "target_id": 160,
+      "target_name_de": "Impergator",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "161": [
+    {
+      "target_id": 162,
+      "target_name_de": "Wiesenior",
+      "type": "level",
+      "min_level": 15,
+      "desc": "Level-Entwicklung (Ab Lv. 15)"
+    }
+  ],
+  "163": [
+    {
+      "target_id": 164,
+      "target_name_de": "Noctuh",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "165": [
+    {
+      "target_id": 166,
+      "target_name_de": "Ledian",
+      "type": "level",
+      "min_level": 18,
+      "desc": "Level-Entwicklung (Ab Lv. 18)"
+    }
+  ],
+  "167": [
+    {
+      "target_id": 168,
+      "target_name_de": "Ariados",
+      "type": "level",
+      "min_level": 22,
+      "desc": "Level-Entwicklung (Ab Lv. 22)"
+    }
+  ],
+  "42": [
+    {
+      "target_id": 169,
+      "target_name_de": "Iksbat",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "170": [
+    {
+      "target_id": 171,
+      "target_name_de": "Lanturn",
+      "type": "level",
+      "min_level": 27,
+      "desc": "Level-Entwicklung (Ab Lv. 27)"
+    }
+  ],
+  "175": [
+    {
+      "target_id": 176,
+      "target_name_de": "Togetic",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "177": [
+    {
+      "target_id": 178,
+      "target_name_de": "Xatu",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "179": [
+    {
+      "target_id": 180,
+      "target_name_de": "Waaty",
+      "type": "level",
+      "min_level": 15,
+      "desc": "Level-Entwicklung (Ab Lv. 15)"
+    }
+  ],
+  "180": [
+    {
+      "target_id": 181,
+      "target_name_de": "Ampharos",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "298": [
+    {
+      "target_id": 183,
+      "target_name_de": "Marill",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "183": [
+    {
+      "target_id": 184,
+      "target_name_de": "Azumarill",
+      "type": "level",
+      "min_level": 18,
+      "desc": "Level-Entwicklung (Ab Lv. 18)"
+    }
+  ],
+  "438": [
+    {
+      "target_id": 185,
+      "target_name_de": "Mogelbaum",
+      "type": "move",
+      "min_level": null,
+      "desc": "Attacken-basiert (Kennt Mimikry)"
+    }
+  ],
+  "187": [
+    {
+      "target_id": 188,
+      "target_name_de": "Hubelupf",
+      "type": "level",
+      "min_level": 18,
+      "desc": "Level-Entwicklung (Ab Lv. 18)"
+    }
+  ],
+  "188": [
+    {
+      "target_id": 189,
+      "target_name_de": "Papungha",
+      "type": "level",
+      "min_level": 27,
+      "desc": "Level-Entwicklung (Ab Lv. 27)"
+    }
+  ],
+  "191": [
+    {
+      "target_id": 192,
+      "target_name_de": "Sonnflora",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Sonnenstein)"
+    }
+  ],
+  "194": [
+    {
+      "target_id": 195,
+      "target_name_de": "Morlord",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "360": [
+    {
+      "target_id": 202,
+      "target_name_de": "Woingenau",
+      "type": "level",
+      "min_level": 15,
+      "desc": "Level-Entwicklung (Ab Lv. 15)"
+    }
+  ],
+  "204": [
+    {
+      "target_id": 205,
+      "target_name_de": "Forstellka",
+      "type": "level",
+      "min_level": 31,
+      "desc": "Level-Entwicklung (Ab Lv. 31)"
+    }
+  ],
+  "95": [
+    {
+      "target_id": 208,
+      "target_name_de": "Stahlos",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Metallmantel)"
+    }
+  ],
+  "209": [
+    {
+      "target_id": 210,
+      "target_name_de": "Granbull",
+      "type": "level",
+      "min_level": 23,
+      "desc": "Level-Entwicklung (Ab Lv. 23)"
+    }
+  ],
+  "123": [
+    {
+      "target_id": 212,
+      "target_name_de": "Scherox",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Metallmantel)"
+    }
+  ],
+  "216": [
+    {
+      "target_id": 217,
+      "target_name_de": "Ursaring",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "218": [
+    {
+      "target_id": 219,
+      "target_name_de": "Magcargo",
+      "type": "level",
+      "min_level": 38,
+      "desc": "Level-Entwicklung (Ab Lv. 38)"
+    }
+  ],
+  "220": [
+    {
+      "target_id": 221,
+      "target_name_de": "Keifel",
+      "type": "level",
+      "min_level": 33,
+      "desc": "Level-Entwicklung (Ab Lv. 33)"
+    }
+  ],
+  "223": [
+    {
+      "target_id": 224,
+      "target_name_de": "Octillery",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "458": [
+    {
+      "target_id": 226,
+      "target_name_de": "Mantax",
+      "type": "special",
+      "min_level": null,
+      "desc": "Spezielle Entwicklung"
+    }
+  ],
+  "228": [
+    {
+      "target_id": 229,
+      "target_name_de": "Hundemon",
+      "type": "level",
+      "min_level": 24,
+      "desc": "Level-Entwicklung (Ab Lv. 24)"
+    }
+  ],
+  "117": [
+    {
+      "target_id": 230,
+      "target_name_de": "Seedraking",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Drachenschuppe)"
+    }
+  ],
+  "231": [
+    {
+      "target_id": 232,
+      "target_name_de": "Donphan",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "137": [
+    {
+      "target_id": 233,
+      "target_name_de": "Porygon2",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Upgrade)"
+    }
+  ],
+  "113": [
+    {
+      "target_id": 242,
+      "target_name_de": "Heiteira",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "246": [
+    {
+      "target_id": 247,
+      "target_name_de": "Pupitar",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "247": [
+    {
+      "target_id": 248,
+      "target_name_de": "Despotar",
+      "type": "level",
+      "min_level": 55,
+      "desc": "Level-Entwicklung (Ab Lv. 55)"
+    }
+  ],
+  "252": [
+    {
+      "target_id": 253,
+      "target_name_de": "Reptain",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "253": [
+    {
+      "target_id": 254,
+      "target_name_de": "Gewaldro",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "255": [
+    {
+      "target_id": 256,
+      "target_name_de": "Jungglut",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "256": [
+    {
+      "target_id": 257,
+      "target_name_de": "Lohgock",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "258": [
+    {
+      "target_id": 259,
+      "target_name_de": "Moorabbel",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "259": [
+    {
+      "target_id": 260,
+      "target_name_de": "Sumpex",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "261": [
+    {
+      "target_id": 262,
+      "target_name_de": "Magnayen",
+      "type": "level",
+      "min_level": 18,
+      "desc": "Level-Entwicklung (Ab Lv. 18)"
+    }
+  ],
+  "263": [
+    {
+      "target_id": 264,
+      "target_name_de": "Geradaks",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "265": [
+    {
+      "target_id": 266,
+      "target_name_de": "Schaloko",
+      "type": "level",
+      "min_level": 7,
+      "desc": "Level-Entwicklung (Ab Lv. 7)"
+    },
+    {
+      "target_id": 268,
+      "target_name_de": "Panekon",
+      "type": "level",
+      "min_level": 7,
+      "desc": "Level-Entwicklung (Ab Lv. 7)"
+    }
+  ],
+  "266": [
+    {
+      "target_id": 267,
+      "target_name_de": "Papinella",
+      "type": "level",
+      "min_level": 10,
+      "desc": "Level-Entwicklung (Ab Lv. 10)"
+    }
+  ],
+  "268": [
+    {
+      "target_id": 269,
+      "target_name_de": "Pudox",
+      "type": "level",
+      "min_level": 10,
+      "desc": "Level-Entwicklung (Ab Lv. 10)"
+    }
+  ],
+  "270": [
+    {
+      "target_id": 271,
+      "target_name_de": "Lombrero",
+      "type": "level",
+      "min_level": 14,
+      "desc": "Level-Entwicklung (Ab Lv. 14)"
+    }
+  ],
+  "271": [
+    {
+      "target_id": 272,
+      "target_name_de": "Kappalores",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Wasserstein)"
+    }
+  ],
+  "273": [
+    {
+      "target_id": 274,
+      "target_name_de": "Blanas",
+      "type": "level",
+      "min_level": 14,
+      "desc": "Level-Entwicklung (Ab Lv. 14)"
+    }
+  ],
+  "274": [
+    {
+      "target_id": 275,
+      "target_name_de": "Tengulist",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Blattstein)"
+    }
+  ],
+  "276": [
+    {
+      "target_id": 277,
+      "target_name_de": "Schwalboss",
+      "type": "level",
+      "min_level": 22,
+      "desc": "Level-Entwicklung (Ab Lv. 22)"
+    }
+  ],
+  "278": [
+    {
+      "target_id": 279,
+      "target_name_de": "Pelipper",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "280": [
+    {
+      "target_id": 281,
+      "target_name_de": "Kirlia",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "281": [
+    {
+      "target_id": 282,
+      "target_name_de": "Guardevoir",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    },
+    {
+      "target_id": 475,
+      "target_name_de": "Galagladi",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Funkelstein)"
+    }
+  ],
+  "283": [
+    {
+      "target_id": 284,
+      "target_name_de": "Maskeregen",
+      "type": "level",
+      "min_level": 22,
+      "desc": "Level-Entwicklung (Ab Lv. 22)"
+    }
+  ],
+  "285": [
+    {
+      "target_id": 286,
+      "target_name_de": "Kapilz",
+      "type": "level",
+      "min_level": 23,
+      "desc": "Level-Entwicklung (Ab Lv. 23)"
+    }
+  ],
+  "287": [
+    {
+      "target_id": 288,
+      "target_name_de": "Muntier",
+      "type": "level",
+      "min_level": 18,
+      "desc": "Level-Entwicklung (Ab Lv. 18)"
+    }
+  ],
+  "288": [
+    {
+      "target_id": 289,
+      "target_name_de": "Letarking",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "290": [
+    {
+      "target_id": 291,
+      "target_name_de": "Ninjask",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    },
+    {
+      "target_id": 292,
+      "target_name_de": "Ninjatom",
+      "type": "special",
+      "min_level": null,
+      "desc": "Spezielle Entwicklung"
+    }
+  ],
+  "293": [
+    {
+      "target_id": 294,
+      "target_name_de": "Krakeelo",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "294": [
+    {
+      "target_id": 295,
+      "target_name_de": "Krawumms",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "296": [
+    {
+      "target_id": 297,
+      "target_name_de": "Hariyama",
+      "type": "level",
+      "min_level": 24,
+      "desc": "Level-Entwicklung (Ab Lv. 24)"
+    }
+  ],
+  "300": [
+    {
+      "target_id": 301,
+      "target_name_de": "Enekoro",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Mondstein)"
+    }
+  ],
+  "304": [
+    {
+      "target_id": 305,
+      "target_name_de": "Stollrak",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "305": [
+    {
+      "target_id": 306,
+      "target_name_de": "Stolloss",
+      "type": "level",
+      "min_level": 42,
+      "desc": "Level-Entwicklung (Ab Lv. 42)"
+    }
+  ],
+  "307": [
+    {
+      "target_id": 308,
+      "target_name_de": "Meditalis",
+      "type": "level",
+      "min_level": 37,
+      "desc": "Level-Entwicklung (Ab Lv. 37)"
+    }
+  ],
+  "309": [
+    {
+      "target_id": 310,
+      "target_name_de": "Voltenso",
+      "type": "level",
+      "min_level": 26,
+      "desc": "Level-Entwicklung (Ab Lv. 26)"
+    }
+  ],
+  "406": [
+    {
+      "target_id": 315,
+      "target_name_de": "Roselia",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "316": [
+    {
+      "target_id": 317,
+      "target_name_de": "Schlukwech",
+      "type": "level",
+      "min_level": 26,
+      "desc": "Level-Entwicklung (Ab Lv. 26)"
+    }
+  ],
+  "318": [
+    {
+      "target_id": 319,
+      "target_name_de": "Tohaido",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "320": [
+    {
+      "target_id": 321,
+      "target_name_de": "Wailord",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "322": [
+    {
+      "target_id": 323,
+      "target_name_de": "Camerupt",
+      "type": "level",
+      "min_level": 33,
+      "desc": "Level-Entwicklung (Ab Lv. 33)"
+    }
+  ],
+  "325": [
+    {
+      "target_id": 326,
+      "target_name_de": "Groink",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "328": [
+    {
+      "target_id": 329,
+      "target_name_de": "Vibrava",
+      "type": "level",
+      "min_level": 35,
+      "desc": "Level-Entwicklung (Ab Lv. 35)"
+    }
+  ],
+  "329": [
+    {
+      "target_id": 330,
+      "target_name_de": "Libelldra",
+      "type": "level",
+      "min_level": 45,
+      "desc": "Level-Entwicklung (Ab Lv. 45)"
+    }
+  ],
+  "331": [
+    {
+      "target_id": 332,
+      "target_name_de": "Noktuska",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "333": [
+    {
+      "target_id": 334,
+      "target_name_de": "Altaria",
+      "type": "level",
+      "min_level": 35,
+      "desc": "Level-Entwicklung (Ab Lv. 35)"
+    }
+  ],
+  "339": [
+    {
+      "target_id": 340,
+      "target_name_de": "Welsar",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "341": [
+    {
+      "target_id": 342,
+      "target_name_de": "Krebutack",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "343": [
+    {
+      "target_id": 344,
+      "target_name_de": "Lepumentas",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "345": [
+    {
+      "target_id": 346,
+      "target_name_de": "Wielie",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "347": [
+    {
+      "target_id": 348,
+      "target_name_de": "Armaldo",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "349": [
+    {
+      "target_id": 350,
+      "target_name_de": "Milotic",
+      "type": "special",
+      "min_level": null,
+      "desc": "Spezielle Entwicklung"
+    }
+  ],
+  "353": [
+    {
+      "target_id": 354,
+      "target_name_de": "Banette",
+      "type": "level",
+      "min_level": 37,
+      "desc": "Level-Entwicklung (Ab Lv. 37)"
+    }
+  ],
+  "355": [
+    {
+      "target_id": 356,
+      "target_name_de": "Zwirrklop",
+      "type": "level",
+      "min_level": 37,
+      "desc": "Level-Entwicklung (Ab Lv. 37)"
+    }
+  ],
+  "433": [
+    {
+      "target_id": 358,
+      "target_name_de": "Palimpalim",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "361": [
+    {
+      "target_id": 362,
+      "target_name_de": "Firnontor",
+      "type": "level",
+      "min_level": 42,
+      "desc": "Level-Entwicklung (Ab Lv. 42)"
+    },
+    {
+      "target_id": 478,
+      "target_name_de": "Frosdedje",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Funkelstein)"
+    }
+  ],
+  "363": [
+    {
+      "target_id": 364,
+      "target_name_de": "Seejong",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "364": [
+    {
+      "target_id": 365,
+      "target_name_de": "Walraisa",
+      "type": "level",
+      "min_level": 44,
+      "desc": "Level-Entwicklung (Ab Lv. 44)"
+    }
+  ],
+  "366": [
+    {
+      "target_id": 367,
+      "target_name_de": "Aalabyss",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Abysszahn)"
+    },
+    {
+      "target_id": 368,
+      "target_name_de": "Saganabyss",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Abyssschuppe)"
+    }
+  ],
+  "371": [
+    {
+      "target_id": 372,
+      "target_name_de": "Draschel",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "372": [
+    {
+      "target_id": 373,
+      "target_name_de": "Brutalanda",
+      "type": "level",
+      "min_level": 50,
+      "desc": "Level-Entwicklung (Ab Lv. 50)"
+    }
+  ],
+  "374": [
+    {
+      "target_id": 375,
+      "target_name_de": "Metang",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "375": [
+    {
+      "target_id": 376,
+      "target_name_de": "Metagross",
+      "type": "level",
+      "min_level": 45,
+      "desc": "Level-Entwicklung (Ab Lv. 45)"
+    }
+  ],
+  "387": [
+    {
+      "target_id": 388,
+      "target_name_de": "Chelcarain",
+      "type": "level",
+      "min_level": 18,
+      "desc": "Level-Entwicklung (Ab Lv. 18)"
+    }
+  ],
+  "388": [
+    {
+      "target_id": 389,
+      "target_name_de": "Chelterrar",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "390": [
+    {
+      "target_id": 391,
+      "target_name_de": "Panpyro",
+      "type": "level",
+      "min_level": 14,
+      "desc": "Level-Entwicklung (Ab Lv. 14)"
+    }
+  ],
+  "391": [
+    {
+      "target_id": 392,
+      "target_name_de": "Panferno",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "393": [
+    {
+      "target_id": 394,
+      "target_name_de": "Pliprin",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "394": [
+    {
+      "target_id": 395,
+      "target_name_de": "Impoleon",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "396": [
+    {
+      "target_id": 397,
+      "target_name_de": "Staravia",
+      "type": "level",
+      "min_level": 14,
+      "desc": "Level-Entwicklung (Ab Lv. 14)"
+    }
+  ],
+  "397": [
+    {
+      "target_id": 398,
+      "target_name_de": "Staraptor",
+      "type": "level",
+      "min_level": 34,
+      "desc": "Level-Entwicklung (Ab Lv. 34)"
+    }
+  ],
+  "399": [
+    {
+      "target_id": 400,
+      "target_name_de": "Bidifas",
+      "type": "level",
+      "min_level": 15,
+      "desc": "Level-Entwicklung (Ab Lv. 15)"
+    }
+  ],
+  "401": [
+    {
+      "target_id": 402,
+      "target_name_de": "Zirpeise",
+      "type": "level",
+      "min_level": 10,
+      "desc": "Level-Entwicklung (Ab Lv. 10)"
+    }
+  ],
+  "403": [
+    {
+      "target_id": 404,
+      "target_name_de": "Luxio",
+      "type": "level",
+      "min_level": 15,
+      "desc": "Level-Entwicklung (Ab Lv. 15)"
+    }
+  ],
+  "404": [
+    {
+      "target_id": 405,
+      "target_name_de": "Luxtra",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "315": [
+    {
+      "target_id": 407,
+      "target_name_de": "Roserade",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Leuchtstein)"
+    }
+  ],
+  "408": [
+    {
+      "target_id": 409,
+      "target_name_de": "Rameidon",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "410": [
+    {
+      "target_id": 411,
+      "target_name_de": "Bollterus",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "412": [
+    {
+      "target_id": 413,
+      "target_name_de": "Burmadame",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    },
+    {
+      "target_id": 414,
+      "target_name_de": "Moterpel",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "415": [
+    {
+      "target_id": 416,
+      "target_name_de": "Honweisel",
+      "type": "level",
+      "min_level": 21,
+      "desc": "Level-Entwicklung (Ab Lv. 21)"
+    }
+  ],
+  "418": [
+    {
+      "target_id": 419,
+      "target_name_de": "Bojelin",
+      "type": "level",
+      "min_level": 26,
+      "desc": "Level-Entwicklung (Ab Lv. 26)"
+    }
+  ],
+  "420": [
+    {
+      "target_id": 421,
+      "target_name_de": "Kinoso",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "422": [
+    {
+      "target_id": 423,
+      "target_name_de": "Gastrodon",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "190": [
+    {
+      "target_id": 424,
+      "target_name_de": "Ambidiffel",
+      "type": "move",
+      "min_level": null,
+      "desc": "Attacken-basiert (Kennt Doppelschlag)"
+    }
+  ],
+  "425": [
+    {
+      "target_id": 426,
+      "target_name_de": "Drifzepeli",
+      "type": "level",
+      "min_level": 28,
+      "desc": "Level-Entwicklung (Ab Lv. 28)"
+    }
+  ],
+  "427": [
+    {
+      "target_id": 428,
+      "target_name_de": "Schlapor",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "200": [
+    {
+      "target_id": 429,
+      "target_name_de": "Traunmagil",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Finsterstein)"
+    }
+  ],
+  "198": [
+    {
+      "target_id": 430,
+      "target_name_de": "Kramshef",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Finsterstein)"
+    }
+  ],
+  "431": [
+    {
+      "target_id": 432,
+      "target_name_de": "Shnurgarst",
+      "type": "level",
+      "min_level": 38,
+      "desc": "Level-Entwicklung (Ab Lv. 38)"
+    }
+  ],
+  "434": [
+    {
+      "target_id": 435,
+      "target_name_de": "Skuntank",
+      "type": "level",
+      "min_level": 34,
+      "desc": "Level-Entwicklung (Ab Lv. 34)"
+    }
+  ],
+  "436": [
+    {
+      "target_id": 437,
+      "target_name_de": "Bronzong",
+      "type": "level",
+      "min_level": 33,
+      "desc": "Level-Entwicklung (Ab Lv. 33)"
+    }
+  ],
+  "443": [
+    {
+      "target_id": 444,
+      "target_name_de": "Knarksel",
+      "type": "level",
+      "min_level": 24,
+      "desc": "Level-Entwicklung (Ab Lv. 24)"
+    }
+  ],
+  "444": [
+    {
+      "target_id": 445,
+      "target_name_de": "Knakrack",
+      "type": "level",
+      "min_level": 48,
+      "desc": "Level-Entwicklung (Ab Lv. 48)"
+    }
+  ],
+  "447": [
+    {
+      "target_id": 448,
+      "target_name_de": "Lucario",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "449": [
+    {
+      "target_id": 450,
+      "target_name_de": "Hippoterus",
+      "type": "level",
+      "min_level": 34,
+      "desc": "Level-Entwicklung (Ab Lv. 34)"
+    }
+  ],
+  "451": [
+    {
+      "target_id": 452,
+      "target_name_de": "Piondragi",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "453": [
+    {
+      "target_id": 454,
+      "target_name_de": "Toxiquak",
+      "type": "level",
+      "min_level": 37,
+      "desc": "Level-Entwicklung (Ab Lv. 37)"
+    }
+  ],
+  "456": [
+    {
+      "target_id": 457,
+      "target_name_de": "Lumineon",
+      "type": "level",
+      "min_level": 31,
+      "desc": "Level-Entwicklung (Ab Lv. 31)"
+    }
+  ],
+  "459": [
+    {
+      "target_id": 460,
+      "target_name_de": "Rexblisar",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "215": [
+    {
+      "target_id": 461,
+      "target_name_de": "Snibunna",
+      "type": "special",
+      "min_level": null,
+      "desc": "Spezielle Entwicklung"
+    }
+  ],
+  "82": [
+    {
+      "target_id": 462,
+      "target_name_de": "Magnezone",
+      "type": "location",
+      "min_level": null,
+      "desc": "Orts-basiert (Besonderer Ort wie Moos-/Eisfelsen/Kraterberg)"
+    }
+  ],
+  "108": [
+    {
+      "target_id": 463,
+      "target_name_de": "Schlurplek",
+      "type": "move",
+      "min_level": null,
+      "desc": "Attacken-basiert (Kennt Walzer)"
+    }
+  ],
+  "112": [
+    {
+      "target_id": 464,
+      "target_name_de": "Rihornior",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Schützer)"
+    }
+  ],
+  "114": [
+    {
+      "target_id": 465,
+      "target_name_de": "Tangoloss",
+      "type": "move",
+      "min_level": null,
+      "desc": "Attacken-basiert (Kennt Antik-Kraft)"
+    }
+  ],
+  "125": [
+    {
+      "target_id": 466,
+      "target_name_de": "Elevoltek",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Stromisierer)"
+    }
+  ],
+  "126": [
+    {
+      "target_id": 467,
+      "target_name_de": "Magbrant",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Magmaisierer)"
+    }
+  ],
+  "176": [
+    {
+      "target_id": 468,
+      "target_name_de": "Togekiss",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Leuchtstein)"
+    }
+  ],
+  "193": [
+    {
+      "target_id": 469,
+      "target_name_de": "Yanmega",
+      "type": "move",
+      "min_level": null,
+      "desc": "Attacken-basiert (Kennt Antik-Kraft)"
+    }
+  ],
+  "207": [
+    {
+      "target_id": 472,
+      "target_name_de": "Skorgro",
+      "type": "special",
+      "min_level": null,
+      "desc": "Spezielle Entwicklung"
+    }
+  ],
+  "221": [
+    {
+      "target_id": 473,
+      "target_name_de": "Mamutel",
+      "type": "move",
+      "min_level": null,
+      "desc": "Attacken-basiert (Kennt Antik-Kraft)"
+    }
+  ],
+  "233": [
+    {
+      "target_id": 474,
+      "target_name_de": "Porygon-Z",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Dubiosdisc)"
+    }
+  ],
+  "299": [
+    {
+      "target_id": 476,
+      "target_name_de": "Voluminas",
+      "type": "location",
+      "min_level": null,
+      "desc": "Orts-basiert (Besonderer Ort wie Moos-/Eisfelsen/Kraterberg)"
+    }
+  ],
+  "356": [
+    {
+      "target_id": 477,
+      "target_name_de": "Zwirrfinst",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch mit getragenem Item (Düsterumhang)"
+    }
+  ],
+  "495": [
+    {
+      "target_id": 496,
+      "target_name_de": "Efoserp",
+      "type": "level",
+      "min_level": 17,
+      "desc": "Level-Entwicklung (Ab Lv. 17)"
+    }
+  ],
+  "496": [
+    {
+      "target_id": 497,
+      "target_name_de": "Serpiroyal",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "498": [
+    {
+      "target_id": 499,
+      "target_name_de": "Ferkokel",
+      "type": "level",
+      "min_level": 17,
+      "desc": "Level-Entwicklung (Ab Lv. 17)"
+    }
+  ],
+  "499": [
+    {
+      "target_id": 500,
+      "target_name_de": "Flambirex",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "501": [
+    {
+      "target_id": 502,
+      "target_name_de": "Zwottronin",
+      "type": "level",
+      "min_level": 17,
+      "desc": "Level-Entwicklung (Ab Lv. 17)"
+    }
+  ],
+  "502": [
+    {
+      "target_id": 503,
+      "target_name_de": "Admurai",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "504": [
+    {
+      "target_id": 505,
+      "target_name_de": "Kukmarda",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "506": [
+    {
+      "target_id": 507,
+      "target_name_de": "Terribark",
+      "type": "level",
+      "min_level": 16,
+      "desc": "Level-Entwicklung (Ab Lv. 16)"
+    }
+  ],
+  "507": [
+    {
+      "target_id": 508,
+      "target_name_de": "Bissbark",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "509": [
+    {
+      "target_id": 510,
+      "target_name_de": "Kleoparda",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "511": [
+    {
+      "target_id": 512,
+      "target_name_de": "Vegichita",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Blattstein)"
+    }
+  ],
+  "513": [
+    {
+      "target_id": 514,
+      "target_name_de": "Grillchita",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Feuerstein)"
+    }
+  ],
+  "515": [
+    {
+      "target_id": 516,
+      "target_name_de": "Sodachita",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Wasserstein)"
+    }
+  ],
+  "517": [
+    {
+      "target_id": 518,
+      "target_name_de": "Somnivora",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Mondstein)"
+    }
+  ],
+  "519": [
+    {
+      "target_id": 520,
+      "target_name_de": "Navitaub",
+      "type": "level",
+      "min_level": 21,
+      "desc": "Level-Entwicklung (Ab Lv. 21)"
+    }
+  ],
+  "520": [
+    {
+      "target_id": 521,
+      "target_name_de": "Fasasnob",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "522": [
+    {
+      "target_id": 523,
+      "target_name_de": "Zebritz",
+      "type": "level",
+      "min_level": 27,
+      "desc": "Level-Entwicklung (Ab Lv. 27)"
+    }
+  ],
+  "524": [
+    {
+      "target_id": 525,
+      "target_name_de": "Sedimantur",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "525": [
+    {
+      "target_id": 526,
+      "target_name_de": "Brockoloss",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch-Entwicklung"
+    }
+  ],
+  "527": [
+    {
+      "target_id": 528,
+      "target_name_de": "Fletiamo",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "529": [
+    {
+      "target_id": 530,
+      "target_name_de": "Stalobor",
+      "type": "level",
+      "min_level": 31,
+      "desc": "Level-Entwicklung (Ab Lv. 31)"
+    }
+  ],
+  "532": [
+    {
+      "target_id": 533,
+      "target_name_de": "Strepoli",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "533": [
+    {
+      "target_id": 534,
+      "target_name_de": "Meistagrif",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch-Entwicklung"
+    }
+  ],
+  "535": [
+    {
+      "target_id": 536,
+      "target_name_de": "Mebrana",
+      "type": "level",
+      "min_level": 25,
+      "desc": "Level-Entwicklung (Ab Lv. 25)"
+    }
+  ],
+  "536": [
+    {
+      "target_id": 537,
+      "target_name_de": "Branawarz",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "540": [
+    {
+      "target_id": 541,
+      "target_name_de": "Folikon",
+      "type": "level",
+      "min_level": 20,
+      "desc": "Level-Entwicklung (Ab Lv. 20)"
+    }
+  ],
+  "541": [
+    {
+      "target_id": 542,
+      "target_name_de": "Matrifol",
+      "type": "happiness",
+      "min_level": null,
+      "desc": "Freundschafts-Entwicklung (Hohe Zuneigung)"
+    }
+  ],
+  "543": [
+    {
+      "target_id": 544,
+      "target_name_de": "Rollum",
+      "type": "level",
+      "min_level": 22,
+      "desc": "Level-Entwicklung (Ab Lv. 22)"
+    }
+  ],
+  "544": [
+    {
+      "target_id": 545,
+      "target_name_de": "Cerapendra",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "546": [
+    {
+      "target_id": 547,
+      "target_name_de": "Elfun",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Sonnenstein)"
+    }
+  ],
+  "548": [
+    {
+      "target_id": 549,
+      "target_name_de": "Dressella",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Sonnenstein)"
+    }
+  ],
+  "551": [
+    {
+      "target_id": 552,
+      "target_name_de": "Rokkaiman",
+      "type": "level",
+      "min_level": 29,
+      "desc": "Level-Entwicklung (Ab Lv. 29)"
+    }
+  ],
+  "552": [
+    {
+      "target_id": 553,
+      "target_name_de": "Rabigator",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "554": [
+    {
+      "target_id": 555,
+      "target_name_de": "Flampivian",
+      "type": "level",
+      "min_level": 35,
+      "desc": "Level-Entwicklung (Ab Lv. 35)"
+    }
+  ],
+  "557": [
+    {
+      "target_id": 558,
+      "target_name_de": "Castellith",
+      "type": "level",
+      "min_level": 34,
+      "desc": "Level-Entwicklung (Ab Lv. 34)"
+    }
+  ],
+  "559": [
+    {
+      "target_id": 560,
+      "target_name_de": "Irokex",
+      "type": "level",
+      "min_level": 39,
+      "desc": "Level-Entwicklung (Ab Lv. 39)"
+    }
+  ],
+  "562": [
+    {
+      "target_id": 563,
+      "target_name_de": "Echnatoll",
+      "type": "level",
+      "min_level": 34,
+      "desc": "Level-Entwicklung (Ab Lv. 34)"
+    }
+  ],
+  "564": [
+    {
+      "target_id": 565,
+      "target_name_de": "Karippas",
+      "type": "level",
+      "min_level": 37,
+      "desc": "Level-Entwicklung (Ab Lv. 37)"
+    }
+  ],
+  "566": [
+    {
+      "target_id": 567,
+      "target_name_de": "Aeropteryx",
+      "type": "level",
+      "min_level": 37,
+      "desc": "Level-Entwicklung (Ab Lv. 37)"
+    }
+  ],
+  "568": [
+    {
+      "target_id": 569,
+      "target_name_de": "Deponitox",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "570": [
+    {
+      "target_id": 571,
+      "target_name_de": "Zoroark",
+      "type": "level",
+      "min_level": 30,
+      "desc": "Level-Entwicklung (Ab Lv. 30)"
+    }
+  ],
+  "572": [
+    {
+      "target_id": 573,
+      "target_name_de": "Chillabell",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Leuchtstein)"
+    }
+  ],
+  "574": [
+    {
+      "target_id": 575,
+      "target_name_de": "Hypnomorba",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "575": [
+    {
+      "target_id": 576,
+      "target_name_de": "Morbitesse",
+      "type": "level",
+      "min_level": 41,
+      "desc": "Level-Entwicklung (Ab Lv. 41)"
+    }
+  ],
+  "577": [
+    {
+      "target_id": 578,
+      "target_name_de": "Mitodos",
+      "type": "level",
+      "min_level": 32,
+      "desc": "Level-Entwicklung (Ab Lv. 32)"
+    }
+  ],
+  "578": [
+    {
+      "target_id": 579,
+      "target_name_de": "Zytomega",
+      "type": "level",
+      "min_level": 41,
+      "desc": "Level-Entwicklung (Ab Lv. 41)"
+    }
+  ],
+  "580": [
+    {
+      "target_id": 581,
+      "target_name_de": "Swaroness",
+      "type": "level",
+      "min_level": 35,
+      "desc": "Level-Entwicklung (Ab Lv. 35)"
+    }
+  ],
+  "582": [
+    {
+      "target_id": 583,
+      "target_name_de": "Gelatroppo",
+      "type": "level",
+      "min_level": 35,
+      "desc": "Level-Entwicklung (Ab Lv. 35)"
+    }
+  ],
+  "583": [
+    {
+      "target_id": 584,
+      "target_name_de": "Gelatwino",
+      "type": "level",
+      "min_level": 47,
+      "desc": "Level-Entwicklung (Ab Lv. 47)"
+    }
+  ],
+  "585": [
+    {
+      "target_id": 586,
+      "target_name_de": "Kronjuwild",
+      "type": "level",
+      "min_level": 34,
+      "desc": "Level-Entwicklung (Ab Lv. 34)"
+    }
+  ],
+  "588": [
+    {
+      "target_id": 589,
+      "target_name_de": "Cavalanzas",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch-Entwicklung"
+    }
+  ],
+  "590": [
+    {
+      "target_id": 591,
+      "target_name_de": "Hutsassa",
+      "type": "level",
+      "min_level": 39,
+      "desc": "Level-Entwicklung (Ab Lv. 39)"
+    }
+  ],
+  "592": [
+    {
+      "target_id": 593,
+      "target_name_de": "Apoquallyp",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "595": [
+    {
+      "target_id": 596,
+      "target_name_de": "Voltula",
+      "type": "level",
+      "min_level": 36,
+      "desc": "Level-Entwicklung (Ab Lv. 36)"
+    }
+  ],
+  "597": [
+    {
+      "target_id": 598,
+      "target_name_de": "Tentantel",
+      "type": "level",
+      "min_level": 40,
+      "desc": "Level-Entwicklung (Ab Lv. 40)"
+    }
+  ],
+  "599": [
+    {
+      "target_id": 600,
+      "target_name_de": "Kliklak",
+      "type": "level",
+      "min_level": 38,
+      "desc": "Level-Entwicklung (Ab Lv. 38)"
+    }
+  ],
+  "600": [
+    {
+      "target_id": 601,
+      "target_name_de": "Klikdiklak",
+      "type": "level",
+      "min_level": 49,
+      "desc": "Level-Entwicklung (Ab Lv. 49)"
+    }
+  ],
+  "602": [
+    {
+      "target_id": 603,
+      "target_name_de": "Zapplalek",
+      "type": "level",
+      "min_level": 39,
+      "desc": "Level-Entwicklung (Ab Lv. 39)"
+    }
+  ],
+  "603": [
+    {
+      "target_id": 604,
+      "target_name_de": "Zapplarang",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Donnerstein)"
+    }
+  ],
+  "605": [
+    {
+      "target_id": 606,
+      "target_name_de": "Megalon",
+      "type": "level",
+      "min_level": 42,
+      "desc": "Level-Entwicklung (Ab Lv. 42)"
+    }
+  ],
+  "607": [
+    {
+      "target_id": 608,
+      "target_name_de": "Laternecto",
+      "type": "level",
+      "min_level": 41,
+      "desc": "Level-Entwicklung (Ab Lv. 41)"
+    }
+  ],
+  "608": [
+    {
+      "target_id": 609,
+      "target_name_de": "Skelabra",
+      "type": "item",
+      "min_level": null,
+      "desc": "Item-Entwicklung (Finsterstein)"
+    }
+  ],
+  "610": [
+    {
+      "target_id": 611,
+      "target_name_de": "Sharfax",
+      "type": "level",
+      "min_level": 38,
+      "desc": "Level-Entwicklung (Ab Lv. 38)"
+    }
+  ],
+  "611": [
+    {
+      "target_id": 612,
+      "target_name_de": "Maxax",
+      "type": "level",
+      "min_level": 48,
+      "desc": "Level-Entwicklung (Ab Lv. 48)"
+    }
+  ],
+  "613": [
+    {
+      "target_id": 614,
+      "target_name_de": "Siberio",
+      "type": "level",
+      "min_level": 37,
+      "desc": "Level-Entwicklung (Ab Lv. 37)"
+    }
+  ],
+  "616": [
+    {
+      "target_id": 617,
+      "target_name_de": "Hydragil",
+      "type": "trade",
+      "min_level": null,
+      "desc": "Tausch-Entwicklung"
+    }
+  ],
+  "619": [
+    {
+      "target_id": 620,
+      "target_name_de": "Wie-Shu",
+      "type": "level",
+      "min_level": 50,
+      "desc": "Level-Entwicklung (Ab Lv. 50)"
+    }
+  ],
+  "622": [
+    {
+      "target_id": 623,
+      "target_name_de": "Golgantes",
+      "type": "level",
+      "min_level": 43,
+      "desc": "Level-Entwicklung (Ab Lv. 43)"
+    }
+  ],
+  "624": [
+    {
+      "target_id": 625,
+      "target_name_de": "Caesurio",
+      "type": "level",
+      "min_level": 52,
+      "desc": "Level-Entwicklung (Ab Lv. 52)"
+    }
+  ],
+  "627": [
+    {
+      "target_id": 628,
+      "target_name_de": "Washakwil",
+      "type": "level",
+      "min_level": 54,
+      "desc": "Level-Entwicklung (Ab Lv. 54)"
+    }
+  ],
+  "629": [
+    {
+      "target_id": 630,
+      "target_name_de": "Grypheldis",
+      "type": "level",
+      "min_level": 54,
+      "desc": "Level-Entwicklung (Ab Lv. 54)"
+    }
+  ],
+  "633": [
+    {
+      "target_id": 634,
+      "target_name_de": "Duodino",
+      "type": "level",
+      "min_level": 50,
+      "desc": "Level-Entwicklung (Ab Lv. 50)"
+    }
+  ],
+  "634": [
+    {
+      "target_id": 635,
+      "target_name_de": "Trikephalo",
+      "type": "level",
+      "min_level": 64,
+      "desc": "Level-Entwicklung (Ab Lv. 64)"
+    }
+  ],
+  "636": [
+    {
+      "target_id": 637,
+      "target_name_de": "Ramoth",
+      "type": "level",
+      "min_level": 59,
+      "desc": "Level-Entwicklung (Ab Lv. 59)"
+    }
+  ]
+}

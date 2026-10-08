@@ -1,0 +1,26 @@
+{
+  "name": "pokemon-pen-and-paper-gen1-5",
+  "version": "2.2.0",
+  "description": "Pokémon Pen & Paper System (Gen 1-5) mit DM Screen, Trainer-App, Live-Synchronisation, Entwicklungs-Manager und PWA/APK Unterstützung",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:python": "python server.py",
+    "build:data": "python scripts/build_data.py",
+    "build:apk": "build_apk.bat"
+  },
+  "keywords": [
+    "pokemon",
+    "pen-and-paper",
+    "pnp",
+    "black-and-white",
+    "gen5",
+    "pokedex",
+    "movesets",
+    "stats",
+    "dm-screen",
+    "trainer-app"
+  ],
+  "author": "",
+  "license": "MIT"
+}

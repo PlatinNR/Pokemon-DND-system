@@ -1,0 +1,30 @@
+{
+  "name": "Pokémon Pen & Paper – DM Screen (Spielleiter)",
+  "short_name": "PKMN DM",
+  "description": "Spielleiter-Konsole für Pokémon Pen & Paper. Live-Synchronisation, Entwicklungs-Manager, Item-Vergabe, Würfel-Log.",
+  "start_url": "dm.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e14",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
