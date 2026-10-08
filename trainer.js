@@ -666,7 +666,7 @@
   // --- SERVER REST API CALL ---
   async function sendAction(type, payload = {}) {
     try {
-      const res = await fetch('/api/action', {
+      const res = await fetch('/api?endpoint=action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, payload })
@@ -680,7 +680,7 @@
 
   async function fetchGameState() {
     try {
-      const res = await fetch('/api/state');
+      const res = await fetch('/api?endpoint=state');
       if (res.ok) {
         const data = await res.json();
         handleStateUpdate(data);
@@ -748,7 +748,7 @@
   // --- LIVE SSE REAL-TIME SYNC ---
   function connectLiveSse() {
     try {
-      const es = new EventSource('/api/events');
+      const es = new EventSource('/api?endpoint=events');
 
       es.onopen = () => {
         elements.trainerLivePill.style.background = 'rgba(16,185,129,0.15)';

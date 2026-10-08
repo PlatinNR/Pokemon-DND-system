@@ -50,7 +50,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // Do not intercept or cache live API calls or SSE
-  if (url.pathname.startsWith('/api/')) {
+  if (url.pathname.startsWith('/api/') || url.pathname === '/api') {
     return;
   }
 

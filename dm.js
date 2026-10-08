@@ -683,7 +683,7 @@
   // --- LIVE SYNC & SSE ---
   function connectSseStream() {
     try {
-      const evtSource = new EventSource('/api/events');
+      const evtSource = new EventSource('/api?endpoint=events');
       evtSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
@@ -768,7 +768,7 @@
   }
 
   function fetchGameState() {
-    fetch('/api/state')
+    fetch('/api?endpoint=state')
       .then(r => r.json())
       .then(gameState => {
         if (gameState.version) {
@@ -807,7 +807,7 @@
   }
 
   function sendAction(actionType, payload) {
-    fetch('/api/action', {
+    fetch('/api?endpoint=action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: actionType, payload })
@@ -815,7 +815,7 @@
   }
 
   function loadNetworkInfo() {
-    fetch('/api/network')
+    fetch('/api?endpoint=network')
       .then(r => r.json())
       .then(net => {
         state.network = net;

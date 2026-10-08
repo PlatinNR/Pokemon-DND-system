@@ -320,7 +320,7 @@
       const qrImg = document.getElementById('trainerQrCodeImg');
       qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(currentTrainerUrl)}`;
     } else {
-      fetch('/api/network')
+      fetch('/api?endpoint=network')
         .then(r => r.json())
         .then(net => {
           const localIp = net.localIp || window.location.hostname;
@@ -361,7 +361,7 @@
 
     // --- LOAD REGISTERED TRAINERS FROM DM STATE ---
     function loadPortalTrainers() {
-      fetch('/api/state')
+      fetch('/api?endpoint=state')
         .then(r => r.json())
         .then(st => {
           const listEl = document.getElementById('portalTrainersList');
