@@ -181,9 +181,15 @@ function handleRequest(req, res) {
 
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = url.pathname;
+  const endpoint = url.searchParams.get('endpoint') || '';
+
+  const isEvents = pathname === '/api/events' || pathname.endsWith('/events') || endpoint === 'events';
+  const isState = pathname === '/api/state' || pathname.endsWith('/state') || endpoint === 'state';
+  const isNetwork = pathname === '/api/network' || pathname.endsWith('/network') || endpoint === 'network';
+  const isAction = pathname === '/api/action' || pathname.endsWith('/action') || endpoint === 'action';
 
   // 1. API: Server-Sent Events (Live Sync Stream)
-  if (pathname === '/api/events' || pathname.endsWith('/events')) {
+  if (isEvents) {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
@@ -199,7 +205,7 @@ function handleRequest(req, res) {
   }
 
   // 2. API: Get Game State
-  if ((pathname === '/api/state' || pathname.endsWith('/state')) && req.method === 'GET') {
+  if (isState && req.method === 'GET') {
     loadState();
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(gameState));
@@ -207,7 +213,7 @@ function handleRequest(req, res) {
   }
 
   // 3. API: Network info (for QR code & links)
-  if ((pathname === '/api/network' || pathname.endsWith('/network')) && req.method === 'GET') {
+  if (isNetwork && req.method === 'GET') {
     const isVercelEnv = Boolean(process.env.VERCEL);
     const hostHeader = req.headers['x-forwarded-host'] || req.headers.host;
     const protoHeader = req.headers['x-forwarded-proto'] || (isVercelEnv ? 'https' : 'http');
@@ -228,7 +234,7 @@ function handleRequest(req, res) {
   }
 
   // 4. API: Post Action (State Updates)
-  if ((pathname === '/api/action' || pathname.endsWith('/action')) && req.method === 'POST') {
+  if (isAction && req.method === 'POST') {
     const executeAction = (action) => {
       try {
         loadState();
