@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokémon Pen & Paper – Gen 1-5 Pokédex, Trainer-Manager & Spielleiter-Kompendium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" type="image/png">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      
+      <div class="logo-group" id="logoBtn" title="Zurück zur Übersicht">
+        <div class="logo-icon">
+          <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="Pokeball" class="pixelated">
+        </div>
+        <div class="logo-text">
+          <h1>
+            Pokémon P&amp;P Kompendium
+            <span class="logo-tag">Gen 1–5</span>
+          </h1>
+          <p>Schwarz &amp; Weiß Edition • 649 Pokémon • Standart-Werte &amp; P&amp;P Attributen-Sheet</p>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="nav-tab-btn active" data-tab="pokedex">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          Pokédex &amp; Werte
+        </button>
+        <button class="nav-tab-btn" data-tab="trainers">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+          Trainer-Manager (<span id="trainersBadgeCount">0</span>)
+        </button>
+        <button class="nav-tab-btn" data-tab="team">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          P&amp;P Schnell-Team (<span id="teamBadgeCount">0</span>)
+        </button>
+        <button class="nav-tab-btn" data-tab="tools">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Würfel &amp; Rechner
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <a href="download.html" class="btn-primary" style="padding:0.4rem 0.75rem; font-size:0.75rem; text-decoration:none; background:linear-gradient(135deg, #3b82f6, #1d4ed8);">
+          📱 Trainer-App
+        </a>
+        <a href="dm.html" class="btn-primary" style="padding:0.4rem 0.75rem; font-size:0.75rem; text-decoration:none; background:linear-gradient(135deg, #7c3aed, #4f46e5);">
+          🎮 DM Screen 🔒
+        </a>
+        <button class="icon-btn" id="themeToggleBtn" title="Design wechseln (Dunkel/Hell)">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="themeIcon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+        <button class="icon-btn" id="printBtn" title="Aktuelle Ansicht drucken / PDF">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="main-layout">
+
+    <!-- ==================== VIEW 1: POKEDEX & FILTER ==================== -->
+    <section id="viewPokedex" class="view-panel active">
+      
+      <!-- Filter and Search Controls -->
+      <div class="controls-card">
+        
+        <!-- Search and Sort Bar -->
+        <div class="search-row">
+          <div class="search-input-wrapper">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Pokémon suchen (z.B. Bisasam, Glurak, 25, Snivy, Mewtu)..." autocomplete="off">
+            <button id="searchClearBtn" class="quick-clear-btn" title="Suche leeren">✕</button>
+          </div>
+
+          <div class="sort-select-wrapper">
+            <label for="sortSelect" style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">SORTIERUNG:</label>
+            <select id="sortSelect" class="select-control">
+              <option value="id-asc">Pokédex-Nr. (#1 → #649)</option>
+              <option value="id-desc">Pokédex-Nr. (#649 → #1)</option>
+              <option value="name-asc">Name (A → Z)</option>
+              <option value="name-desc">Name (Z → A)</option>
+              <option value="bst-desc">Basiswert-Summe (Höchste)</option>
+              <option value="bst-asc">Basiswert-Summe (Niedrigste)</option>
+              <option value="hp-desc">Standart KP (Lv 50)</option>
+              <option value="atk-desc">Standart Angriff (Lv 50)</option>
+              <option value="def-desc">Standart Verteidigung (Lv 50)</option>
+              <option value="spa-desc">Standart Sp.-Angriff (Lv 50)</option>
+              <option value="spd-desc">Standart Sp.-Vert. (Lv 50)</option>
+              <option value="spe-desc">Standart Initiative (Lv 50)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Generation Filter Tabs -->
+        <div class="filter-tabs-row" id="genPillsContainer">
+          <button class="gen-pill active" data-gen="all">Alle Generationen (1–5)</button>
+          <button class="gen-pill" data-gen="1">Gen 1: Kanto (#001–#151)</button>
+          <button class="gen-pill" data-gen="2">Gen 2: Johto (#152–#251)</button>
+          <button class="gen-pill" data-gen="3">Gen 3: Hoenn (#252–#386)</button>
+          <button class="gen-pill" data-gen="4">Gen 4: Sinnoh (#387–#493)</button>
+          <button class="gen-pill" data-gen="5">Gen 5: Einall (#494–#649)</button>
+        </div>
+
+        <!-- Type Filter Chips -->
+        <div class="type-chips-row" id="typeChipsContainer">
+          <span class="type-filter-label">Typ:</span>
+          <button class="type-chip type-chip-all active" data-type="all">Alle Typen</button>
+        </div>
+
+        <!-- Results Info & Display Controls -->
+        <div class="results-info-row">
+          <div>
+            Gefunden: <strong id="resultsCount">649</strong> Pokémon
+            <span id="activeFilterBadge" style="margin-left: 0.5rem; font-size: 0.75rem; color: #93c5fd;"></span>
+          </div>
+
+          <div class="sprite-toggle-group">
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">SPRITES:</span>
+            <button class="toggle-switch-btn active" id="btnSpriteAnimated" title="Animierte Schwarz/Weiß GIFs anzeigen">Animiert</button>
+            <button class="toggle-switch-btn" id="btnSpriteStatic" title="Statische Pixel-Art PNGs anzeigen">Statisch</button>
+            <button class="toggle-switch-btn" id="btnSpriteShiny" title="Schillernde (Shiny) Sprites anzeigen">✨ Shiny</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pokémon Cards Grid -->
+      <div id="pokemonGrid" class="pokemon-grid">
+        <!-- Rendered by JavaScript -->
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 2: TRAINER & POKÉMON MANAGER ==================== -->
+    <section id="viewTrainers" class="view-panel">
+      <div class="trainers-view-container">
+        
+        <!-- Trainer Selection & Creation Bar -->
+        <div class="trainers-top-bar">
+          <div class="trainer-select-group">
+            <label for="trainerSelect" style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">AKTIVER TRAINER:</label>
+            <select id="trainerSelect" class="select-control" style="min-width:220px; font-weight:700; font-size:0.95rem;"></select>
+            <button class="btn-secondary" id="btnNewTrainerModal" style="padding:0.45rem 0.85rem; font-size:0.8rem;">+ Neuer Trainer</button>
+          </div>
+
+          <div class="trainer-actions-group">
+            <button class="btn-primary" id="btnAssignPokemonModal">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              + Pokémon an Trainer vergeben
+            </button>
+            <button class="btn-secondary" id="btnDeleteTrainer" title="Aktuellen Trainer löschen" style="color:#ef4444;">
+              Trainer löschen
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Trainer Info Banner -->
+        <div class="trainer-info-banner" id="trainerInfoBanner">
+          <div class="trainer-avatar-group">
+            <div class="trainer-avatar-box">🧢</div>
+            <div>
+              <h2 id="trainerBannerName" style="font-size:1.35rem; font-weight:800;">Trainer</h2>
+              <p id="trainerBannerSub" style="font-size:0.8rem; color:var(--text-secondary);">Klasse: Pokémon-Trainer • Pokémon im Team: 0</p>
+            </div>
+          </div>
+          <div class="trainer-badge-row" id="trainerBadgeRow">
+            <span class="trainer-tag">Pen &amp; Paper Charakter</span>
+          </div>
+        </div>
+
+        <!-- Trainer Pokémon Cards Grid -->
+        <div id="trainerPokemonGrid" class="trainer-pokemon-grid">
+          <!-- Populated by JS -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: P&P SCHNELL-TEAM ==================== -->
+    <section id="viewTeam" class="view-panel">
+      <div class="team-view-container">
+        
+        <div class="team-header-card">
+          <div>
+            <h2>
+              ⚔️ Pen &amp; Paper Schnelltabelle &amp; Kampfverwaltung
+            </h2>
+            <p style="color:var(--text-secondary); font-size:0.85rem; margin-top:0.25rem;">
+              Temporäre Team-Liste oder schnelle Übersicht für wilde Pokémon-Begegnungen.
+            </p>
+          </div>
+
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn-secondary" id="btnClearTeam">Team leeren</button>
+            <button class="btn-primary" id="btnPrintTeam">Bogen drucken</button>
+          </div>
+        </div>
+
+        <div id="teamCardsContainer" class="team-cards-grid">
+          <!-- Rendered by JavaScript -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 4: P&P WÜRFEL & SCHADENSRECHNER ==================== -->
+    <section id="viewTools" class="view-panel">
+      <div class="pnp-tools-grid">
+        
+        <!-- Dice Roller Card -->
+        <div class="tool-card">
+          <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:0.25rem; display:flex; align-items:center; gap:0.5rem;">
+            🎲 Pen &amp; Paper Würfelbecher
+          </h3>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1rem;">
+            Für Angriffs-, Attributs- und Fertigkeitsproben am Tisch.
+          </p>
+
+          <div class="dice-result-box">
+            <div id="diceMainResult" class="dice-result-value">-</div>
+            <div id="diceResultLabel" class="dice-result-label">Wähle einen Würfel zum Rollen</div>
+          </div>
+
+          <div class="dice-roller-buttons">
+            <button class="dice-btn" data-sides="20">D20 <span>Attributs-Probe</span></button>
+            <button class="dice-btn" data-sides="100">D100 <span>Genauigkeit %</span></button>
+            <button class="dice-btn" data-sides="6">D6 <span>Schaden</span></button>
+            <button class="dice-btn" data-sides="8">D8 <span>Schaden</span></button>
+            <button class="dice-btn" data-sides="10">D10 <span>Schaden</span></button>
+            <button class="dice-btn" data-sides="12">D12 <span>Kritisch</span></button>
+          </div>
+
+          <div style="margin-top:1rem; border-top:1px solid var(--border-color); padding-top:0.75rem;">
+            <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.4rem;">
+              Wurf-Historie
+            </div>
+            <div id="diceHistoryList" class="dice-history-list">
+              <div class="history-item">Noch keine Würfe getätigt.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gen 5 Damage Calculator -->
+        <div class="tool-card">
+          <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:0.25rem; display:flex; align-items:center; gap:0.5rem;">
+            💥 Gen 5 Schadensrechner (Level 50)
+          </h3>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1rem;">
+            Berechnet den realistischen Schadensbereich nach offizieller Generation 5 Schadensformel.
+          </p>
+
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            
+            <div>
+              <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted);">1. ANGREIFENDES POKÉMON:</label>
+              <select id="calcAttackerSelect" class="select-control" style="width:100%; margin-top:0.25rem;"></select>
+            </div>
+
+            <div>
+              <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted);">2. GEWÄHLTE ATTACKE:</label>
+              <select id="calcMoveSelect" class="select-control" style="width:100%; margin-top:0.25rem;"></select>
+            </div>
+
+            <div>
+              <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted);">3. VERTEIDIGENDES POKÉMON:</label>
+              <select id="calcDefenderSelect" class="select-control" style="width:100%; margin-top:0.25rem;"></select>
+            </div>
+
+            <button class="btn-primary" id="btnCalculateDamage" style="margin-top:0.5rem; justify-content:center;">
+              Schaden berechnen
+            </button>
+
+            <!-- Damage Output -->
+            <div id="damageOutputBox" style="background:var(--bg-primary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1rem; margin-top:0.5rem; display:none;">
+              <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.35rem;" id="damageEffectivenessLabel">Effektivität: 1.0x</div>
+              <div style="font-size:1.6rem; font-family:var(--font-mono); font-weight:800; color:var(--accent-red);" id="damageNumberRange">
+                0 - 0 KP
+              </div>
+              <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.35rem;" id="damagePercentLabel">
+                entspricht ca. 0% - 0% der Gesamt-KP
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== POKÉMON DETAIL MODAL ==================== -->
+  <div id="pokemonModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-nav-arrows">
+            <button class="icon-btn" id="modalPrevBtn" title="Vorheriges Pokémon (Taste Links)">←</button>
+            <button class="icon-btn" id="modalNextBtn" title="Nächstes Pokémon (Taste Rechts)">→</button>
+          </div>
+          <div>
+            <span id="modalDexNr" class="modal-dex-nr">#001</span>
+            <h2 id="modalNameDe" class="modal-pokemon-name">
+              Bisasam
+              <span id="modalNameEn" class="modal-pokemon-en">Bulbasaur</span>
+            </h2>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <button class="btn-secondary" id="modalQuickAssignTrainerBtn" style="padding:0.45rem 0.85rem; font-size:0.78rem;">
+            👤 An Trainer vergeben
+          </button>
+          <button class="btn-primary" id="modalAddTeamBtn" style="padding:0.45rem 0.85rem; font-size:0.78rem;">
+            + Zu Schnell-Team
+          </button>
+          <button class="modal-close-btn" id="modalCloseBtn" title="Schließen (ESC)">✕</button>
+        </div>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="modal-body" id="modalBody">
+        
+        <!-- Top Half: Left Visuals & Info + Right Stat Calculator -->
+        <div class="detail-top-grid">
+          
+          <!-- Left Column: Sprites & Facts -->
+          <div class="detail-sprite-card">
+            
+            <div class="sprite-stage">
+              <img id="modalSpriteImg" src="" alt="" class="modal-large-sprite pixelated">
+            </div>
+
+            <div class="sprite-controls-row">
+              <button class="sprite-ctrl-btn active" id="modalBtnFront">Vorne</button>
+              <button class="sprite-ctrl-btn" id="modalBtnBack">Hinten</button>
+              <button class="sprite-ctrl-btn active" id="modalBtnAnim">Animiert</button>
+              <button class="sprite-ctrl-btn" id="modalBtnStatic">Statisch</button>
+              <button class="sprite-ctrl-btn shiny" id="modalBtnShiny">✨ Shiny</button>
+            </div>
+
+            <div id="modalTypesRow" class="type-badges-group" style="margin-bottom: 1rem;"></div>
+
+            <!-- Quick Facts Table -->
+            <table class="quick-facts-table">
+              <tbody>
+                <tr>
+                  <td>Kategorie</td>
+                  <td id="modalFactCategory">Samen-Pokémon</td>
+                </tr>
+                <tr>
+                  <td>Generation</td>
+                  <td id="modalFactGen">Gen 1 (Kanto)</td>
+                </tr>
+                <tr>
+                  <td>Größe</td>
+                  <td id="modalFactHeight">0.7 m</td>
+                </tr>
+                <tr>
+                  <td>Gewicht</td>
+                  <td id="modalFactWeight">6.9 kg</td>
+                </tr>
+                <tr>
+                  <td>Basiswert-Summe</td>
+                  <td id="modalFactBST" style="color:var(--accent-gold); font-family:var(--font-mono);">318</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Abilities List -->
+            <div class="abilities-container">
+              <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.4rem;">
+                Fähigkeiten (Abilities)
+              </div>
+              <div id="modalAbilitiesList"></div>
+            </div>
+
+            <!-- Type Matchups Gen 5 -->
+            <div class="type-matchups-card">
+              <div class="matchups-title">
+                <span>Gen 5 Schwächen &amp; Resistenzen</span>
+              </div>
+              <div id="modalMatchupsGrid" class="matchups-grid"></div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: STATS & CALCULATOR (STANDART LV 50) -->
+          <div class="stats-calc-panel">
+            
+            <div class="calc-header-bar">
+              <div class="calc-title">
+                <h3>
+                  📊 Werte-Rechner &amp; Standart auf Level 50
+                </h3>
+                <p>Offizielle Gen 5 Formel. Passe Level, DVs, FPs und Wesen für dein Pen &amp; Paper an.</p>
+              </div>
+            </div>
+
+            <!-- Interactive Settings Card -->
+            <div class="calc-controls-card">
+              
+              <div class="calc-controls-row">
+                <div class="level-slider-group">
+                  <div class="level-slider-header">
+                    <span>Level:</span>
+                    <span id="levelValueDisplay" class="level-value-badge">Lv. 50</span>
+                  </div>
+                  <input type="range" id="levelRangeInput" class="range-slider" min="1" max="100" value="50">
+                </div>
+
+                <div class="nature-select-group">
+                  <label for="natureSelect">Wesen (Nature):</label>
+                  <select id="natureSelect" class="select-control" style="width:100%;"></select>
+                </div>
+              </div>
+
+              <!-- Presets Row -->
+              <div class="presets-row">
+                <span style="font-size:0.72rem; color:var(--text-muted); font-weight:700; align-self:center; margin-right:0.3rem;">PRESETS:</span>
+                <button class="preset-chip-btn active" data-preset="standard31" title="Max Talent / Turnier (31 DVs, 0 FPs)">Standart (31 DV)</button>
+                <button class="preset-chip-btn" data-preset="wild15" title="Klassisches wildes Pokémon (15 DVs, 0 FPs)">Wild / Schnitt (15 DV)</button>
+                <button class="preset-chip-btn" data-preset="base0" title="Reine Basiswerte (0 DVs, 0 FPs)">Basis (0 DV)</button>
+                <button class="preset-chip-btn" data-preset="trained" title="Voll trainiert (31 DVs, 252/252 FPs)">Voll trainiert (EVs)</button>
+              </div>
+
+            </div>
+
+            <!-- Stat Rows Table -->
+            <div class="stats-table-wrapper" id="modalStatsTable"></div>
+
+            <!-- Total Sum Footer -->
+            <div class="stat-total-row">
+              <span style="color:var(--text-secondary);">Berechnete Gesamtsumme der Werte:</span>
+              <span id="modalStatTotalVal" class="stat-total-badge">0</span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Bottom Half: NAVIGATION BETWEEN MOVESET AND P&P ATTRIBUTE SHEET -->
+        <div class="subtabs-bar">
+          <button class="subtab-btn active" data-subtab="attributes">
+            📜 P&amp;P Attributen-Sheet &amp; Fertigkeiten (Skills)
+          </button>
+          <button class="subtab-btn" data-subtab="moves">
+            ⚔️ Kampf-Moveset (Schwarz &amp; Weiß)
+          </button>
+        </div>
+
+        <!-- ================= SUB-PANEL: P&P ATTRIBUTEN-SHEET ================= -->
+        <div id="modalSubpanelAttributes" class="subpanel-content active">
+          <div class="pnp-sheet-card">
+            
+            <div class="pnp-sheet-header">
+              <div>
+                <h3 style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                  🎲 Die 6 P&amp;P Grund-Attribute (Skalierung bis 70 &amp; 10er Schritte)
+                </h3>
+                <p style="font-size:0.78rem; color:var(--text-secondary); margin-top:0.2rem;">
+                  Berechnung: Bis Wert 70 in 7er-Schritten (35 = +5, 63 = +9, 70 = +10). Über 70 in 10er-Schritten (100 = +13, 170 = +20, 260 = +29).
+                </p>
+              </div>
+            </div>
+
+            <!-- 6 Attributes Grid -->
+            <div class="pnp-attributes-grid" id="modalPnpAttributesGrid">
+              <!-- Rendered by JS -->
+            </div>
+
+            <!-- Skills List with Nature Modifiers -->
+            <div style="margin-top:1.5rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <h4 style="font-size:0.95rem; font-weight:800; color:var(--text-primary);">
+                  🎯 Fertigkeiten (Skills) mit Wesens-Modifikatoren
+                </h4>
+                <div id="modalNatureSkillsTitle" style="font-size:0.78rem; font-weight:700; color:var(--accent-blue);">
+                  Wesen: Robust
+                </div>
+              </div>
+
+              <div class="skills-grid" id="modalSkillsGrid">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ================= SUB-PANEL: MOVESET ================= -->
+        <div id="modalSubpanelMoves" class="subpanel-content">
+          <div class="moveset-container">
+            
+            <div class="moveset-header">
+              <div>
+                <h3 style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                  ⚔️ Moveset &amp; Attacken (Schwarz &amp; Weiß)
+                </h3>
+                <p style="font-size:0.78rem; color:var(--text-secondary); margin-top:0.2rem;">
+                  Alle erlernbaren Attacken der 5. Generation mit Stärke, Genauigkeit, AP und deutscher Beschreibung.
+                </p>
+              </div>
+
+              <div class="moveset-tabs" id="movesetTabs">
+                <button class="move-tab-btn active" data-movetab="level_up">Levelaufstieg (<span id="moveCountLevelUp">0</span>)</button>
+                <button class="move-tab-btn" data-movetab="machine">TMs &amp; VMs (<span id="moveCountTM">0</span>)</button>
+                <button class="move-tab-btn" data-movetab="egg">Ei-Attacken (<span id="moveCountEgg">0</span>)</button>
+                <button class="move-tab-btn" data-movetab="tutor">Tutor (<span id="moveCountTutor">0</span>)</button>
+              </div>
+            </div>
+
+            <!-- Level Filter Switch -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; padding-bottom:0.5rem; border-bottom:1px solid rgba(255,255,255,0.05);">
+              <label class="moves-filter-checkbox" id="filterLevelCheckboxLabel">
+                <input type="checkbox" id="filterOnlyLearnedMoves" checked>
+                <span>Nur Attacken anzeigen, die bis <strong>Level <span id="filterCurrentLevelSpan">50</span></strong> erlernt werden</span>
+              </label>
+              <div id="movesFoundCountLabel" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"></div>
+            </div>
+
+            <!-- Moves Table -->
+            <div style="overflow-x: auto;">
+              <table class="moves-table">
+                <thead>
+                  <tr>
+                    <th style="width: 80px;">Erlernung</th>
+                    <th style="width: 180px;">Attacke</th>
+                    <th style="width: 90px;">Typ</th>
+                    <th style="width: 90px;">Kategorie</th>
+                    <th style="width: 70px; text-align: right;">Stärke</th>
+                    <th style="width: 70px; text-align: right;">Genauigkeit</th>
+                    <th style="width: 60px; text-align: right;">AP</th>
+                    <th>Beschreibung &amp; Zusatzeffekt</th>
+                    <th style="width: 100px; text-align: center;">Schnell-Team</th>
+                  </tr>
+                </thead>
+                <tbody id="modalMovesTbody"></tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== ASSIGN POKEMON TO TRAINER MODAL ==================== -->
+  <div id="assignPokemonModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 650px;">
+      
+      <div class="modal-header">
+        <h3 style="font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+          👤 Pokémon an Trainer vergeben
+        </h3>
+        <button class="modal-close-btn" id="assignModalCloseBtn">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:1.5rem; gap:1.15rem;">
+        
+        <div>
+          <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">1. ZIEL-TRAINER:</label>
+          <select id="assignTargetTrainerSelect" class="select-control" style="width:100%; margin-top:0.25rem; font-weight:700;"></select>
+        </div>
+
+        <div>
+          <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">2. POKÉMON AUSWÄHLEN (#001 - #649):</label>
+          <select id="assignPokemonSelect" class="select-control" style="width:100%; margin-top:0.25rem; font-weight:700;"></select>
+        </div>
+
+        <div>
+          <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">3. SPITZNAME (PFLICHTFELD):</label>
+          <input type="text" id="assignNicknameInput" class="search-input" style="padding-left:1rem; margin-top:0.25rem;" placeholder="z.B. Sparky, Flammi, Knospe...">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div>
+            <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">4. START-LEVEL:</label>
+            <input type="number" id="assignLevelInput" class="search-input" style="padding-left:1rem; margin-top:0.25rem;" min="1" max="100" value="5">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">5. WESEN:</label>
+              <button class="btn-secondary" id="btnRollRandomNature" style="padding:0.15rem 0.5rem; font-size:0.7rem; color:var(--accent-gold);">
+                🎲 Zufall würfeln
+              </button>
+            </div>
+            <select id="assignNatureSelect" class="select-control" style="width:100%; margin-top:0.25rem;"></select>
+          </div>
+        </div>
+
+        <!-- Wesen Preview Box -->
+        <div id="assignNaturePreviewBox" style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.85rem; font-size:0.78rem;">
+          <div style="font-weight:700; color:#93c5fd; margin-bottom:0.25rem;" id="assignNatureNameTitle">Wesen-Effekt:</div>
+          <div id="assignNatureSkillsText" style="color:var(--text-secondary); line-height:1.4;"></div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+          <button class="btn-secondary" id="assignCancelBtn">Abbrechen</button>
+          <button class="btn-primary" id="assignConfirmBtn">✨ Pokémon zuweisen</button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== NEW TRAINER MODAL ==================== -->
+  <div id="newTrainerModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 480px;">
+      
+      <div class="modal-header">
+        <h3 style="font-size:1.15rem; font-weight:800;">Neuen Trainer anlegen</h3>
+        <button class="modal-close-btn" id="newTrainerCloseBtn">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:1.5rem; gap:1rem;">
+        <div>
+          <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">TRAINER-NAME:</label>
+          <input type="text" id="newTrainerNameInput" class="search-input" style="padding-left:1rem; margin-top:0.25rem;" placeholder="z.B. Ash, Red, Misty, Lukas (Spieler 1)...">
+        </div>
+
+        <div>
+          <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">KLASSE / ROLLE:</label>
+          <input type="text" id="newTrainerClassInput" class="search-input" style="padding-left:1rem; margin-top:0.25rem;" value="Pokémon-Trainer" placeholder="z.B. Ass-Trainer, Arenaleiter, Forscher...">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+          <button class="btn-secondary" id="newTrainerCancelBtn">Abbrechen</button>
+          <button class="btn-primary" id="newTrainerCreateBtn">Trainer erstellen</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastNotice" class="toast-notice"></div>
+
+  <!-- Load Pokédex Data and App Logic -->
+  <script src="data/pokedex_data.js?v=2.0"></script>
+  <script src="app.js?v=2.0"></script>
+</body>
+</html>
