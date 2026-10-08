@@ -849,6 +849,7 @@
     if (tabName === 'enemies') renderEnemiesView();
     if (tabName === 'evolutions') renderEvolutionsView();
     if (tabName === 'trainers') renderTrainersView();
+    if (tabName === 'pokedex') renderPokedexGrid();
   }
 
   // --- EVENT BINDING ---
@@ -1475,7 +1476,7 @@
     showToast(`Trainer "${name}" erstellt.`);
   }
 
-  function promptAssignPokemon(preferredTrainerId = null) {
+  function promptAssignPokemon(preferredTrainerId = null, preselectedPokemonId = null) {
     if (state.trainers.length === 0) {
       alert('Erstelle zuerst mindestens einen Trainer!');
       return;
@@ -1483,8 +1484,11 @@
     const tid = preferredTrainerId || state.trainers[0].id;
     const targetTrainer = state.trainers.find(t => t.id === tid);
 
-    const pidStr = prompt('Welches Pokémon vergeben? (Pokédex-Nummer 1 bis 649 eingeben, z.B. 1 für Bisasam, 4 für Glumanda, 25 für Pikachu):', '4');
-    const pid = parseInt(pidStr, 10);
+    let pid = preselectedPokemonId;
+    if (!pid) {
+      const pidStr = prompt('Welches Pokémon vergeben? (Pokédex-Nummer 1 bis 649 eingeben, z.B. 1 für Bisasam, 4 für Glumanda, 25 für Pikachu):', '4');
+      pid = parseInt(pidStr, 10);
+    }
     const p = ALL_POKEMON.find(item => item.id === pid);
     if (!p) {
       alert('Ungültige Pokédex-Nummer!');
@@ -3381,29 +3385,141 @@
     renderEnemiesView();
     renderQuickSpawners();
   }
-  function renderPokedexGrid() {
-    let list = ALL_POKEMON;
+  // --- POKEDEX VIEW (GEN 1-5 INFINITE SCROLL & SORT) ---
+  let dmPokedexRenderLimit = 50;
+  let currentDmFilteredPokemon = [];
+  let dmPokedexObserver = null;
+
+  function filterAndSortDmPokedex() {
+    let list = Array.isArray(ALL_POKEMON) ? [...ALL_POKEMON] : [];
     const q = (elements.dmPokedexSearch?.value || '').trim().toLowerCase();
     if (q) {
-      list = list.filter(p => p.name_de.toLowerCase().includes(q) || String(p.id) === q);
+      list = list.filter(p => 
+        p.name_de.toLowerCase().includes(q) || 
+        (p.name_en && p.name_en.toLowerCase().includes(q)) || 
+        String(p.id) === q ||
+        String(p.id).padStart(3, '0').includes(q)
+      );
     }
-    elements.dmPokedexGrid.innerHTML = '';
-    list.slice(0, 40).forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'pokemon-card';
-      card.innerHTML = `
-        <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">#${String(p.id).padStart(3, '0')}</div>
-        <div style="text-align:center; margin:0.5rem 0;">
-          <img src="${p.sprites.front_default}" alt="" style="width:72px; height:72px;" class="pixelated">
-        </div>
-        <div style="font-weight:800; text-align:center; font-size:0.95rem;">${p.name_de}</div>
-        <div style="text-align:center; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.5rem;">${p.types.map(t=>t.name_de).join('/')}</div>
-        <button class="btn-card-details btn-pokedex-give" data-pid="${p.id}" style="width:100%; font-size:0.75rem;">+ An Trainer vergeben</button>
-      `;
-      card.querySelector('.btn-pokedex-give').addEventListener('click', () => promptAssignPokemon());
-      elements.dmPokedexGrid.appendChild(card);
-    });
+
+    const sortVal = elements.dmPokedexSort?.value || 'id-asc';
+    if (sortVal === 'id-asc') {
+      list.sort((a, b) => a.id - b.id);
+    } else if (sortVal === 'name-asc') {
+      list.sort((a, b) => a.name_de.localeCompare(b.name_de, 'de'));
+    } else if (sortVal === 'bst-desc') {
+      list.sort((a, b) => {
+        const bstA = (a.base_stats.hp || 0) + (a.base_stats.atk || 0) + (a.base_stats.def || 0) + (a.base_stats.spa || 0) + (a.base_stats.spd || 0) + (a.base_stats.spe || 0);
+        const bstB = (b.base_stats.hp || 0) + (b.base_stats.atk || 0) + (b.base_stats.def || 0) + (b.base_stats.spa || 0) + (b.base_stats.spd || 0) + (b.base_stats.spe || 0);
+        return bstB - bstA;
+      });
+    }
+
+    currentDmFilteredPokemon = list;
+    return list;
   }
+
+  function createDmPokemonCard(p) {
+    const bst = (p.base_stats.hp || 0) + (p.base_stats.atk || 0) + (p.base_stats.def || 0) + (p.base_stats.spa || 0) + (p.base_stats.spd || 0) + (p.base_stats.spe || 0);
+    const card = document.createElement('div');
+    card.className = 'pokemon-card';
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">#${String(p.id).padStart(3, '0')}</span>
+        <span style="font-size:0.68rem; color:var(--text-muted); font-weight:700;">BST: ${bst}</span>
+      </div>
+      <div style="text-align:center; margin:0.5rem 0;">
+        <img src="${p.sprites.front_default}" alt="${p.name_de}" style="width:72px; height:72px;" class="pixelated" loading="lazy" onerror="this.src='${p.sprites.front_static || ''}'">
+      </div>
+      <div style="font-weight:800; text-align:center; font-size:0.95rem; color:var(--text-highlight);">${p.name_de}</div>
+      <div style="display:flex; justify-content:center; gap:0.25rem; margin:0.35rem 0 0.65rem 0; flex-wrap:wrap;">
+        ${p.types.map(t => `<span class="type-badge type-${t.identifier}" style="font-size:0.65rem; padding:0.15rem 0.4rem;">${t.name_de}</span>`).join('')}
+      </div>
+      <div style="font-size:0.7rem; color:var(--text-secondary); text-align:center; margin-bottom:0.6rem; font-family:var(--font-mono);">
+        KP ${p.base_stats.hp} | ATK ${p.base_stats.atk} | DEF ${p.base_stats.def}
+      </div>
+      <button class="btn-card-details btn-pokedex-give" data-pid="${p.id}" style="width:100%; font-size:0.75rem; padding:0.35rem 0.5rem; background:linear-gradient(135deg, #3b82f6, #1d4ed8); border:none; border-radius:var(--radius-sm); color:#fff; font-weight:700; cursor:pointer;" title="${p.name_de} einem Spieler-Trainer geben">
+        + An Trainer vergeben
+      </button>
+    `;
+    card.querySelector('.btn-pokedex-give').addEventListener('click', () => promptAssignPokemon(null, p.id));
+    return card;
+  }
+
+  function renderPokedexGrid(isAppend = false) {
+    if (!elements.dmPokedexGrid) return;
+
+    if (!isAppend) {
+      filterAndSortDmPokedex();
+      dmPokedexRenderLimit = 50;
+      elements.dmPokedexGrid.innerHTML = '';
+    }
+
+    const currentCardsCount = elements.dmPokedexGrid.querySelectorAll('.pokemon-card').length;
+    const toRender = currentDmFilteredPokemon.slice(currentCardsCount, dmPokedexRenderLimit);
+
+    // Remove existing sentinel/load-more if any
+    const oldSentinel = elements.dmPokedexGrid.querySelector('.pokedex-sentinel');
+    if (oldSentinel) oldSentinel.remove();
+
+    // Append new cards
+    toRender.forEach(p => {
+      elements.dmPokedexGrid.appendChild(createDmPokemonCard(p));
+    });
+
+    // Check if more items exist
+    if (dmPokedexRenderLimit < currentDmFilteredPokemon.length) {
+      const sentinel = document.createElement('div');
+      sentinel.className = 'pokedex-sentinel';
+      sentinel.style.cssText = 'grid-column: 1 / -1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 2rem 1rem; gap: 0.75rem;';
+      sentinel.innerHTML = `
+        <div style="color:var(--text-muted); font-size:0.85rem;">
+          Zeige ${Math.min(dmPokedexRenderLimit, currentDmFilteredPokemon.length)} von ${currentDmFilteredPokemon.length} Pokémon
+        </div>
+        <button class="btn-secondary btn-load-more-pokedex" style="padding:0.5rem 1.25rem; font-size:0.85rem; font-weight:700; cursor:pointer;">
+          ⬇️ Weitere 50 Pokémon laden...
+        </button>
+      `;
+
+      sentinel.querySelector('.btn-load-more-pokedex').addEventListener('click', () => {
+        dmPokedexRenderLimit += 50;
+        renderPokedexGrid(true);
+      });
+
+      elements.dmPokedexGrid.appendChild(sentinel);
+
+      // Setup IntersectionObserver for auto-loading on scroll
+      if (dmPokedexObserver) dmPokedexObserver.disconnect();
+      if ('IntersectionObserver' in window) {
+        dmPokedexObserver = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            dmPokedexRenderLimit += 50;
+            renderPokedexGrid(true);
+          }
+        }, { rootMargin: '400px' });
+        dmPokedexObserver.observe(sentinel);
+      }
+    } else if (currentDmFilteredPokemon.length > 0) {
+      const endNotice = document.createElement('div');
+      endNotice.className = 'pokedex-sentinel';
+      endNotice.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.85rem; font-weight: 600;';
+      endNotice.textContent = `✨ Alle ${currentDmFilteredPokemon.length} Pokémon geladen.`;
+      elements.dmPokedexGrid.appendChild(endNotice);
+    } else {
+      elements.dmPokedexGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">Keine Pokémon gefunden.</div>';
+    }
+  }
+
+  // Window scroll fallback for infinite scroll
+  window.addEventListener('scroll', () => {
+    if (state.activeTab !== 'pokedex') return;
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 600) {
+      if (dmPokedexRenderLimit < currentDmFilteredPokemon.length) {
+        dmPokedexRenderLimit += 50;
+        renderPokedexGrid(true);
+      }
+    }
+  });
 
   function showToast(msg) {
     elements.toastNotice.textContent = msg;

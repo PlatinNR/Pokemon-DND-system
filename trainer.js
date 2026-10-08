@@ -1987,17 +1987,37 @@
   }
 
   // --- POKEDEX TAB ---
-  function renderPokedexGrid() {
-    const query = (elements.trainerPokedexSearch.value || '').toLowerCase().trim();
-    const filtered = ALL_POKEMON.filter(p => {
-      if (!query) return true;
-      return p.name_de.toLowerCase().includes(query) ||
-             p.name_en.toLowerCase().includes(query) ||
-             String(p.id).includes(query);
-    }).slice(0, 48);
+  let trainerPokedexRenderLimit = 48;
+  let currentTrainerFilteredPokemon = [];
+  let trainerPokedexObserver = null;
 
-    elements.trainerPokedexGrid.innerHTML = filtered.map(p => `
-      <div class="pokemon-card" style="padding:0.75rem;">
+  function renderPokedexGrid(isAppend = false) {
+    if (!elements.trainerPokedexGrid) return;
+    const query = (elements.trainerPokedexSearch?.value || '').toLowerCase().trim();
+
+    if (!isAppend) {
+      currentTrainerFilteredPokemon = (Array.isArray(ALL_POKEMON) ? ALL_POKEMON : []).filter(p => {
+        if (!query) return true;
+        return p.name_de.toLowerCase().includes(query) ||
+               (p.name_en && p.name_en.toLowerCase().includes(query)) ||
+               String(p.id) === query ||
+               String(p.id).padStart(3, '0').includes(query);
+      });
+      trainerPokedexRenderLimit = 48;
+      elements.trainerPokedexGrid.innerHTML = '';
+    }
+
+    const currentCardsCount = elements.trainerPokedexGrid.querySelectorAll('.pokemon-card').length;
+    const toRender = currentTrainerFilteredPokemon.slice(currentCardsCount, trainerPokedexRenderLimit);
+
+    const oldSentinel = elements.trainerPokedexGrid.querySelector('.pokedex-sentinel');
+    if (oldSentinel) oldSentinel.remove();
+
+    toRender.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'pokemon-card';
+      card.style.padding = '0.75rem';
+      card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:0.75rem; font-family:var(--font-mono); color:var(--text-muted);">#${String(p.id).padStart(3, '0')}</span>
           <div style="display:flex; gap:0.25rem;">
@@ -2005,14 +2025,53 @@
           </div>
         </div>
         <div style="text-align:center; margin:0.5rem 0;">
-          <img src="${p.sprites.front_default}" alt="${p.name_de}" style="width:60px; height:60px;" class="pixelated" onerror="this.src='${p.sprites.front_static}'">
+          <img src="${p.sprites.front_default}" alt="${p.name_de}" style="width:60px; height:60px;" class="pixelated" loading="lazy" onerror="this.src='${p.sprites.front_static || ''}'">
         </div>
         <div style="font-weight:800; font-size:0.95rem; text-align:center; color:var(--text-highlight);">${p.name_de}</div>
         <div style="font-size:0.72rem; color:var(--text-secondary); text-align:center; margin-top:0.25rem;">
           KP: ${p.base_stats.hp} | ANG: ${p.base_stats.atk} | VER: ${p.base_stats.def}
         </div>
-      </div>
-    `).join('');
+      `;
+      elements.trainerPokedexGrid.appendChild(card);
+    });
+
+    if (trainerPokedexRenderLimit < currentTrainerFilteredPokemon.length) {
+      const sentinel = document.createElement('div');
+      sentinel.className = 'pokedex-sentinel';
+      sentinel.style.cssText = 'grid-column: 1 / -1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 2rem 1rem; gap: 0.75rem;';
+      sentinel.innerHTML = `
+        <div style="color:var(--text-muted); font-size:0.85rem;">
+          Zeige ${Math.min(trainerPokedexRenderLimit, currentTrainerFilteredPokemon.length)} von ${currentTrainerFilteredPokemon.length} Pokémon
+        </div>
+        <button class="btn-secondary btn-load-more-trainer-pokedex" style="padding:0.5rem 1.25rem; font-size:0.85rem; font-weight:700; cursor:pointer;">
+          ⬇️ Weitere Pokémon laden...
+        </button>
+      `;
+
+      sentinel.querySelector('.btn-load-more-trainer-pokedex').addEventListener('click', () => {
+        trainerPokedexRenderLimit += 48;
+        renderPokedexGrid(true);
+      });
+
+      elements.trainerPokedexGrid.appendChild(sentinel);
+
+      if (trainerPokedexObserver) trainerPokedexObserver.disconnect();
+      if ('IntersectionObserver' in window) {
+        trainerPokedexObserver = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            trainerPokedexRenderLimit += 48;
+            renderPokedexGrid(true);
+          }
+        }, { rootMargin: '400px' });
+        trainerPokedexObserver.observe(sentinel);
+      }
+    } else if (currentTrainerFilteredPokemon.length > 0) {
+      const endNotice = document.createElement('div');
+      endNotice.className = 'pokedex-sentinel';
+      endNotice.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.85rem; font-weight: 600;';
+      endNotice.textContent = `✨ Alle ${currentTrainerFilteredPokemon.length} Pokémon geladen.`;
+      elements.trainerPokedexGrid.appendChild(endNotice);
+    }
   }
 
   // --- TAKTISCHE KAMPFKARTE (BATTLE GRID & D&D REICHWEITEN) ---
