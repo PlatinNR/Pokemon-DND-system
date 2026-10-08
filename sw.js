@@ -3,7 +3,7 @@
  * Ermöglicht PWA-Installation auf Android/iOS und Caching statischer Assets.
  */
 
-const CACHE_NAME = 'pnp-pokemon-v2.2';
+const CACHE_NAME = 'pnp-pokemon-v2.3';
 const STATIC_ASSETS = [
   '/',
   '/download.html',

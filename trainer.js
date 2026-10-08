@@ -657,7 +657,7 @@
 
     // Connect to live Server-Sent Events stream
     connectLiveSse();
-    setInterval(fetchGameState, 2500);
+    setInterval(fetchGameState, 1500);
 
     // Render pokedex
     renderPokedexGrid();
@@ -671,7 +671,11 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, payload })
       });
-      return await res.json();
+      const data = await res.json();
+      if (data && data.gameState) {
+        handleStateUpdate(data.gameState);
+      }
+      return data;
     } catch (e) {
       console.warn('[Trainer] Action send error:', e);
       return { success: false, error: e.message };
@@ -694,18 +698,7 @@
     if (!newState) return;
 
     if (newState.version) {
-      try {
-        const localCached = localStorage.getItem('pnp_saved_gamestate');
-        if (localCached) {
-          const cached = JSON.parse(localCached);
-          if (cached && cached.version && cached.version > newState.version) {
-            console.log('[Trainer] Restoring newer state to server...');
-            sendAction('SYNC_STATE', cached);
-            return;
-          }
-        }
-        localStorage.setItem('pnp_saved_gamestate', JSON.stringify(newState));
-      } catch (e) {}
+      try { localStorage.setItem('pnp_saved_gamestate', JSON.stringify(newState)); } catch (e) {}
     }
 
     if (newState.trainers) state.trainers = newState.trainers;

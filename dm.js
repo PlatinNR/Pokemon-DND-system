@@ -642,7 +642,7 @@
     checkDmAuth();
     connectSseStream();
     fetchGameState();
-    setInterval(fetchGameState, 2500);
+    setInterval(fetchGameState, 1500);
   }
 
   // --- DM AUTHENTICATION (PASSWORD GATE) ---
@@ -767,36 +767,30 @@
     }
   }
 
+  function applyGameState(gameState) {
+    if (!gameState) return;
+    if (gameState.version) {
+      try { localStorage.setItem('pnp_saved_gamestate', JSON.stringify(gameState)); } catch (e) {}
+    }
+    state.trainers = gameState.trainers || [];
+    state.diceHistory = gameState.diceHistory || [];
+    state.battleState = gameState.battleState || { active: true, gridWidth: 20, gridHeight: 14, turnNumber: 1, tokens: [] };
+    state.pendingRequests = gameState.pendingRequests || [];
+    state.enemyPresets = gameState.enemyPresets || [];
+    renderTrainersView();
+    renderEvolutionsView();
+    updateItemTrainerSelect();
+    renderLiveRollsList();
+    renderBattleMapView();
+    renderEnemiesView();
+    renderRequestsPanel();
+  }
+
   function fetchGameState() {
     fetch('/api?endpoint=state')
       .then(r => r.json())
       .then(gameState => {
-        if (gameState.version) {
-          try {
-            const localCached = localStorage.getItem('pnp_saved_gamestate');
-            if (localCached) {
-              const cached = JSON.parse(localCached);
-              if (cached && cached.version && cached.version > gameState.version) {
-                console.log('[DM] Restoring newer state to server...');
-                sendAction('SYNC_STATE', cached);
-                return;
-              }
-            }
-            localStorage.setItem('pnp_saved_gamestate', JSON.stringify(gameState));
-          } catch (e) {}
-        }
-        state.trainers = gameState.trainers || [];
-        state.diceHistory = gameState.diceHistory || [];
-        state.battleState = gameState.battleState || { active: true, gridWidth: 20, gridHeight: 14, turnNumber: 1, tokens: [] };
-        state.pendingRequests = gameState.pendingRequests || [];
-        state.enemyPresets = gameState.enemyPresets || [];
-        renderTrainersView();
-        renderEvolutionsView();
-        updateItemTrainerSelect();
-        renderLiveRollsList();
-        renderBattleMapView();
-        renderEnemiesView();
-        renderRequestsPanel();
+        applyGameState(gameState);
       })
       .catch(() => {
         state.trainers = JSON.parse(localStorage.getItem('pnp_trainers') || '[]');
@@ -806,12 +800,24 @@
       });
   }
 
-  function sendAction(actionType, payload) {
-    fetch('/api?endpoint=action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: actionType, payload })
-    }).catch(e => console.error('Action error:', e));
+  async function sendAction(actionType, payload) {
+    try {
+      const res = await fetch('/api?endpoint=action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: actionType, payload })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.gameState) {
+          applyGameState(data.gameState);
+        } else {
+          fetchGameState();
+        }
+      }
+    } catch (e) {
+      console.error('Action error:', e);
+    }
   }
 
   function loadNetworkInfo() {
