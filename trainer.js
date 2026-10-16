@@ -503,6 +503,7 @@
 
   // --- STATE ---
   const state = {
+    version: 0,
     activeTab: 'team',
     activeTrainerId: null,
     trainers: [],
@@ -656,12 +657,23 @@
     ALL_EVOLUTIONS = data.evolutions || {};
     ALL_ITEMS = data.items || [];
 
+    // Immediately load cached state from localStorage if available
+    try {
+      const cached = localStorage.getItem('pnp_saved_gamestate');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.trainers && parsed.trainers.length > 0) {
+          handleStateUpdate(parsed, true);
+        }
+      }
+    } catch (e) {}
+
     // Fetch initial Game State from server
     fetchGameState();
 
     // Connect to live Server-Sent Events stream
     connectLiveSse();
-    setInterval(fetchGameState, 1500);
+    setInterval(fetchGameState, 4000);
 
     // Render pokedex
     renderPokedexGrid();
@@ -677,7 +689,7 @@
       });
       const data = await res.json();
       if (data && data.gameState) {
-        handleStateUpdate(data.gameState);
+        handleStateUpdate(data.gameState, true);
       }
       return data;
     } catch (e) {
@@ -695,10 +707,22 @@
       }
     } catch (e) {
       console.warn('[Trainer] Failed to fetch state:', e);
+      // Never wipe state.trainers on network error! Only load cache if completely empty
+      if (!state.trainers || state.trainers.length === 0) {
+        try {
+          const cached = localStorage.getItem('pnp_saved_gamestate');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed && parsed.trainers && parsed.trainers.length > 0) {
+              handleStateUpdate(parsed, true);
+            }
+          }
+        } catch (err) {}
+      }
     }
   }
 
-  function handleStateUpdate(newState) {
+  function handleStateUpdate(newState, force = false) {
     if (!newState) return;
 
     if (newState.battleState && Array.isArray(newState.battleState.tokens)) {
@@ -708,6 +732,21 @@
       newState.enemyPresets = newState.enemyPresets.filter(p => p.id !== 'enemy_human_standard' && p.nickname !== 'Standard-Mensch');
     }
 
+    const incomingVersion = Number(newState.version) || 0;
+    const currentVersion = Number(state.version) || 0;
+
+    // Reject stale state from cold serverless instances if we already have a newer version with trainers
+    if (!force && incomingVersion && currentVersion && incomingVersion < currentVersion && state.trainers && state.trainers.length > 0) {
+      console.warn(`[Trainer] Ignoring stale state (v${incomingVersion} < current v${currentVersion})`);
+      return;
+    }
+
+    // Skip DOM wiping and re-rendering if version has not changed and team is already rendered
+    if (!force && incomingVersion && currentVersion && incomingVersion === currentVersion && state.trainers && state.trainers.length > 0) {
+      return;
+    }
+
+    state.version = incomingVersion || currentVersion || 1;
     if (newState.version) {
       try { localStorage.setItem('pnp_saved_gamestate', JSON.stringify(newState)); } catch (e) {}
     }

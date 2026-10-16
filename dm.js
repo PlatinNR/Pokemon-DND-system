@@ -495,6 +495,7 @@
 
   // --- DM STATE ---
   const state = {
+    version: 0,
     activeTab: 'trainers',
     trainers: [],
     network: { localIp: 'localhost', port: 3000 },
@@ -664,9 +665,21 @@
     populateItemsCatalog();
     renderPokedexGrid();
     checkDmAuth();
+
+    // Immediately load cached state from localStorage if available
+    try {
+      const cached = localStorage.getItem('pnp_saved_gamestate');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.trainers && parsed.trainers.length > 0) {
+          applyGameState(parsed, true);
+        }
+      }
+    } catch (e) {}
+
     connectSseStream();
     fetchGameState();
-    setInterval(fetchGameState, 1500);
+    setInterval(fetchGameState, 4000);
   }
 
   // --- DM AUTHENTICATION (PASSWORD GATE) ---
@@ -739,23 +752,7 @@
 
     switch (type) {
       case 'STATE_UPDATED':
-        if (payload.trainers) state.trainers = payload.trainers;
-        if (payload.battleState) {
-          if (Array.isArray(payload.battleState.tokens)) {
-            payload.battleState.tokens = payload.battleState.tokens.filter(t => t.id !== 'token_enemy_1791407444606_512a' && t.nickname !== 'Standard-Mensch' && t.pokemonId !== 0);
-          }
-          state.battleState = payload.battleState;
-        }
-        if (payload.enemyPresets) {
-          state.enemyPresets = payload.enemyPresets.filter(p => p.id !== 'enemy_human_standard' && p.nickname !== 'Standard-Mensch');
-        }
-        if (payload.pendingRequests) state.pendingRequests = payload.pendingRequests;
-        renderTrainersView();
-        renderEvolutionsView();
-        updateItemTrainerSelect();
-        renderBattleMapView();
-        renderEnemiesView();
-        renderRequestsPanel();
+        applyGameState(payload);
         break;
 
       case 'ACTION_REQUEST_SUBMITTED':
@@ -800,7 +797,7 @@
     }
   }
 
-  function applyGameState(gameState) {
+  function applyGameState(gameState, force = false) {
     if (!gameState) return;
     if (gameState.battleState && Array.isArray(gameState.battleState.tokens)) {
       gameState.battleState.tokens = gameState.battleState.tokens.filter(t => t.id !== 'token_enemy_1791407444606_512a' && t.nickname !== 'Standard-Mensch' && t.pokemonId !== 0);
@@ -808,9 +805,27 @@
     if (Array.isArray(gameState.enemyPresets)) {
       gameState.enemyPresets = gameState.enemyPresets.filter(p => p.id !== 'enemy_human_standard' && p.nickname !== 'Standard-Mensch');
     }
+
+    const incomingVersion = Number(gameState.version) || 0;
+    const currentVersion = Number(state.version) || 0;
+
+    // Reject stale state from cold serverless instances if we already have a newer version with trainers
+    if (!force && incomingVersion && currentVersion && incomingVersion < currentVersion && state.trainers && state.trainers.length > 0) {
+      console.warn(`[DM] Ignoring stale gameState (v${incomingVersion} < current v${currentVersion})`);
+      sendAction('SYNC_STATE', { trainers: state.trainers, battleState: state.battleState, enemyPresets: state.enemyPresets, version: state.version });
+      return;
+    }
+
+    // Skip DOM wiping and re-rendering if version has not changed and trainers are already rendered
+    if (!force && incomingVersion && currentVersion && incomingVersion === currentVersion && state.trainers && state.trainers.length > 0) {
+      return;
+    }
+
+    state.version = incomingVersion || currentVersion || 1;
     if (gameState.version) {
       try { localStorage.setItem('pnp_saved_gamestate', JSON.stringify(gameState)); } catch (e) {}
     }
+
     state.trainers = gameState.trainers || [];
     state.diceHistory = gameState.diceHistory || [];
     state.battleState = gameState.battleState || { active: true, gridWidth: 20, gridHeight: 14, turnNumber: 1, tokens: [] };
@@ -827,15 +842,27 @@
 
   function fetchGameState() {
     fetch('/api?endpoint=state')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then(gameState => {
         applyGameState(gameState);
       })
-      .catch(() => {
-        state.trainers = JSON.parse(localStorage.getItem('pnp_trainers') || '[]');
-        renderTrainersView();
-        renderEvolutionsView();
-        updateItemTrainerSelect();
+      .catch((err) => {
+        console.warn('[DM] Failed to fetch state:', err);
+        // Never wipe state.trainers on network error! Only load cache if completely empty
+        if (!state.trainers || state.trainers.length === 0) {
+          try {
+            const cached = localStorage.getItem('pnp_saved_gamestate');
+            if (cached) {
+              const parsed = JSON.parse(cached);
+              if (parsed && parsed.trainers && parsed.trainers.length > 0) {
+                applyGameState(parsed, true);
+              }
+            }
+          } catch (e) {}
+        }
       });
   }
 

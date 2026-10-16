@@ -34,12 +34,28 @@ let gameState = {
 const ENEMY_FILE = path.join(__dirname, 'data', 'enemy_presets.json');
 const POKEDEX_FILE = path.join(__dirname, 'data', 'pokedex_gen1_5.json');
 let POKEDEX_DATA = null;
-if (fs.existsSync(POKEDEX_FILE)) {
-  try {
-    POKEDEX_DATA = JSON.parse(fs.readFileSync(POKEDEX_FILE, 'utf8'));
-    console.log(`[Server] Pokédex-Daten geladen (${POKEDEX_DATA.pokemon?.length || 0} Pokémon, ${Object.keys(POKEDEX_DATA.moves || {}).length} Attacken).`);
-  } catch (e) {
-    console.error('[Server] Fehler beim Laden von pokedex_gen1_5.json:', e);
+try {
+  POKEDEX_DATA = require('./data/pokedex_gen1_5.json');
+  console.log(`[Server] Pokédex-Daten statisch geladen (${POKEDEX_DATA.pokemon?.length || 0} Pokémon, ${Object.keys(POKEDEX_DATA.moves || {}).length} Attacken).`);
+} catch (e) {
+  if (fs.existsSync(POKEDEX_FILE)) {
+    try {
+      POKEDEX_DATA = JSON.parse(fs.readFileSync(POKEDEX_FILE, 'utf8'));
+      console.log(`[Server] Pokédex-Daten via FS geladen (${POKEDEX_DATA.pokemon?.length || 0} Pokémon).`);
+    } catch (err) {
+      console.error('[Server] Fehler beim Laden von pokedex_gen1_5.json:', err);
+    }
+  }
+}
+
+let DEFAULT_GAME_STATE = null;
+try {
+  DEFAULT_GAME_STATE = require('./data/game_state.json');
+} catch (e) {
+  if (fs.existsSync(BUNDLED_STATE_FILE)) {
+    try {
+      DEFAULT_GAME_STATE = JSON.parse(fs.readFileSync(BUNDLED_STATE_FILE, 'utf8'));
+    } catch (err) {}
   }
 }
 
@@ -102,20 +118,19 @@ function loadState() {
       console.error('[Server] Fehler beim Laden des Spielstands:', e);
     }
   } else {
-    // Try to load initial trainers from pnp_trainers or default
-    gameState.trainers = [
-      {
-        id: 'trainer_rot',
-        name: 'Rot',
-        role: 'Pokémon-Trainer',
-        items: [
-          { id: 'poke_ball', name_de: 'Pokéball', count: 5, icon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png' },
-          { id: 'potion', name_de: 'Trank', count: 3, icon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/potion.png' }
-        ],
-        pokemon: []
-      }
-    ];
-    gameState.version = 1;
+    // Fall back to bundled initial default state
+    if (DEFAULT_GAME_STATE) {
+      gameState = JSON.parse(JSON.stringify(DEFAULT_GAME_STATE));
+    } else {
+      gameState.trainers = [];
+    }
+    if (!gameState.version) gameState.version = 1;
+    if (gameState.battleState && Array.isArray(gameState.battleState.tokens)) {
+      gameState.battleState.tokens = gameState.battleState.tokens.filter(t => t.id !== 'token_enemy_1791407444606_512a' && t.nickname !== 'Standard-Mensch' && t.pokemonId !== 0);
+    }
+    if (Array.isArray(gameState.enemyPresets)) {
+      gameState.enemyPresets = gameState.enemyPresets.filter(p => p.id !== 'enemy_human_standard' && p.nickname !== 'Standard-Mensch');
+    }
     isStateLoaded = true;
     saveState();
   }
