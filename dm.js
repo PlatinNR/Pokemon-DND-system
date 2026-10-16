@@ -540,6 +540,9 @@
     dmBattleGrid: document.getElementById('dmBattleGrid'),
     btnDmClearBattleMap: document.getElementById('btnDmClearBattleMap'),
     btnDmOpenAddEnemyModal: document.getElementById('btnDmOpenAddEnemyModal'),
+    btnDmFitMap: document.getElementById('btnDmFitMap'),
+    btnDmZoomInMap: document.getElementById('btnDmZoomInMap'),
+    btnDmZoomOutMap: document.getElementById('btnDmZoomOutMap'),
     battleTokensCountBadge: document.getElementById('battleTokensCountBadge'),
     dmSelectedTokenBox: document.getElementById('dmSelectedTokenBox'),
     dmSelectedTokenContent: document.getElementById('dmSelectedTokenContent'),
@@ -864,7 +867,10 @@
     elements.dmTabPokedex.classList.toggle('active', tabName === 'pokedex');
     elements.dmTabTools.classList.toggle('active', tabName === 'tools');
 
-    if (tabName === 'battle') renderBattleMapView();
+    if (tabName === 'battle') {
+      renderBattleMapView();
+      setTimeout(fitBattleGrid, 60);
+    }
     if (tabName === 'enemies') renderEnemiesView();
     if (tabName === 'evolutions') renderEvolutionsView();
     if (tabName === 'trainers') renderTrainersView();
@@ -898,6 +904,17 @@
         }
       });
     }
+
+    if (elements.btnDmFitMap) {
+      elements.btnDmFitMap.addEventListener('click', fitBattleGrid);
+    }
+    if (elements.btnDmZoomInMap) {
+      elements.btnDmZoomInMap.addEventListener('click', () => adjustBattleGridZoom(3));
+    }
+    if (elements.btnDmZoomOutMap) {
+      elements.btnDmZoomOutMap.addEventListener('click', () => adjustBattleGridZoom(-3));
+    }
+    window.addEventListener('resize', fitBattleGrid);
 
     if (elements.btnDmOpenAddEnemyModal) {
       elements.btnDmOpenAddEnemyModal.addEventListener('click', openCreateEnemyModal);
@@ -1847,6 +1864,37 @@
 
     renderSelectedTokenBox();
     renderQuickSpawners();
+    fitBattleGrid();
+  }
+
+  function fitBattleGrid() {
+    const wrapper = document.querySelector('.battlemap-board-wrapper');
+    const grid = elements.dmBattleGrid;
+    if (!wrapper || !grid) return;
+
+    const padX = 24;
+    const padY = 38;
+    const availW = Math.max(200, wrapper.clientWidth - padX);
+    let availH = wrapper.clientHeight - padY;
+    if (!availH || availH <= 150) {
+      const rect = wrapper.getBoundingClientRect();
+      availH = Math.max(200, (window.innerHeight - rect.top) - padY - 20);
+    }
+
+    const maxCellW = Math.floor((availW - 20) / 20);
+    const maxCellH = Math.floor((availH - 14) / 14);
+    let cell = Math.min(maxCellW, maxCellH);
+
+    cell = Math.max(20, Math.min(50, cell));
+    grid.style.setProperty('--grid-cell-size', `${cell}px`);
+  }
+
+  function adjustBattleGridZoom(delta) {
+    const grid = elements.dmBattleGrid;
+    if (!grid) return;
+    const current = parseInt(getComputedStyle(grid).getPropertyValue('--grid-cell-size'), 10) || 34;
+    const next = Math.max(18, Math.min(60, current + delta));
+    grid.style.setProperty('--grid-cell-size', `${next}px`);
   }
 
   function selectToken(tokenId) {
@@ -2583,7 +2631,7 @@
     elements.dmAttackModalBody.querySelector('#btnExecuteDmAttack')?.addEventListener('click', executeDmAttack);
   }
 
-  function executeDmAttack() {
+  async function executeDmAttack() {
     if (!currentAttackModalState) return;
     const { attacker, move, targets } = currentAttackModalState;
 
@@ -2593,14 +2641,21 @@
       return;
     }
 
-    // Deduct 1 AP
+    // Deduct 1 AP locally
     attacker.moveAps = attacker.moveAps || {};
     attacker.moveAps[String(move.id)] = Math.max(0, curAp - 1);
-    sendAction('RESTORE_AP', { tokenId: attacker.id, trainerId: attacker.trainerId, pokemonUid: attacker.pokemonUid, moveId: move.id, amount: -1 });
+    if (attacker.trainerId && attacker.pokemonUid && state.trainers) {
+      const aTr = state.trainers.find(t => t.id === attacker.trainerId);
+      const aPk = aTr?.pokemon?.find(p => p.uid === attacker.pokemonUid);
+      if (aPk) {
+        aPk.moveAps = aPk.moveAps || {};
+        aPk.moveAps[String(move.id)] = attacker.moveAps[String(move.id)];
+      }
+    }
 
     const hits = [];
 
-    targets.forEach(tgtObj => {
+    targets.forEach((tgtObj, tIdx) => {
       const tgt = tgtObj.token;
       if (tgtObj.result === 'miss') {
         hits.push({ tokenId: tgt.id, damage: 0, text: ' (💨 Verfehlt!)', extraText: '' });
@@ -2613,9 +2668,39 @@
         useRandom: false
       });
 
-      const finalDmg = (tgtObj.damageOverride !== null && !isNaN(tgtObj.damageOverride))
-        ? Math.max(0, parseInt(tgtObj.damageOverride, 10))
+      // Read override directly from DOM input if user entered one
+      const overrideInput = elements.dmAttackModalBody?.querySelector(`.dm-dmg-override-input[data-tidx="${tIdx}"]`);
+      let effectiveOverride = tgtObj.damageOverride;
+      if (overrideInput && overrideInput.value.trim() !== '') {
+        const parsed = parseInt(overrideInput.value.trim(), 10);
+        if (!isNaN(parsed)) {
+          effectiveOverride = parsed;
+        }
+      }
+
+      const finalDmg = (effectiveOverride !== null && effectiveOverride !== undefined && !isNaN(effectiveOverride))
+        ? Math.max(0, parseInt(effectiveOverride, 10))
         : calc.damage;
+
+      // Update target HP locally right away!
+      const targetInBattle = state.battleState?.tokens?.find(t => t.id === tgt.id);
+      const curHp = Number((targetInBattle && targetInBattle.currentHp !== undefined) ? targetInBattle.currentHp : ((tgt.currentHp !== undefined) ? tgt.currentHp : (tgt.maxHp || 50)));
+      const newHp = Math.max(0, curHp - finalDmg);
+
+      if (targetInBattle) {
+        targetInBattle.currentHp = newHp;
+      }
+      tgt.currentHp = newHp;
+
+      if (tgt.presetId && state.enemyPresets) {
+        const pr = state.enemyPresets.find(p => p.id === tgt.presetId);
+        if (pr) pr.currentHp = newHp;
+      }
+      if (tgt.trainerId && tgt.pokemonUid && state.trainers) {
+        const tr = state.trainers.find(t => t.id === tgt.trainerId);
+        const pk = tr?.pokemon?.find(p => p.uid === tgt.pokemonUid);
+        if (pk) pk.currentHp = newHp;
+      }
 
       const hitObj = { tokenId: tgt.id, damage: finalDmg, text: calc.text };
       let statusNotice = '';
@@ -2624,6 +2709,7 @@
         hitObj.isConfused = true;
         hitObj.confusionTurns = 3;
         statusNotice += ' [🌀 Verwirrt!]';
+        if (targetInBattle) targetInBattle.isConfused = true;
       }
 
       const priStatuses = ['toxic', 'poison', 'burn', 'paralysis', 'sleep', 'freeze'];
@@ -2634,6 +2720,7 @@
           if (st === 'toxic') hitObj.statusTurns = 1;
           const labels = { toxic: '☠️ TOX', poison: '🟣 PSN', burn: '🔥 BRN', paralysis: '⚡ PAR', sleep: '💤 SLP', freeze: '❄️ FRZ' };
           statusNotice += ` [${labels[st]}!]`;
+          if (targetInBattle) targetInBattle.status = st;
           break;
         }
       }
@@ -2641,6 +2728,7 @@
       if (tgt.status === 'freeze' && move.type_name === 'fire' && finalDmg > 0 && !hitObj.status) {
         hitObj.status = 'none';
         statusNotice += ' [🔥 Aufgetaut!]';
+        if (targetInBattle) targetInBattle.status = 'none';
       }
 
       const debuff = calc.debuff || getDebuffFromMove(move);
@@ -2668,16 +2756,8 @@
       prioMsg = ' ⚡ Erstschlag! Volle Bewegung zurückerhalten (Hit & Run)!';
     }
 
-    sendAction('BATTLE_APPLY_DAMAGE', {
-      hits,
-      moveName: move.name_de,
-      attackerName: attacker.nickname,
-      attackerId: attacker.id,
-      remainingMovement: attacker.remainingMovement
-    });
-
     const hitLog = hits.map(h => {
-      const t = state.battleState.tokens.find(tok => tok.id === h.tokenId);
+      const t = state.battleState?.tokens?.find(tok => tok.id === h.tokenId);
       return `${t ? t.nickname : 'Ziel'} (-${h.damage} KP${h.text || ''}${h.extraText || ''})`;
     }).join(', ');
 
@@ -2687,17 +2767,27 @@
       sides: move.name_de,
       roll: `⚔️ ${move.name_de}: ${hitLog}${prioMsg}`
     };
-    sendAction('DICE_ROLL', rollData);
-    addLiveRollLog(rollData);
-
-    showToast(`⚔️ ${attacker.nickname} setzt ${move.name_de} ein! ${hitLog}${prioMsg}`);
 
     closeDmAttackModal();
     state.selectedMoveIndex = null;
     state.selectedTokenId = attacker.id;
     renderBattleMapView();
+    renderSelectedTokenBox();
     applyHighlights();
-    fetchGameState();
+    addLiveRollLog(rollData);
+    showToast(`⚔️ ${attacker.nickname} setzt ${move.name_de} ein! ${hitLog}${prioMsg}`);
+
+    // Send atomic action (damage + AP deduction + dice roll in one atomic update)
+    await sendAction('BATTLE_APPLY_DAMAGE', {
+      hits,
+      moveName: move.name_de,
+      moveId: move.id,
+      movePp: move.pp || 20,
+      attackerName: attacker.nickname,
+      attackerId: attacker.id,
+      remainingMovement: attacker.remainingMovement,
+      diceRoll: rollData
+    });
   }
 
   function handleAttackTargetClick(targetToken) {

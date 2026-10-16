@@ -1912,12 +1912,17 @@ function handleAction(action) {
                 }
 
                 // 3. Ausdauer Check (Überlebt fatale Treffer mit mindestens 1 KP)
-                if (defender.isEnduring && (defender.currentHp - finalDmg <= 0)) {
-                  finalDmg = Math.max(0, defender.currentHp - 1);
+                const curDefHp = Number(defender.currentHp !== undefined && defender.currentHp !== null ? defender.currentHp : (defender.maxHp || 50));
+                if (defender.isEnduring && (curDefHp - finalDmg <= 0)) {
+                  finalDmg = Math.max(0, curDefHp - 1);
                   endureText = ' (💪 Überlebt mit 1 KP dank Ausdauer!)';
                 }
 
-                defender.currentHp = Math.max(0, defender.currentHp - finalDmg);
+                defender.currentHp = Math.max(0, curDefHp - finalDmg);
+                if (defender.presetId && gameState.enemyPresets) {
+                  const defPreset = gameState.enemyPresets.find(p => p.id === defender.presetId);
+                  if (defPreset) defPreset.currentHp = defender.currentHp;
+                }
 
                 // Status-Effekt anwenden (bei Status-Attacken oder Treffern)
                 const statusEff = calc.statusEffect || getStatusFromMove(move);
@@ -2271,23 +2276,44 @@ function handleAction(action) {
 
     case 'BATTLE_APPLY_DAMAGE':
       if (gameState.battleState && gameState.battleState.tokens && payload.hits) {
-        if (payload.attackerId && payload.remainingMovement !== undefined) {
+        if (payload.attackerId) {
           const atkToken = gameState.battleState.tokens.find(t => t.id === payload.attackerId);
           if (atkToken) {
-            atkToken.remainingMovement = payload.remainingMovement;
+            if (payload.remainingMovement !== undefined) {
+              atkToken.remainingMovement = payload.remainingMovement;
+            }
+            atkToken.hasAttacked = true;
+            if (payload.moveId) {
+              atkToken.moveAps = atkToken.moveAps || {};
+              const curAp = (typeof atkToken.moveAps[String(payload.moveId)] === 'number')
+                ? atkToken.moveAps[String(payload.moveId)]
+                : (payload.movePp || 20);
+              atkToken.moveAps[String(payload.moveId)] = Math.max(0, curAp - 1);
+              if (atkToken.trainerId && atkToken.pokemonUid) {
+                const atkTr = gameState.trainers.find(t => t.id === atkToken.trainerId);
+                const atkPk = atkTr?.pokemon?.find(p => p.uid === atkToken.pokemonUid);
+                if (atkPk) {
+                  atkPk.moveAps = atkPk.moveAps || {};
+                  atkPk.moveAps[String(payload.moveId)] = atkToken.moveAps[String(payload.moveId)];
+                }
+              }
+            }
           }
         }
         const counterLogs = [];
         payload.hits.forEach(hit => {
           const targetToken = gameState.battleState.tokens.find(t => t.id === hit.tokenId);
           if (targetToken) {
+            const dmg = Math.max(0, parseInt(hit.damage, 10) || 0);
+            const curHp = Number(targetToken.currentHp !== undefined && targetToken.currentHp !== null ? targetToken.currentHp : (targetToken.maxHp || 50));
             if (targetToken.isProtected) {
               hit.damage = 0;
+              targetToken.currentHp = curHp;
             } else {
-              if (targetToken.isEnduring && (targetToken.currentHp - hit.damage <= 0)) {
+              if (targetToken.isEnduring && (curHp - dmg <= 0)) {
                 targetToken.currentHp = 1;
               } else {
-                targetToken.currentHp = Math.max(0, targetToken.currentHp - hit.damage);
+                targetToken.currentHp = Math.max(0, curHp - dmg);
               }
               if (hit.status !== undefined) {
                 targetToken.status = hit.status;
@@ -2300,22 +2326,27 @@ function handleAction(action) {
               }
 
               // KONTER CHECK: Greift direkt an (Reichweite egal) mit 2× Schaden, sofern nicht besiegt!
-              if (targetToken.isCountering && hit.damage > 0) {
+              if (targetToken.isCountering && dmg > 0) {
                 if (targetToken.currentHp <= 0) {
                   targetToken.isCountering = false;
                   counterLogs.push(`💥 ${targetToken.nickname} wurde besiegt und konnte keinen Konter mehr ausführen.`);
                 } else if (payload.attackerId) {
                   const atkToken = gameState.battleState.tokens.find(t => t.id === payload.attackerId);
                   if (atkToken) {
-                    const counterDmg = hit.damage * 2;
-                    atkToken.currentHp = Math.max(0, atkToken.currentHp - counterDmg);
+                    const counterDmg = dmg * 2;
+                    const atkCurHp = Number(atkToken.currentHp !== undefined && atkToken.currentHp !== null ? atkToken.currentHp : (atkToken.maxHp || 50));
+                    atkToken.currentHp = Math.max(0, atkCurHp - counterDmg);
                     targetToken.isCountering = false;
                     if (atkToken.trainerId && atkToken.pokemonUid) {
                       const atkTr = gameState.trainers.find(t => t.id === atkToken.trainerId);
                       const atkPk = atkTr?.pokemon?.find(p => p.uid === atkToken.pokemonUid);
                       if (atkPk) atkPk.currentHp = atkToken.currentHp;
                     }
-                    counterLogs.push(`💥 KONTER! ${targetToken.nickname} kontert ${atkToken.nickname} mit ${counterDmg} KP Schaden (2× ${hit.damage} KP)!`);
+                    if (atkToken.presetId && gameState.enemyPresets) {
+                      const atkPr = gameState.enemyPresets.find(p => p.id === atkToken.presetId);
+                      if (atkPr) atkPr.currentHp = atkToken.currentHp;
+                    }
+                    counterLogs.push(`💥 KONTER! ${targetToken.nickname} kontert ${atkToken.nickname} mit ${counterDmg} KP Schaden (2× ${dmg} KP)!`);
                     if (atkToken.currentHp <= 0) {
                       counterLogs.push(`💀 ${atkToken.nickname} wurde durch den Konter besiegt!`);
                     }
@@ -2328,9 +2359,19 @@ function handleAction(action) {
                 applyStatStageChange(targetToken, hit.debuff.stat, hit.debuff.delta, payload.attackerName || '', true);
               }
             }
+
+            // Sync with enemy presets if preset-owned
+            if (targetToken.presetId && gameState.enemyPresets) {
+              const defPreset = gameState.enemyPresets.find(p => p.id === targetToken.presetId);
+              if (defPreset) {
+                defPreset.currentHp = targetToken.currentHp;
+              }
+            }
+
+            // Sync with trainer Pokémon if player-owned
             if (targetToken.trainerId && targetToken.pokemonUid) {
               const tTrainer = gameState.trainers.find(t => t.id === targetToken.trainerId);
-              const tPoke = tTrainer?.pokemon.find(p => p.uid === targetToken.pokemonUid);
+              const tPoke = tTrainer?.pokemon?.find(p => p.uid === targetToken.pokemonUid);
               if (tPoke) {
                 tPoke.currentHp = targetToken.currentHp;
                 if (!targetToken.isProtected) {
@@ -2353,6 +2394,12 @@ function handleAction(action) {
           gameState.diceHistory.unshift(counterLogEntry);
           if (gameState.diceHistory.length > 50) gameState.diceHistory.pop();
           broadcastEvent('DICE_ROLLED', counterLogEntry);
+        }
+        if (payload.diceRoll) {
+          gameState.diceHistory = gameState.diceHistory || [];
+          gameState.diceHistory.unshift(payload.diceRoll);
+          if (gameState.diceHistory.length > 50) gameState.diceHistory.pop();
+          broadcastEvent('DICE_ROLLED', payload.diceRoll);
         }
         saveState();
         broadcastEvent('BATTLE_DAMAGE_APPLIED', payload);

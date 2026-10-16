@@ -105,46 +105,43 @@
     <!-- ==================== DM TAB: TAKTISCHE KAMPFKARTE (D&D GRID) ==================== -->
     <section id="dmTabBattle" class="view-panel">
       
-      <!-- Top Action Bar for Combat -->
-      <div class="trainers-top-bar" style="margin-bottom:1rem;">
-        <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
-          <h2 style="font-size:1.25rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
-            ⚔️ Taktische D&amp;D Kampfkarte
+      <!-- Top Action Bar for Combat (Compact single-line toolbar) -->
+      <div class="trainers-top-bar" style="margin-bottom:0.4rem; padding:0.45rem 0.85rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+        <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+          <h2 style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.4rem; margin:0;">
+            ⚔️ Kampfkarte
           </h2>
-          <span style="font-size:0.75rem; font-family:var(--font-mono); color:var(--text-muted); background:var(--bg-tertiary); padding:0.2rem 0.5rem; border-radius:4px;">
-            20 × 14 Felder • Mehrfachkämpfe
+          <span style="font-weight:900; font-size:0.85rem; color:var(--text-highlight); background:var(--bg-tertiary); padding:0.15rem 0.55rem; border-radius:4px; border:1px solid var(--border-color);">
+            Runde <span id="dmRoundNumber" style="color:#60a5fa; font-family:var(--font-mono);">1</span>
+          </span>
+          <span style="font-size:0.72rem; font-family:var(--font-mono); color:var(--text-muted); background:var(--bg-tertiary); padding:0.15rem 0.45rem; border-radius:4px;">
+            20 × 14
           </span>
         </div>
 
-        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
-          <button class="btn-secondary" id="btnDmClearBattleMap" style="color:#ef4444; border-color:rgba(239,68,68,0.3); font-size:0.78rem;">
-            🧹 Feld leeren
+        <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
+          <button class="btn-primary" id="btnDmResetRound" style="background:#2563eb; border-color:#1d4ed8; font-size:0.78rem; font-weight:800; padding:0.35rem 0.85rem; box-shadow:0 2px 10px rgba(37,99,235,0.4);">
+            🔄 Runde beenden
           </button>
-          <button class="btn-primary" id="btnDmOpenAddEnemyModal" style="font-size:0.78rem;">
-            + Neues Gegner-Pokémon
+          <button class="btn-secondary" id="btnDmClearBattleMap" style="color:#ef4444; border-color:rgba(239,68,68,0.3); font-size:0.78rem; padding:0.35rem 0.65rem;">
+            🧹 Leeren
           </button>
+          <button class="btn-primary" id="btnDmOpenAddEnemyModal" style="font-size:0.78rem; padding:0.35rem 0.75rem;">
+            + Neuer Gegner
+          </button>
+          <div style="display:inline-flex; gap:2px; margin-left:0.25rem;">
+            <button type="button" class="btn-secondary" id="btnDmFitMap" title="Karte optimal an Fenster anpassen" style="padding:0.35rem 0.6rem; font-size:0.75rem; font-weight:800;">📐 Einpassen</button>
+            <button type="button" class="btn-secondary" id="btnDmZoomInMap" title="Karte vergrößern" style="padding:0.35rem 0.5rem; font-size:0.75rem; font-weight:800;">➕</button>
+            <button type="button" class="btn-secondary" id="btnDmZoomOutMap" title="Karte verkleinern" style="padding:0.35rem 0.5rem; font-size:0.75rem; font-weight:800;">➖</button>
+          </div>
         </div>
       </div>
 
-      <!-- Turn & Round Control Toolbar -->
-      <div class="dm-turn-bar" id="dmTurnBar">
-        <div style="display:flex; align-items:center; gap:0.75rem;">
-          <span style="font-weight:900; font-size:1rem; color:var(--text-highlight);">
-            ⚔️ Kampfrunde: <span id="dmRoundNumber" style="color:#60a5fa; font-family:var(--font-mono);">1</span>
-          </span>
-          <span style="font-size:0.75rem; color:var(--text-muted);">
-            (Alle Aktionen &amp; Angriffe erfordern DM-Bestätigung)
-          </span>
-        </div>
-        <div style="display:flex; gap:0.5rem; align-items:center;">
-          <button class="btn-primary" id="btnDmResetRound" style="background:#2563eb; border-color:#1d4ed8; font-size:0.85rem; font-weight:800; padding:0.45rem 1rem; box-shadow:0 2px 10px rgba(37,99,235,0.4);">
-            🔄 Runde beenden (Nächste Runde starten)
-          </button>
-        </div>
-      </div>
+      <!-- Hidden placeholder for backwards compatibility -->
+      <div id="dmTurnBar" style="display:none;"></div>
 
       <!-- Live Initiative Order Tracker at Top -->
-      <div id="dmInitiativeBar" class="initiative-tracker-bar"></div>
+      <div id="dmInitiativeBar" class="initiative-tracker-bar" style="margin-bottom:0.4rem; min-height:42px;"></div>
 
       <!-- Incoming Action Requests from Players (Prominent Notification Bar) -->
       <div id="dmRequestsPanel" class="dm-requests-panel" style="display:none;">

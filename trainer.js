@@ -552,6 +552,9 @@
     // Battle Map Tab
     trainerRoundNumber: document.getElementById('trainerRoundNumber'),
     btnTrainerEndTurn: document.getElementById('btnTrainerEndTurn'),
+    btnTrainerFitMap: document.getElementById('btnTrainerFitMap'),
+    btnTrainerZoomInMap: document.getElementById('btnTrainerZoomInMap'),
+    btnTrainerZoomOutMap: document.getElementById('btnTrainerZoomOutMap'),
     trainerBattleTokensBadge: document.getElementById('trainerBattleTokensBadge'),
     trainerInitiativeBar: document.getElementById('trainerInitiativeBar'),
     trainerBattleGrid: document.getElementById('trainerBattleGrid'),
@@ -793,6 +796,19 @@
         break;
 
       case 'BATTLE_DAMAGE_APPLIED':
+        if (payload.hits && state.battleState?.tokens) {
+          payload.hits.forEach(hit => {
+            const tok = state.battleState.tokens.find(t => t.id === hit.tokenId);
+            if (tok) {
+              const curHp = Number(tok.currentHp !== undefined ? tok.currentHp : (tok.maxHp || 50));
+              tok.currentHp = Math.max(0, curHp - (parseInt(hit.damage, 10) || 0));
+              if (hit.status !== undefined) tok.status = hit.status;
+              if (hit.isConfused !== undefined) tok.isConfused = hit.isConfused;
+            }
+          });
+          renderTrainerBattleGrid();
+          renderTrainerSelectedTokenBox();
+        }
         if (payload.attackerId && state.selectedBattleTokenId === payload.attackerId) {
           const selToken = state.battleState?.tokens?.find(t => t.id === payload.attackerId);
           if (selToken && payload.remainingMovement !== undefined) {
@@ -2231,6 +2247,37 @@
     // Update Token-Detail-Box & Reichweiten-Highlights
     renderTrainerSelectedTokenBox();
     applyTrainerGridHighlights();
+    fitBattleGrid();
+  }
+
+  function fitBattleGrid() {
+    const wrapper = document.querySelector('.battlemap-board-wrapper');
+    const grid = elements.trainerBattleGrid;
+    if (!wrapper || !grid) return;
+
+    const padX = 24;
+    const padY = 24;
+    const availW = Math.max(200, wrapper.clientWidth - padX);
+    let availH = wrapper.clientHeight - padY;
+    if (!availH || availH <= 150) {
+      const rect = wrapper.getBoundingClientRect();
+      availH = Math.max(200, (window.innerHeight - rect.top) - padY - 20);
+    }
+
+    const maxCellW = Math.floor((availW - 20) / 20);
+    const maxCellH = Math.floor((availH - 14) / 14);
+    let cell = Math.min(maxCellW, maxCellH);
+
+    cell = Math.max(20, Math.min(50, cell));
+    grid.style.setProperty('--grid-cell-size', `${cell}px`);
+  }
+
+  function adjustBattleGridZoom(delta) {
+    const grid = elements.trainerBattleGrid;
+    if (!grid) return;
+    const current = parseInt(getComputedStyle(grid).getPropertyValue('--grid-cell-size'), 10) || 34;
+    const next = Math.max(18, Math.min(60, current + delta));
+    grid.style.setProperty('--grid-cell-size', `${next}px`);
   }
 
   function handleTrainerCellClick(x, y) {
@@ -2837,6 +2884,17 @@
 
     // End Turn / Round End button on Battle map
     elements.btnTrainerEndTurn?.addEventListener('click', requestEndTurn);
+
+    if (elements.btnTrainerFitMap) {
+      elements.btnTrainerFitMap.addEventListener('click', fitBattleGrid);
+    }
+    if (elements.btnTrainerZoomInMap) {
+      elements.btnTrainerZoomInMap.addEventListener('click', () => adjustBattleGridZoom(3));
+    }
+    if (elements.btnTrainerZoomOutMap) {
+      elements.btnTrainerZoomOutMap.addEventListener('click', () => adjustBattleGridZoom(-3));
+    }
+    window.addEventListener('resize', fitBattleGrid);
   }
 
   function switchTab(tabId) {
@@ -2853,6 +2911,7 @@
 
     if (tabId === 'battle') {
       renderTrainerBattleGrid();
+      setTimeout(fitBattleGrid, 60);
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
