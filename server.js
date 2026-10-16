@@ -1434,6 +1434,131 @@ function handleAction(action) {
       executeBattleRoundReset(payload?.initiator || 'Spielleiter');
       break;
 
+    case 'BATTLE_END_ENCOUNTER':
+      if (gameState.battleState) {
+        // Sync any tokens currently on the board so all damage, debuffs, status & AP are preserved
+        if (gameState.battleState.tokens && gameState.battleState.tokens.length > 0) {
+          gameState.battleState.tokens.forEach(tok => {
+            if (tok.trainerId && tok.pokemonUid && gameState.trainers) {
+              const tr = gameState.trainers.find(t => t.id === tok.trainerId);
+              const pk = tr?.pokemon?.find(p => p.uid === tok.pokemonUid);
+              if (pk) {
+                if (tok.currentHp !== undefined) pk.currentHp = tok.currentHp;
+                if (tok.status !== undefined) pk.status = tok.status;
+                if (tok.isConfused !== undefined) pk.isConfused = tok.isConfused;
+                if (tok.moveAps) pk.moveAps = tok.moveAps;
+                if (tok.statStages) pk.statStages = tok.statStages;
+              }
+            }
+            if (tok.presetId && gameState.enemyPresets) {
+              const pr = gameState.enemyPresets.find(p => p.id === tok.presetId);
+              if (pr) {
+                if (tok.currentHp !== undefined) pr.currentHp = tok.currentHp;
+                if (tok.status !== undefined) pr.status = tok.status;
+              }
+            }
+          });
+        }
+        gameState.battleState.tokens = [];
+        gameState.battleState.turnNumber = 1;
+        gameState.pendingRequests = [];
+
+        const endCombatEntry = {
+          time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          character: 'Spielleiter',
+          sides: 'Kampfende',
+          roll: '🏁 Kampf beendet! Alle Einheiten behalten ihren aktuellen Schaden, Statuseffekte und verbrauchte AP.'
+        };
+        gameState.diceHistory = gameState.diceHistory || [];
+        gameState.diceHistory.unshift(endCombatEntry);
+        if (gameState.diceHistory.length > 50) gameState.diceHistory.pop();
+        broadcastEvent('DICE_ROLLED', endCombatEntry);
+
+        saveState();
+        broadcastEvent('BATTLE_ENCOUNTER_ENDED', {});
+        broadcastEvent('STATE_UPDATED', gameState);
+      }
+      break;
+
+    case 'APPLY_LONG_REST':
+      let healedPkmnCount = 0;
+      let faintedPkmnCount = 0;
+
+      // 1. Alle Trainer-Pokémon heilen (außer 0 KP!)
+      if (gameState.trainers && gameState.trainers.length > 0) {
+        gameState.trainers.forEach(trainer => {
+          (trainer.pokemon || []).forEach(poke => {
+            const cur = Number(poke.currentHp !== undefined && poke.currentHp !== null ? poke.currentHp : poke.maxHp);
+            if (cur <= 0) {
+              faintedPkmnCount++;
+              // Bleibt 0 KP (kampfunfähig)
+            } else {
+              healedPkmnCount++;
+              poke.currentHp = poke.maxHp;
+              poke.status = 'none';
+              poke.isConfused = false;
+              poke.sleepTurns = 0;
+              poke.statusTurns = 0;
+              poke.confusionTurns = 0;
+              poke.moveAps = {};
+              poke.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0 };
+            }
+          });
+        });
+      }
+
+      // 2. Tokens auf dem Kampffeld heilen (außer 0 KP!)
+      if (gameState.battleState && gameState.battleState.tokens) {
+        gameState.battleState.tokens.forEach(token => {
+          const cur = Number(token.currentHp !== undefined && token.currentHp !== null ? token.currentHp : token.maxHp);
+          if (cur <= 0) {
+            // Bleibt 0 KP
+          } else {
+            token.currentHp = token.maxHp;
+            token.status = 'none';
+            token.isConfused = false;
+            token.sleepTurns = 0;
+            token.statusTurns = 0;
+            token.confusionTurns = 0;
+            token.moveAps = {};
+            token.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0 };
+            token.remainingMovement = token.maxMovement || 5;
+            token.turnEnded = false;
+            token.hasReaction = true;
+            token.isProtected = false;
+            token.isEnduring = false;
+            token.isCountering = false;
+          }
+        });
+      }
+
+      // 3. Gegner-Presets heilen (außer 0 KP!)
+      if (gameState.enemyPresets && gameState.enemyPresets.length > 0) {
+        gameState.enemyPresets.forEach(preset => {
+          const cur = Number(preset.currentHp !== undefined && preset.currentHp !== null ? preset.currentHp : preset.maxHp);
+          if (cur > 0) {
+            preset.currentHp = preset.maxHp;
+            preset.status = 'none';
+          }
+        });
+      }
+
+      const longRestEntry = {
+        time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        character: 'Lange Rast (Spielleiter)',
+        sides: 'Rast',
+        roll: `⛺ Lange Rast durchgeführt: ${healedPkmnCount} lebende Pokémon vollständig regeneriert (volle KP, alle AP, Statusprobleme geheilt). ${faintedPkmnCount > 0 ? `${faintedPkmnCount} kampfunfähige Pokémon (0 KP) blieben unverändert bei 0 KP.` : 'Keine kampfunfähigen Pokémon vorhanden.'}`
+      };
+      gameState.diceHistory = gameState.diceHistory || [];
+      gameState.diceHistory.unshift(longRestEntry);
+      if (gameState.diceHistory.length > 50) gameState.diceHistory.pop();
+      broadcastEvent('DICE_ROLLED', longRestEntry);
+
+      saveState();
+      broadcastEvent('LONG_REST_APPLIED', { healedCount: healedPkmnCount, faintedCount: faintedPkmnCount });
+      broadcastEvent('STATE_UPDATED', gameState);
+      break;
+
     case 'BATTLE_TOKEN_END_TURN':
       if (gameState.battleState && gameState.battleState.tokens) {
         const t = gameState.battleState.tokens.find(tok => tok.id === payload.tokenId);

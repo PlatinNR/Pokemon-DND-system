@@ -826,6 +826,16 @@
         fetchGameState();
         break;
 
+      case 'BATTLE_ENCOUNTER_ENDED':
+        showToast('🏁 Kampf beendet! Alle Pokémon behalten ihren aktuellen Status.');
+        fetchGameState();
+        break;
+
+      case 'LONG_REST_APPLIED':
+        showToast(`⛺ Lange Rast abgeschlossen! Alle lebenden Pokémon haben volle KP & AP zurückerhalten.`);
+        fetchGameState();
+        break;
+
       case 'ACTION_REQUEST_REJECTED':
         if (payload.trainerId === state.activeTrainerId) {
           showToast(`❌ Aktion vom Spielleiter abgelehnt: ${payload.reason || 'Abgelehnt'}`);

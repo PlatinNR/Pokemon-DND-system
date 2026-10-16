@@ -539,6 +539,8 @@
     dmRequestsList: document.getElementById('dmRequestsList'),
     dmBattleGrid: document.getElementById('dmBattleGrid'),
     btnDmClearBattleMap: document.getElementById('btnDmClearBattleMap'),
+    btnDmEndBattle: document.getElementById('btnDmEndBattle'),
+    btnDmLongRest: document.getElementById('btnDmLongRest'),
     btnDmOpenAddEnemyModal: document.getElementById('btnDmOpenAddEnemyModal'),
     btnDmFitMap: document.getElementById('btnDmFitMap'),
     btnDmZoomInMap: document.getElementById('btnDmZoomInMap'),
@@ -762,6 +764,8 @@
       case 'BATTLE_TOKEN_SPAWNED':
       case 'BATTLE_TOKEN_REMOVED':
       case 'BATTLE_DAMAGE_APPLIED':
+      case 'BATTLE_ENCOUNTER_ENDED':
+      case 'LONG_REST_APPLIED':
       case 'POKEMON_HEALED':
       case 'AP_RESTORED':
         fetchGameState();
@@ -904,6 +908,33 @@
         }
       });
     }
+
+    // Kampf beenden (Alle behalten Schaden, Status & AP)
+    if (elements.btnDmEndBattle) {
+      elements.btnDmEndBattle.addEventListener('click', () => {
+        if (confirm('Kampf offiziell beenden? Das Feld wird geleert und die Runde auf 1 zurückgesetzt. Alle Pokémon behalten ihren erlittenen Schaden, Statuseffekte und verbrauchte AP.')) {
+          sendAction('BATTLE_END_ENCOUNTER', {});
+          state.battleState.tokens = [];
+          state.battleState.turnNumber = 1;
+          state.selectedTokenId = null;
+          renderBattleMapView();
+          showToast('🏁 Kampf beendet! Alle Pokémon behalten ihren aktuellen Status.');
+        }
+      });
+    }
+
+    // Lange Rast (Alles heilen außer 0 KP)
+    function triggerLongRest() {
+      if (confirm('Lange Rast für alle Pokémon durchführen? Alle Pokémon mit mehr als 0 KP werden vollständig geheilt (volle KP, alle AP aufgefüllt, Statusprobleme geheilt). Kampfunfähige Pokémon mit 0 KP bleiben bei 0 KP!')) {
+        sendAction('APPLY_LONG_REST', {});
+        showToast('⛺ Lange Rast angewendet! Alle lebenden Pokémon regeneriert.');
+      }
+    }
+
+    elements.btnDmLongRest?.addEventListener('click', triggerLongRest);
+    document.querySelectorAll('.btn-dm-long-rest-trigger').forEach(btn => {
+      btn.addEventListener('click', triggerLongRest);
+    });
 
     if (elements.btnDmFitMap) {
       elements.btnDmFitMap.addEventListener('click', fitBattleGrid);

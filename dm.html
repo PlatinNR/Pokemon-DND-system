@@ -88,7 +88,10 @@
           <button class="btn-secondary" id="btnDmNewTrainer">+ Neuer Trainer</button>
         </div>
 
-        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+          <button type="button" class="btn-secondary btn-dm-long-rest-trigger" style="background:rgba(16,185,129,0.15); border-color:#10b981; color:#6ee7b7; font-size:0.78rem; font-weight:800; padding:0.4rem 0.85rem;" title="Lange Rast: Heilt alle lebenden Pokémon (volle KP, alle AP, Statusprobleme entfernt). Kampfunfähige Pokémon mit 0 KP bleiben bei 0 KP!">
+            ⛺ Lange Rast (Heilen außer 0 KP)
+          </button>
           <button class="btn-primary" id="btnDmAssignPokemon">
             + Pokémon an Trainer vergeben
           </button>
@@ -122,6 +125,12 @@
         <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
           <button class="btn-primary" id="btnDmResetRound" style="background:#2563eb; border-color:#1d4ed8; font-size:0.78rem; font-weight:800; padding:0.35rem 0.85rem; box-shadow:0 2px 10px rgba(37,99,235,0.4);">
             🔄 Runde beenden
+          </button>
+          <button class="btn-secondary" id="btnDmEndBattle" style="background:rgba(239,68,68,0.15); border-color:#ef4444; color:#fca5a5; font-size:0.78rem; font-weight:800; padding:0.35rem 0.75rem;" title="Kampf beenden: Feld leeren, Runde auf 1 setzen. Alle Pokémon behalten ihren aktuellen Schaden, Status und AP!">
+            🏁 Kampf beenden
+          </button>
+          <button class="btn-secondary btn-dm-long-rest-trigger" id="btnDmLongRest" style="background:rgba(16,185,129,0.15); border-color:#10b981; color:#6ee7b7; font-size:0.78rem; font-weight:800; padding:0.35rem 0.75rem;" title="Lange Rast: Heilt alle lebenden Pokémon (volle KP, alle AP, Statusprobleme). Kampfunfähige Pokémon mit 0 KP bleiben bei 0 KP!">
+            ⛺ Lange Rast
           </button>
           <button class="btn-secondary" id="btnDmClearBattleMap" style="color:#ef4444; border-color:rgba(239,68,68,0.3); font-size:0.78rem; padding:0.35rem 0.65rem;">
             🧹 Leeren
