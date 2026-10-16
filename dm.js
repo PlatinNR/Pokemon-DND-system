@@ -386,6 +386,18 @@
     return 3 / (3 - stage);
   }
 
+  function calculateTokenInitiative(token) {
+    if (!token) return 50;
+    const pData = ALL_POKEMON.find(p => p.id === token.pokemonId);
+    const baseSpe = token.spe || pData?.base_stats?.spe || 50;
+    const speStage = token.statStages?.spe || 0;
+    let effSpe = Math.max(1, Math.floor(baseSpe * getStatStageMultiplier(speStage)));
+    if (token.status === 'paralysis') {
+      effSpe = Math.floor(effSpe / 2);
+    }
+    return effSpe;
+  }
+
   function getDebuffFromMove(move) {
     if (!move) return null;
     const mid = Number(move.id);
@@ -521,6 +533,7 @@
     dmTurnBar: document.getElementById('dmTurnBar'),
     dmRoundNumber: document.getElementById('dmRoundNumber'),
     btnDmResetRound: document.getElementById('btnDmResetRound'),
+    dmInitiativeBar: document.getElementById('dmInitiativeBar'),
     dmRequestsPanel: document.getElementById('dmRequestsPanel'),
     dmRequestsBadge: document.getElementById('dmRequestsBadge'),
     dmRequestsList: document.getElementById('dmRequestsList'),
@@ -533,6 +546,12 @@
     dmQuickEnemySpawnsList: document.getElementById('dmQuickEnemySpawnsList'),
     dmQuickPlayerSpawnsList: document.getElementById('dmQuickPlayerSpawnsList'),
     linkToEnemiesTab: document.getElementById('linkToEnemiesTab'),
+
+    // Attack Resolution Modal
+    dmAttackModal: document.getElementById('dmAttackModal'),
+    dmAttackModalCloseBtn: document.getElementById('dmAttackModalCloseBtn'),
+    dmAttackModalTitle: document.getElementById('dmAttackModalTitle'),
+    dmAttackModalBody: document.getElementById('dmAttackModalBody'),
 
     // Enemies View
     btnDmCreateNewEnemy: document.getElementById('btnDmCreateNewEnemy'),
@@ -914,6 +933,11 @@
     elements.evoConfirmCloseBtn.addEventListener('click', () => elements.evolutionConfirmModal.classList.remove('open'));
     elements.evoConfirmCancelBtn.addEventListener('click', () => elements.evolutionConfirmModal.classList.remove('open'));
     elements.evoConfirmExecuteBtn.addEventListener('click', executeConfirmedEvolution);
+
+    // DM Attack Modal
+    if (elements.dmAttackModalCloseBtn) {
+      elements.dmAttackModalCloseBtn.addEventListener('click', closeDmAttackModal);
+    }
 
     // Trainer actions
     elements.btnDmNewTrainer.addEventListener('click', promptCreateTrainer);
@@ -1572,6 +1596,137 @@
   const GRID_COLS = 20;
   const GRID_ROWS = 14;
 
+  function renderDmInitiativeTracker() {
+    if (!elements.dmInitiativeBar) return;
+    const tokens = (state.battleState && state.battleState.tokens) || [];
+    if (tokens.length === 0) {
+      elements.dmInitiativeBar.innerHTML = `
+        <div style="font-size:0.75rem; color:var(--text-muted); font-style:italic; text-align:center; padding:0.25rem;">
+          ⚔️ Keine Einheiten auf dem Feld – Platziere Einheiten aus der Seitenleiste.
+        </div>
+      `;
+      return;
+    }
+
+    // Sort tokens by initiative descending
+    const sorted = [...tokens].sort((a, b) => {
+      const initA = (typeof a.initiative === 'number') ? a.initiative : 50;
+      const initB = (typeof b.initiative === 'number') ? b.initiative : 50;
+      return initB - initA;
+    });
+
+    const activeCount = sorted.filter(t => !t.turnEnded).length;
+    const allEnded = activeCount === 0;
+
+    elements.dmInitiativeBar.innerHTML = `
+      <div class="initiative-header-row">
+        <span style="font-weight:900; color:#93c5fd; display:flex; align-items:center; gap:0.4rem;">
+          <span>⏱️ INITIATIVE-REIHENFOLGE (DM-SCREEN)</span>
+          <span style="font-size:0.68rem; color:${allEnded ? '#10b981' : 'var(--text-muted)'}; font-weight:700;">
+            (${allEnded ? '✨ Alle Züge beendet!' : `${activeCount} / ${sorted.length} noch aktiv`})
+          </span>
+        </span>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <span style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">
+            Runde ${(state.battleState?.turnNumber || 1)}
+          </span>
+          <button class="btn-token-recalc-init" style="background:transparent; border:1px solid rgba(255,255,255,0.15); border-radius:4px; color:#93c5fd; font-size:0.65rem; padding:0.15rem 0.4rem; cursor:pointer;" title="Initiative-Werte anhand aktueller Tempostufen sofort aktualisieren">
+            🔄 Init neu berechnen
+          </button>
+        </div>
+      </div>
+      <div class="initiative-track">
+        ${sorted.map((t, idx) => {
+          const isSelected = (t.id === state.selectedTokenId);
+          const pData = ALL_POKEMON.find(p => p.id === t.pokemonId);
+          const sprite = t.sprite || (pData ? pData.sprites.front_default : '');
+          const isEnemy = !!t.isEnemy;
+          const cardClass = `initiative-card ${isSelected ? 'active-selected' : ''} ${t.turnEnded ? 'turn-ended' : ''} ${isEnemy ? 'is-enemy' : 'is-player'}`;
+          const reactionHtml = (t.hasReaction !== false) 
+            ? '<span class="reaction-pill ready btn-toggle-react-pill" title="Reaktion: 1/1 Bereit (Klick zum Umschalten)">⚡ 1/1</span>'
+            : '<span class="reaction-pill used btn-toggle-react-pill" title="Reaktion: 0/1 Verbraucht (Klick zum Wiederherstellen)">⚡ 0/1</span>';
+          const turnStatusHtml = t.turnEnded 
+            ? '<span class="btn-toggle-turn-pill" style="color:#10b981; font-weight:800; font-size:0.65rem; cursor:pointer;" title="Klick: Zug wieder aktivieren">✅ Fertig</span>'
+            : '<span class="btn-toggle-turn-pill" style="color:#60a5fa; font-weight:800; font-size:0.65rem; cursor:pointer;" title="Klick: Zug beenden">⏳ Am Zug</span>';
+
+          return `
+            <div class="${cardClass}" data-tokenid="${t.id}" title="Klicken zum Auswählen auf Karte">
+              <span class="initiative-rank-badge">#${idx + 1}</span>
+              <img src="${sprite}" alt="" style="width:28px; height:28px;" class="pixelated" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
+              <div style="display:flex; flex-direction:column; line-height:1.2; overflow:hidden;">
+                <div style="font-size:0.75rem; font-weight:800; color:${isEnemy ? '#fca5a5' : '#86efac'}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; max-width:85px;">
+                  ${t.nickname}
+                </div>
+                <div style="display:flex; align-items:center; gap:0.3rem; font-size:0.65rem; color:var(--text-muted); font-family:var(--font-mono);">
+                  <span>Init: <strong>${t.initiative || 50}</strong></span>
+                  ${reactionHtml}
+                </div>
+              </div>
+              <div style="margin-left:auto; text-align:right;">
+                ${turnStatusHtml}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    // Click on card to select token
+    elements.dmInitiativeBar.querySelectorAll('.initiative-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-toggle-react-pill') || e.target.closest('.btn-toggle-turn-pill')) return;
+        const tid = card.dataset.tokenid;
+        state.selectedTokenId = tid;
+        state.selectedMoveIndex = null;
+        renderBattleMapView();
+        applyHighlights();
+        renderSelectedTokenBox();
+      });
+    });
+
+    // Quick toggle reaction from pill
+    elements.dmInitiativeBar.querySelectorAll('.btn-toggle-react-pill').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = pill.closest('.initiative-card');
+        const tid = card?.dataset.tokenid;
+        const token = state.battleState?.tokens?.find(t => t.id === tid);
+        if (token) {
+          token.hasReaction = (token.hasReaction === false);
+          sendAction('BATTLE_TOGGLE_REACTION', { tokenId: token.id, hasReaction: token.hasReaction });
+          renderDmInitiativeTracker();
+          renderSelectedTokenBox();
+        }
+      });
+    });
+
+    // Quick toggle turn ended from pill
+    elements.dmInitiativeBar.querySelectorAll('.btn-toggle-turn-pill').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = pill.closest('.initiative-card');
+        const tid = card?.dataset.tokenid;
+        const token = state.battleState?.tokens?.find(t => t.id === tid);
+        if (token) {
+          token.turnEnded = !token.turnEnded;
+          sendAction('BATTLE_TOKEN_END_TURN', { tokenId: token.id });
+          renderDmInitiativeTracker();
+          renderSelectedTokenBox();
+        }
+      });
+    });
+
+    // Recalc init button
+    elements.dmInitiativeBar.querySelector('.btn-token-recalc-init')?.addEventListener('click', () => {
+      state.battleState?.tokens?.forEach(t => {
+        t.initiative = calculateTokenInitiative(t);
+      });
+      sendAction('SYNC_STATE', { battleState: state.battleState });
+      renderDmInitiativeTracker();
+      showToast('⏱️ Initiative-Werte aller Tokens neu berechnet!');
+    });
+  }
+
   function renderBattleMapView() {
     if (!elements.dmBattleGrid) return;
     if (elements.dmRoundNumber) {
@@ -1583,6 +1738,25 @@
     if (elements.dmEnemiesCount) {
       elements.dmEnemiesCount.textContent = String(state.enemyPresets.length);
     }
+
+    // Highlight end round button if all units ended their turn
+    if (elements.btnDmResetRound) {
+      const tokens = state.battleState?.tokens || [];
+      const allEnded = tokens.length > 0 && tokens.every(t => t.turnEnded);
+      if (allEnded) {
+        elements.btnDmResetRound.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+        elements.btnDmResetRound.style.borderColor = '#34d399';
+        elements.btnDmResetRound.style.boxShadow = '0 0 15px rgba(16,185,129,0.5)';
+        elements.btnDmResetRound.textContent = `✨ Alle fertig! Runde ${state.battleState.turnNumber || 1} beenden ➔ Runde ${(state.battleState.turnNumber || 1) + 1}`;
+      } else {
+        elements.btnDmResetRound.style.background = '#2563eb';
+        elements.btnDmResetRound.style.borderColor = '#1d4ed8';
+        elements.btnDmResetRound.style.boxShadow = '0 2px 10px rgba(37,99,235,0.4)';
+        elements.btnDmResetRound.textContent = '🔄 Runde beenden (Nächste Runde starten)';
+      }
+    }
+
+    renderDmInitiativeTracker();
     renderRequestsPanel();
 
     elements.dmBattleGrid.innerHTML = '';
@@ -1823,7 +1997,7 @@
   }
 
   // Authentic Pokémon Gen 5 Damage Calculation
-  function calculatePokemonDamage(attacker, defender, move) {
+  function calculatePokemonDamage(attacker, defender, move, options = {}) {
     if (!move) {
       return { damage: 0, text: '', effectiveness: 1, isImmune: false };
     }
@@ -1838,17 +2012,14 @@
       };
     }
 
-    // Accuracy Check (-6 to +6 stages)
-    if (attacker?.statStages?.acc && attacker.statStages.acc < 0) {
-      const accMult = getAccuracyStageMultiplier(attacker.statStages.acc);
-      if (Math.random() > accMult) {
-        return {
-          damage: 0,
-          text: ' (💨 Verfehlt! Genauigkeit durch Sandwirbel/Rauchwolke gesenkt)',
-          isMissed: true,
-          effectiveness: 0
-        };
-      }
+    // Pen & Paper: DM entscheidet Treffer/Miss manuell
+    if (options.isMiss) {
+      return {
+        damage: 0,
+        text: ' (💨 Verfehlt!)',
+        isMissed: true,
+        effectiveness: 0
+      };
     }
 
     const moveId = Number(move.id);
@@ -2068,11 +2239,13 @@
     const defHasUnaware = defAbility === 'unkenntnis';
     const atkHasUnaware = atkAbility === 'unkenntnis';
     if (!defHasUnaware) {
-      const aStage = (attacker.statStages?.[isPhysical ? 'atk' : 'spa'] || 0);
+      let aStage = (attacker.statStages?.[isPhysical ? 'atk' : 'spa'] || 0);
+      if (options.isCrit) aStage = Math.max(0, aStage); // Volltreffer ignoriert negative Angriffs-Debuffs
       A = Math.max(1, Math.floor(A * getStatStageMultiplier(aStage)));
     }
     if (!atkHasUnaware) {
-      const dStage = (defender.statStages?.[isPhysical ? 'def' : 'spd'] || 0);
+      let dStage = (defender.statStages?.[isPhysical ? 'def' : 'spd'] || 0);
+      if (options.isCrit) dStage = Math.min(0, dStage); // Volltreffer ignoriert positive Verteidigungs-Buffs
       D = Math.max(1, Math.floor(D * getStatStageMultiplier(dStage)));
     }
 
@@ -2102,12 +2275,14 @@
       burnText = ' (🔥 Verbrennung: physischer Schaden halbiert)';
     }
 
-    const randomFactor = 0.85 + (Math.random() * 0.15);
-    let finalDamage = Math.max(1, Math.floor(baseDmg * stab * typeMult * randomFactor * burnPenalty));
+    const critMultiplier = options.isCrit ? 1.5 : 1.0;
+    const randomFactor = options.useRandom ? (0.85 + (Math.random() * 0.15)) : 1.0;
+    let finalDamage = Math.max(1, Math.floor(baseDmg * stab * typeMult * randomFactor * burnPenalty * critMultiplier));
 
     let effectText = '';
-    if (typeMult >= 2.0) effectText = ` (Sehr effektiv! ${typeMult}× 💥)`;
-    else if (typeMult <= 0.5) effectText = ` (Nicht sehr effektiv... ${typeMult}× 🛡️)`;
+    if (options.isCrit) effectText += ' (💥 Volltreffer!)';
+    if (typeMult >= 2.0) effectText += ` (Sehr effektiv! ${typeMult}× 💥)`;
+    else if (typeMult <= 0.5) effectText += ` (Nicht sehr effektiv... ${typeMult}× 🛡️)`;
     if (burnText) effectText += burnText;
 
     // Robustheit
@@ -2122,81 +2297,296 @@
       effectText += ' (💪 Überlebt mit 1 KP dank Ausdauer!)';
     }
 
-    return { damage: finalDamage, text: effectText, effectiveness: typeMult, stab, A, D, power, baseDmg, debuff, buff };
+    return { damage: finalDamage, text: effectText, effectiveness: typeMult, stab, A, D, power, baseDmg, debuff, buff, isCrit: options.isCrit };
   }
 
-  function handleAttackTargetClick(targetToken) {
-    const attacker = state.battleState.tokens.find(t => t.id === state.selectedTokenId);
-    if (!attacker || state.selectedMoveIndex === null) return;
-    const move = attacker.moves[state.selectedMoveIndex];
-    if (!move) return;
+  // --- DM ATTACK RESOLUTION MODAL STATE & HANDLERS ---
+  let currentAttackModalState = null;
 
-    // Check Attacker Status
-    if (attacker.status === 'sleep') {
-      showToast(`💤 ${attacker.nickname} schläft tief und fest und kann nicht angreifen!`);
-      const rollData = {
-        time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        character: attacker.nickname,
-        sides: move.name_de,
-        roll: `💤 ${attacker.nickname} schläft tief und fest und kann nicht angreifen!`
-      };
-      sendAction('DICE_ROLL', rollData);
-      state.selectedMoveIndex = null;
-      renderBattleMapView();
-      return;
+  function openDmAttackModal(attacker, targetToken, move) {
+    if (!elements.dmAttackModal || !elements.dmAttackModalBody) return;
+
+    const isAoE = (move.range_type === 'circle' || move.range_type === 'cone');
+    let affectedTokens = [];
+
+    if (isAoE) {
+      const targetCells = getAttackCells(attacker.x, attacker.y, move, state.coneDirection);
+      affectedTokens = state.battleState.tokens.filter(t => {
+        if (t.id === attacker.id) return false;
+        if (t.isEnemy === attacker.isEnemy) return false;
+        return targetCells.some(c => c.x === t.x && c.y === t.y);
+      });
+      if (affectedTokens.length === 0) {
+        affectedTokens.push(targetToken);
+      }
+    } else {
+      affectedTokens = [targetToken];
     }
 
-    if (attacker.status === 'freeze') {
-      showToast(`❄️ ${attacker.nickname} ist eingefroren und kann nicht angreifen!`);
-      const rollData = {
-        time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        character: attacker.nickname,
-        sides: move.name_de,
-        roll: `❄️ ${attacker.nickname} ist tiefgefroren und kann nicht angreifen!`
-      };
-      sendAction('DICE_ROLL', rollData);
-      state.selectedMoveIndex = null;
-      renderBattleMapView();
-      return;
-    }
+    const naturalStatus = getStatusFromMove(move);
 
-    if (attacker.status === 'paralysis' && Math.random() < 0.25) {
-      showToast(`⚡ ${attacker.nickname} ist vollkommen paralysiert!`);
-      const rollData = {
-        time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        character: attacker.nickname,
-        sides: move.name_de,
-        roll: `⚡ ${attacker.nickname} ist vollkommen paralysiert und kann sich nicht rühren!`
-      };
-      sendAction('DICE_ROLL', rollData);
-      attacker.hasAttacked = true;
-      state.selectedMoveIndex = null;
-      renderBattleMapView();
-      return;
-    }
+    currentAttackModalState = {
+      attacker,
+      move,
+      targets: affectedTokens.map(tgt => ({
+        token: tgt,
+        result: 'hit', // 'hit' | 'crit' | 'miss'
+        damageOverride: null,
+        statuses: {
+          poison: naturalStatus?.type === 'poison',
+          toxic: naturalStatus?.type === 'toxic',
+          burn: naturalStatus?.type === 'burn',
+          paralysis: naturalStatus?.type === 'paralysis',
+          sleep: naturalStatus?.type === 'sleep',
+          freeze: naturalStatus?.type === 'freeze',
+          confusion: naturalStatus?.isConfused || false
+        }
+      }))
+    };
 
-    if (attacker.isConfused && Math.random() < 0.33) {
-      const lvl = attacker.level || 50;
-      const atk = attacker.atk || 50;
-      const def = attacker.def || 50;
-      const selfDmg = Math.max(1, Math.floor(((Math.floor((2 * lvl) / 5) + 2) * 40 * (atk / def)) / 50) + 2);
-      attacker.currentHp = Math.max(0, attacker.currentHp - selfDmg);
-      sendAction('BATTLE_APPLY_DAMAGE', { hits: [{ tokenId: attacker.id, damage: selfDmg }] });
-      const rollData = {
-        time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        character: attacker.nickname,
-        sides: move.name_de,
-        roll: `🌀 ${attacker.nickname} ist verwirrt und verletzt sich selbst vor Verwirrung! (-${selfDmg} KP)`
-      };
-      sendAction('DICE_ROLL', rollData);
-      showToast(`🌀 ${attacker.nickname} verletzt sich vor Verwirrung selbst (-${selfDmg} KP)!`);
-      attacker.hasAttacked = true;
-      state.selectedMoveIndex = null;
-      fetchGameState();
-      return;
-    }
+    renderDmAttackModalContent();
+    elements.dmAttackModal.style.display = 'flex';
+    elements.dmAttackModal.classList.add('open');
+  }
 
-    // Check AP
+  function closeDmAttackModal() {
+    if (elements.dmAttackModal) {
+      elements.dmAttackModal.style.display = 'none';
+      elements.dmAttackModal.classList.remove('open');
+    }
+    currentAttackModalState = null;
+  }
+
+  function renderDmAttackModalContent() {
+    if (!currentAttackModalState || !elements.dmAttackModalBody) return;
+    const { attacker, move, targets } = currentAttackModalState;
+
+    const attackerPData = ALL_POKEMON.find(p => p.id === attacker.pokemonId);
+    const attackerSprite = attacker.sprite || attackerPData?.sprites?.front_default || '';
+    const curAp = getMoveAp(attacker, move);
+
+    const targetsHtml = targets.map((tgtObj, tIdx) => {
+      const tgt = tgtObj.token;
+      const tgtPData = ALL_POKEMON.find(p => p.id === tgt.pokemonId);
+      const tgtSprite = tgt.sprite || tgtPData?.sprites?.front_default || '';
+      const eff = getMoveEffectivenessAgainstTarget(move, tgt);
+
+      const calc = calculatePokemonDamage(attacker, tgt, move, {
+        isCrit: tgtObj.result === 'crit',
+        isMiss: tgtObj.result === 'miss',
+        useRandom: false
+      });
+
+      const currentDmg = (tgtObj.damageOverride !== null && !isNaN(tgtObj.damageOverride))
+        ? tgtObj.damageOverride
+        : calc.damage;
+
+      const remainingHpPreview = Math.max(0, tgt.currentHp - currentDmg);
+
+      return `
+        <div class="dm-target-attack-card" style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; margin-bottom:0.75rem;">
+          
+          <!-- Target Header -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.6rem;">
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <img src="${tgtSprite}" alt="" style="width:40px; height:40px;" class="pixelated">
+              <div>
+                <div style="display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap;">
+                  <strong style="font-size:0.95rem; color:var(--text-highlight);">${tgt.nickname}</strong>
+                  <span class="matchup-multiplier ${eff.badgeClass}" style="font-size:0.65rem; padding:0.1rem 0.35rem;">${eff.text}</span>
+                  ${getStatusDisplayBadge(tgt)}
+                </div>
+                <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.15rem;">
+                  ${tgt.isEnemy ? '🔴 Gegner' : '🔵 Spieler'} • Lv. ${tgt.level} • KP: <strong style="color:#10b981;">${tgt.currentHp}/${tgt.maxHp}</strong>
+                </div>
+              </div>
+            </div>
+            <div style="text-align:right; font-size:0.75rem; color:var(--text-secondary); font-family:var(--font-mono);">
+              Nach Treffer: <strong style="color:${remainingHpPreview === 0 ? '#ef4444' : '#34d399'};">${remainingHpPreview} KP</strong>
+            </div>
+          </div>
+
+          <!-- Treffer / Volltreffer / Verfehlt Buttons -->
+          <div style="margin-bottom:0.65rem;">
+            <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.3rem;">
+              🎲 WÜRFEL-ENTSCHEIDUNG (DM AM TISCH):
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1.2fr 1fr; gap:0.35rem;">
+              <button type="button" class="attack-result-btn ${tgtObj.result === 'hit' ? 'selected-hit' : ''}" data-tidx="${tIdx}" data-res="hit" style="padding:0.4rem 0.3rem; font-size:0.75rem; font-weight:800; border-radius:5px; cursor:pointer;">
+                🎯 Normaler Treffer
+              </button>
+              <button type="button" class="attack-result-btn ${tgtObj.result === 'crit' ? 'selected-crit' : ''}" data-tidx="${tIdx}" data-res="crit" style="padding:0.4rem 0.3rem; font-size:0.75rem; font-weight:800; border-radius:5px; cursor:pointer;">
+                💥 Volltreffer (1.5×)
+              </button>
+              <button type="button" class="attack-result-btn ${tgtObj.result === 'miss' ? 'selected-miss' : ''}" data-tidx="${tIdx}" data-res="miss" style="padding:0.4rem 0.3rem; font-size:0.75rem; font-weight:800; border-radius:5px; cursor:pointer;">
+                💨 Verfehlt (0 Dmg)
+              </button>
+            </div>
+          </div>
+
+          <!-- Status-Effekt Auswahl (Checkboxes) -->
+          <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:0.45rem 0.6rem; margin-bottom:0.65rem;">
+            <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.3rem;">
+              STATUS-EFFEKT ANWENDEN:
+            </div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <label class="status-checkbox-label" style="font-size:0.72rem; display:flex; align-items:center; gap:0.25rem; cursor:pointer; color:#c084fc;">
+                <input type="checkbox" class="dm-status-cb" data-tidx="${tIdx}" data-st="poison" ${tgtObj.statuses.poison ? 'checked' : ''}>
+                🟣 Gift (PSN)
+              </label>
+              <label class="status-checkbox-label" style="font-size:0.72rem; display:flex; align-items:center; gap:0.25rem; cursor:pointer; color:#a855f7;">
+                <input type="checkbox" class="dm-status-cb" data-tidx="${tIdx}" data-st="toxic" ${tgtObj.statuses.toxic ? 'checked' : ''}>
+                ☠️ Toxin (TOX)
+              </label>
+              <label class="status-checkbox-label" style="font-size:0.72rem; display:flex; align-items:center; gap:0.25rem; cursor:pointer; color:#f87171;">
+                <input type="checkbox" class="dm-status-cb" data-tidx="${tIdx}" data-st="burn" ${tgtObj.statuses.burn ? 'checked' : ''}>
+                🔥 Verbrennung (BRN)
+              </label>
+              <label class="status-checkbox-label" style="font-size:0.72rem; display:flex; align-items:center; gap:0.25rem; cursor:pointer; color:#facc15;">
+                <input type="checkbox" class="dm-status-cb" data-tidx="${tIdx}" data-st="paralysis" ${tgtObj.statuses.paralysis ? 'checked' : ''}>
+                ⚡ Paralyse (PAR)
+              </label>
+              <label class="status-checkbox-label" style="font-size:0.72rem; display:flex; align-items:center; gap:0.25rem; cursor:pointer; color:#94a3b8;">
+                <input type="checkbox" class="dm-status-cb" data-tidx="${tIdx}" data-st="sleep" ${tgtObj.statuses.sleep ? 'checked' : ''}>
+                💤 Schlaf (SLP)
+              </label>
+              <label class="status-checkbox-label" style="font-size:0.72rem; display:flex; align-items:center; gap:0.25rem; cursor:pointer; color:#38bdf8;">
+                <input type="checkbox" class="dm-status-cb" data-tidx="${tIdx}" data-st="freeze" ${tgtObj.statuses.freeze ? 'checked' : ''}>
+                ❄️ Frost (FRZ)
+              </label>
+              <label class="status-checkbox-label" style="font-size:0.72rem; display:flex; align-items:center; gap:0.25rem; cursor:pointer; color:#f472b6;">
+                <input type="checkbox" class="dm-status-cb" data-tidx="${tIdx}" data-st="confusion" ${tgtObj.statuses.confusion ? 'checked' : ''}>
+                🌀 Verwirrt
+              </label>
+            </div>
+          </div>
+
+          <!-- Schaden & Formel-Berechnung mit manueller Anpassung -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:6px; padding:0.5rem 0.65rem; display:flex; justify-content:space-between; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <div>
+              <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">
+                BERECHNETER SCHADEN (INCL. BUFFS / DEBUFFS):
+              </div>
+              <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:0.15rem;">
+                ${calc.text ? `<span style="color:#93c5fd; font-weight:700;">${calc.text}</span> • ` : ''}
+                Basis: ${calc.baseDmg || 0} KP | Typ: ${calc.effectiveness}× | STAB: ${calc.stab}×
+                ${tgtObj.result === 'crit' ? ' | <strong style="color:#f59e0b;">Kritisch: 1.5×</strong>' : ''}
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <label style="font-size:0.72rem; font-weight:800; color:var(--text-secondary); white-space:nowrap;">Schaden anpassen:</label>
+              <input type="number" class="dm-dmg-override-input search-input" data-tidx="${tIdx}" min="0" max="999" value="${currentDmg}" style="width:75px; text-align:center; font-family:var(--font-mono); font-weight:900; font-size:1.05rem; color:#f87171; padding:0.25rem 0.35rem;" />
+              <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted);">KP</span>
+            </div>
+          </div>
+
+        </div>
+      `;
+    }).join('');
+
+    elements.dmAttackModalBody.innerHTML = `
+      <!-- Attacker & Move Header -->
+      <div style="background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.25); border-radius:8px; padding:0.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <img src="${attackerSprite}" alt="" style="width:46px; height:46px;" class="pixelated">
+          <div>
+            <div style="display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap;">
+              <span style="font-weight:900; font-size:1.05rem; color:var(--text-highlight);">${attacker.nickname}</span>
+              ${getStatusDisplayBadge(attacker)}
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:0.15rem;">
+              Attacke: <strong style="color:#fff; font-size:0.85rem;">${move.name_de}</strong>
+              ${getTypeBadgeHtml(move.type_name, move.type_de)}
+              • Stärke: <strong style="color:#93c5fd;">${getMovePowerDisplay(move)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:right;">
+          <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted);">AP NACH ANGRIFF:</div>
+          <div style="font-family:var(--font-mono); font-size:0.95rem; font-weight:900; color:${curAp <= 1 ? '#ef4444' : '#34d399'};">
+            ${curAp - 1} / ${move.pp || 20}
+          </div>
+        </div>
+      </div>
+
+      <!-- Attacker Status / Sleep / Freeze Alerts -->
+      ${attacker.status === 'sleep' ? `
+        <div style="background:rgba(100,116,139,0.25); border:1px solid #64748b; border-radius:6px; padding:0.4rem 0.6rem; font-size:0.75rem; color:#cbd5e1; display:flex; align-items:center; gap:0.4rem;">
+          <span>💤 <strong>Hinweis:</strong> ${attacker.nickname} schläft. Am Spieltisch gewürfelt, ob es aufwacht?</span>
+        </div>
+      ` : ''}
+      ${attacker.status === 'freeze' ? `
+        <div style="background:rgba(56,189,248,0.25); border:1px solid #38bdf8; border-radius:6px; padding:0.4rem 0.6rem; font-size:0.75rem; color:#bae6fd; display:flex; align-items:center; gap:0.4rem;">
+          <span>❄️ <strong>Hinweis:</strong> ${attacker.nickname} ist eingefroren. Am Spieltisch aufgetaut?</span>
+        </div>
+      ` : ''}
+
+      <!-- Targets List -->
+      <div style="margin-top:0.25rem;">
+        <div style="font-size:0.72rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.4rem;">
+          ZIELE &amp; ERGEBNISSE (${targets.length}):
+        </div>
+        ${targetsHtml}
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem; padding-top:0.6rem; border-top:1px solid var(--border-color);">
+        <button type="button" class="btn-secondary" id="btnCancelDmAttack" style="padding:0.45rem 1rem; font-size:0.82rem; font-weight:700;">
+          Abbrechen
+        </button>
+        <button type="button" class="btn-primary" id="btnExecuteDmAttack" style="background:linear-gradient(135deg, #dc2626, #b91c1c); padding:0.5rem 1.4rem; font-size:0.85rem; font-weight:900; box-shadow:0 0 15px rgba(220,38,38,0.4);">
+          ⚔️ Angriff anwenden &amp; eintragen
+        </button>
+      </div>
+    `;
+
+    // Bind Result buttons (Hit / Crit / Miss)
+    elements.dmAttackModalBody.querySelectorAll('.attack-result-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tIdx = parseInt(btn.dataset.tidx, 10);
+        const res = btn.dataset.res;
+        if (currentAttackModalState?.targets[tIdx]) {
+          currentAttackModalState.targets[tIdx].result = res;
+          currentAttackModalState.targets[tIdx].damageOverride = null;
+          renderDmAttackModalContent();
+        }
+      });
+    });
+
+    // Bind Status checkboxes
+    elements.dmAttackModalBody.querySelectorAll('.dm-status-cb').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const tIdx = parseInt(cb.dataset.tidx, 10);
+        const st = cb.dataset.st;
+        if (currentAttackModalState?.targets[tIdx]) {
+          currentAttackModalState.targets[tIdx].statuses[st] = cb.checked;
+        }
+      });
+    });
+
+    // Bind Damage override input
+    elements.dmAttackModalBody.querySelectorAll('.dm-dmg-override-input').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const tIdx = parseInt(inp.dataset.tidx, 10);
+        const val = parseInt(inp.value, 10);
+        if (currentAttackModalState?.targets[tIdx]) {
+          currentAttackModalState.targets[tIdx].damageOverride = isNaN(val) ? 0 : val;
+        }
+      });
+    });
+
+    // Cancel & Execute buttons
+    elements.dmAttackModalBody.querySelector('#btnCancelDmAttack')?.addEventListener('click', closeDmAttackModal);
+    elements.dmAttackModalBody.querySelector('#btnExecuteDmAttack')?.addEventListener('click', executeDmAttack);
+  }
+
+  function executeDmAttack() {
+    if (!currentAttackModalState) return;
+    const { attacker, move, targets } = currentAttackModalState;
+
     const curAp = getMoveAp(attacker, move);
     if (curAp <= 0) {
       showToast(`Keine AP mehr für ${move.name_de}!`);
@@ -2205,33 +2595,54 @@
 
     // Deduct 1 AP
     attacker.moveAps = attacker.moveAps || {};
-    attacker.moveAps[String(move.id)] = curAp - 1;
+    attacker.moveAps[String(move.id)] = Math.max(0, curAp - 1);
     sendAction('RESTORE_AP', { tokenId: attacker.id, trainerId: attacker.trainerId, pokemonUid: attacker.pokemonUid, moveId: move.id, amount: -1 });
 
-    const isAoE = (move.range_type === 'circle' || move.range_type === 'cone');
     const hits = [];
 
-    const applyDamageToTarget = (target) => {
-      const calc = calculatePokemonDamage(attacker, target, move);
-      const hitObj = { tokenId: target.id, damage: calc.damage, text: calc.text };
-      const statusEff = calc.statusEffect || getStatusFromMove(move);
+    targets.forEach(tgtObj => {
+      const tgt = tgtObj.token;
+      if (tgtObj.result === 'miss') {
+        hits.push({ tokenId: tgt.id, damage: 0, text: ' (💨 Verfehlt!)', extraText: '' });
+        return;
+      }
+
+      const calc = calculatePokemonDamage(attacker, tgt, move, {
+        isCrit: tgtObj.result === 'crit',
+        isMiss: false,
+        useRandom: false
+      });
+
+      const finalDmg = (tgtObj.damageOverride !== null && !isNaN(tgtObj.damageOverride))
+        ? Math.max(0, parseInt(tgtObj.damageOverride, 10))
+        : calc.damage;
+
+      const hitObj = { tokenId: tgt.id, damage: finalDmg, text: calc.text };
       let statusNotice = '';
-      if (statusEff) {
-        if (statusEff.isConfused) {
-          hitObj.isConfused = true;
-          hitObj.confusionTurns = statusEff.confusionTurns || 3;
-          statusNotice = ' [🌀 Verwirrt!]';
-        } else if (statusEff.status && (!target.status || target.status === 'none')) {
-          hitObj.status = statusEff.status;
-          if (statusEff.sleepTurns) hitObj.sleepTurns = statusEff.sleepTurns;
-          if (statusEff.statusTurns) hitObj.statusTurns = statusEff.statusTurns;
-          statusNotice = ` [${statusEff.label || 'Status'}!]`;
+
+      if (tgtObj.statuses.confusion) {
+        hitObj.isConfused = true;
+        hitObj.confusionTurns = 3;
+        statusNotice += ' [🌀 Verwirrt!]';
+      }
+
+      const priStatuses = ['toxic', 'poison', 'burn', 'paralysis', 'sleep', 'freeze'];
+      for (const st of priStatuses) {
+        if (tgtObj.statuses[st]) {
+          hitObj.status = st;
+          if (st === 'sleep') hitObj.sleepTurns = Math.floor(Math.random() * 3) + 1;
+          if (st === 'toxic') hitObj.statusTurns = 1;
+          const labels = { toxic: '☠️ TOX', poison: '🟣 PSN', burn: '🔥 BRN', paralysis: '⚡ PAR', sleep: '💤 SLP', freeze: '❄️ FRZ' };
+          statusNotice += ` [${labels[st]}!]`;
+          break;
         }
       }
-      if (target.status === 'freeze' && move.type_name === 'fire' && calc.damage > 0) {
+
+      if (tgt.status === 'freeze' && move.type_name === 'fire' && finalDmg > 0 && !hitObj.status) {
         hitObj.status = 'none';
         statusNotice += ' [🔥 Aufgetaut!]';
       }
+
       const debuff = calc.debuff || getDebuffFromMove(move);
       if (debuff) {
         hitObj.debuff = debuff;
@@ -2242,33 +2653,14 @@
         hitObj.buff = buff;
         statusNotice += ` [${buff.label}]`;
       }
+
       hitObj.extraText = statusNotice;
-      return hitObj;
-    };
-
-    if (isAoE) {
-      // Find all target tokens inside the AoE
-      const targetCells = getAttackCells(attacker.x, attacker.y, move, state.coneDirection);
-      const affectedTokens = state.battleState.tokens.filter(t => {
-        if (t.id === attacker.id) return false;
-        if (t.isEnemy === attacker.isEnemy) return false; // only hit opposing side
-        return targetCells.some(c => c.x === t.x && c.y === t.y);
-      });
-
-      if (affectedTokens.length === 0) {
-        affectedTokens.push(targetToken);
-      }
-
-      affectedTokens.forEach(t => {
-        hits.push(applyDamageToTarget(t));
-      });
-    } else {
-      hits.push(applyDamageToTarget(targetToken));
-    }
+      hits.push(hitObj);
+    });
 
     attacker.hasAttacked = true;
 
-    // Ruckzuckhieb und Erstschlag-Attacken geben die Bewegung zurück!
+    // Erstschlag / Hit & Run
     const isPriority = isPriorityMove(move);
     let prioMsg = '';
     if (isPriority) {
@@ -2293,18 +2685,36 @@
       time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
       character: attacker.nickname,
       sides: move.name_de,
-      roll: `⚔️ Trifft: ${hitLog}${prioMsg}`
+      roll: `⚔️ ${move.name_de}: ${hitLog}${prioMsg}`
     };
     sendAction('DICE_ROLL', rollData);
     addLiveRollLog(rollData);
 
     showToast(`⚔️ ${attacker.nickname} setzt ${move.name_de} ein! ${hitLog}${prioMsg}`);
 
+    closeDmAttackModal();
     state.selectedMoveIndex = null;
     state.selectedTokenId = attacker.id;
     renderBattleMapView();
     applyHighlights();
     fetchGameState();
+  }
+
+  function handleAttackTargetClick(targetToken) {
+    const attacker = state.battleState.tokens.find(t => t.id === state.selectedTokenId);
+    if (!attacker || state.selectedMoveIndex === null) return;
+    const move = attacker.moves[state.selectedMoveIndex];
+    if (!move) return;
+
+    // Check AP
+    const curAp = getMoveAp(attacker, move);
+    if (curAp <= 0) {
+      showToast(`Keine AP mehr für ${move.name_de}!`);
+      return;
+    }
+
+    // Open DM Attack Resolution Modal!
+    openDmAttackModal(attacker, targetToken, move);
   }
 
   function getMoveAp(token, move) {
@@ -2338,7 +2748,7 @@
 
     elements.dmSelectedTokenContent.innerHTML = `
       <!-- Token Header -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.6rem;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
         <div style="display:flex; align-items:center; gap:0.5rem;">
           <img src="${spriteUrl}" alt="" style="width:48px; height:48px;" class="pixelated" onerror="this.src='https://play.pokemonshowdown.com/sprites/trainers/acetrainer.png'">
           <div>
@@ -2354,8 +2764,18 @@
             </div>
           </div>
         </div>
-        <button class="btn-secondary btn-remove-token" style="color:#ef4444; border-color:rgba(239,68,68,0.5); font-size:0.75rem; padding:0.3rem 0.65rem; font-weight:700;" title="Dieses Token vom Feld nehmen / zurückrufen">
-          🔴 Vom Feld nehmen
+        <button class="btn-secondary btn-remove-token" style="color:#ef4444; border-color:rgba(239,68,68,0.5); font-size:0.72rem; padding:0.3rem 0.6rem; font-weight:800; background:rgba(239,68,68,0.08);" title="Dieses Pokémon vom Feld nehmen / in Party zurückrufen">
+          🔴 Zurückrufen
+        </button>
+      </div>
+
+      <!-- Turn & Reaction Quick Bar -->
+      <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:0.4rem 0.55rem; margin-bottom:0.6rem; display:flex; gap:0.4rem; justify-content:space-between; align-items:center;">
+        <button class="btn-token-toggle-reaction" style="flex:1; padding:0.35rem 0.45rem; font-size:0.74rem; font-weight:800; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.3rem; ${token.hasReaction !== false ? 'background:rgba(245,158,11,0.2); border:1px solid #f59e0b; color:#fbbf24;' : 'background:rgba(255,255,255,0.05); border:1px solid var(--border-color); color:var(--text-muted);'}">
+          ⚡ Reaktion: <strong>${token.hasReaction !== false ? 'Bereit (1/1)' : 'Verbraucht (0/1)'}</strong>
+        </button>
+        <button class="btn-token-toggle-turn" style="flex:1; padding:0.35rem 0.45rem; font-size:0.74rem; font-weight:800; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.3rem; ${token.turnEnded ? 'background:rgba(100,116,139,0.25); border:1px solid #64748b; color:#94a3b8;' : 'background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399;'}">
+          🏁 Zug: <strong>${token.turnEnded ? 'Beendet ✅' : 'Am Zug ⏳'}</strong>
         </button>
       </div>
 
@@ -2384,27 +2804,27 @@
         `;
       })()}
 
-      <!-- Stat Stages Management (DM) -->
+      <!-- Stat Stages & P&P Modifiers (DM) -->
       <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:6px; padding:0.5rem; margin-top:0.5rem;">
-        <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.35rem; display:flex; justify-content:space-between; align-items:center;">
-          <span>STATUSWERTE-STUFEN (-6 bis +6):</span>
+        <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.35rem; display:flex; justify-content:space-between; align-items:center;">
+          <span>🎲 P&amp;P MODIFIKATOREN &amp; WERTE (-6 bis +6):</span>
           <button class="btn-token-reset-stages" style="background:transparent; border:none; color:#f87171; font-size:0.68rem; cursor:pointer; font-weight:700;">🔄 Reset (Alle 0)</button>
         </div>
         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.3rem;">
           ${[
-            { key: 'atk', label: 'Angriff' },
-            { key: 'def', label: 'Verteidigung' },
-            { key: 'spa', label: 'Sp.-Angriff' },
-            { key: 'spd', label: 'Sp.-Vert.' },
-            { key: 'spe', label: 'Initiative' },
-            { key: 'acc', label: 'Genauigkeit' }
+            { key: 'acc', label: 'Genauigkeit (acc)' },
+            { key: 'atk', label: 'Angriff (atk)' },
+            { key: 'def', label: 'Verteidigung (def)' },
+            { key: 'spe', label: 'Initiative (spe)' },
+            { key: 'spa', label: 'Sp.-Angriff (spa)' },
+            { key: 'spd', label: 'Sp.-Vert. (spd)' }
           ].map(({ key, label }) => {
             const stage = (token.statStages && token.statStages[key]) || 0;
             const sign = stage > 0 ? `+${stage}` : `${stage}`;
             const color = stage < 0 ? '#f87171' : (stage > 0 ? '#34d399' : 'var(--text-secondary)');
             return `
               <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:0.25rem 0.35rem; display:flex; justify-content:space-between; align-items:center; font-size:0.68rem;">
-                <span style="font-weight:700;">${label}:</span>
+                <span style="font-weight:700;" title="${label}">${label.split(' ')[0]}:</span>
                 <div style="display:flex; align-items:center; gap:0.2rem;">
                   <button class="btn-stat-stage-mod" data-stat="${key}" data-delta="-1" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; border-radius:3px; padding:0 4px; font-weight:900; cursor:pointer;">-</button>
                   <span style="font-weight:900; min-width:18px; text-align:center; font-family:var(--font-mono); color:${color};">${sign}</span>
@@ -2413,6 +2833,9 @@
               </div>
             `;
           }).join('')}
+        </div>
+        <div style="font-size:0.62rem; color:var(--text-muted); margin-top:0.3rem;">
+          acc = Trefferchance am Spieltisch • def = Schadensreduktion • spe = Initiative am Rundenende
         </div>
       </div>
 
@@ -2434,6 +2857,23 @@
         <button class="btn-token-confusion-toggle" style="width:100%; padding:0.25rem 0.5rem; font-size:0.72rem; font-weight:800; border-radius:4px; ${token.isConfused ? 'background:#ec4899; color:#fff; border:1px solid #f472b6;' : 'background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid var(--border-color);'}">
           🌀 Verwirrung: ${token.isConfused ? 'AKTIV (Klick zum Beenden)' : 'Inaktiv (Klick zum Verwirren)'}
         </button>
+      </div>
+
+      <!-- Quick Items for Pen & Paper DM -->
+      <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.5rem; margin:0.6rem 0;">
+        <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.35rem;">
+          🎒 P&amp;P SCHNELL-ITEMS FÜR DIESES POKÉMON:
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.3rem;">
+          <button class="btn-dm-quick-item" data-item="potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; border-radius:4px; cursor:pointer;" title="Heilt 20 KP">🧪 Trank (+20)</button>
+          <button class="btn-dm-quick-item" data-item="super_potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; border-radius:4px; cursor:pointer;" title="Heilt 50 KP">🧪 Super (+50)</button>
+          <button class="btn-dm-quick-item" data-item="hyper_potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; border-radius:4px; cursor:pointer;" title="Heilt 120 KP">🧪 Hyper (+120)</button>
+          <button class="btn-dm-quick-item" data-item="max_potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#86efac; border-radius:4px; cursor:pointer;" title="Heilt alle KP">💊 Top-Trank</button>
+          <button class="btn-dm-quick-item" data-item="revive" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); color:#fde047; border-radius:4px; cursor:pointer;" title="Belebt mit 50% KP">🌟 Beleber</button>
+          <button class="btn-dm-quick-item" data-item="antidote" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(168,85,247,0.15); border:1px solid rgba(168,85,247,0.3); color:#d8b4fe; border-radius:4px; cursor:pointer;" title="Heilt Vergiftung">🌿 Gegengift</button>
+          <button class="btn-dm-quick-item" data-item="full_heal" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(236,72,153,0.15); border:1px solid rgba(236,72,153,0.3); color:#f472b6; border-radius:4px; cursor:pointer;" title="Heilt alle Statusprobleme">✨ Hyperheiler</button>
+          <button class="btn-dm-quick-item" data-item="ether" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(14,165,233,0.15); border:1px solid rgba(14,165,233,0.3); color:#7dd3fc; border-radius:4px; cursor:pointer;" title="+10 AP für alle Attacken">🔵 Äther (+10)</button>
+        </div>
       </div>
 
       <!-- Live HP Bar & Movement -->
@@ -2464,19 +2904,25 @@
           </button>
         </div>
 
-        <!-- DM Quick Healing Buttons (USER REQUIREMENT: +20, +50, +100 HP, Voll) -->
+        <!-- DM Quick Healing Buttons & Custom Input (IMMER VERFÜGBAR) -->
         <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.25rem;">
-          DM SCHNELLHEILUNG:
+          ❤️ DM HEILUNG (IMMER VERFÜGBAR):
         </div>
-        <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+        <div style="display:flex; gap:0.3rem; flex-wrap:wrap; margin-bottom:0.4rem;">
+          <button class="btn-heal btn-heal-amount" data-amt="10">+10 KP</button>
           <button class="btn-heal btn-heal-amount" data-amt="20">+20 KP</button>
           <button class="btn-heal btn-heal-amount" data-amt="50">+50 KP</button>
           <button class="btn-heal btn-heal-amount" data-amt="100">+100 KP</button>
           <button class="btn-heal btn-heal-full" style="background:linear-gradient(135deg, #047857, #10b981);">Voll (Max)</button>
         </div>
+        <div style="display:flex; gap:0.35rem; align-items:center;">
+          <input type="number" id="dmCustomHealInput" class="search-input" placeholder="KP..." style="width:70px; padding:0.22rem 0.35rem; font-size:0.75rem; text-align:center;" min="1" max="999" />
+          <button id="btnDmCustomHeal" class="btn-heal" style="font-size:0.7rem; padding:0.25rem 0.55rem; font-weight:700;">+ Heilen</button>
+          <button id="btnDmCustomDamage" class="btn-secondary" style="font-size:0.7rem; padding:0.25rem 0.55rem; color:#ef4444; border-color:rgba(239,68,68,0.4); font-weight:700;">- Schaden</button>
+        </div>
       </div>
 
-      <!-- Attacks & AP Restore (USER REQUIREMENT: +10 AP, Alle AP wiederherstellen) -->
+      <!-- Attacks & AP Restore -->
       <div style="margin-bottom:0.5rem;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
           <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">
@@ -2595,7 +3041,7 @@
                         </div>
                       ` : ''}
                       <div style="font-size:0.68rem; color:var(--text-secondary); margin-bottom:0.25rem; font-weight:700;">
-                        ⚔️ Ziel wählen (oder direkt auf Token der Karte tippen):
+                        ⚔️ Ziel wählen (öffnet Treffer- &amp; Würfel-Dialog):
                       </div>
                       ${validTargets.length > 0 ? `
                         <div style="display:flex; flex-direction:column; gap:0.25rem;">
@@ -2623,7 +3069,7 @@
           }).join('')}
         </div>
 
-        <!-- Big Remove / Recall Button at Bottom -->
+        <!-- Big Recall / Remove Button at Bottom -->
         <div style="margin-top:0.75rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.08);">
           <button class="btn-secondary btn-remove-token" style="width:100%; color:#ef4444; border-color:rgba(239,68,68,0.5); font-size:0.78rem; padding:0.45rem 0.8rem; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.4rem; background:rgba(239,68,68,0.08);">
             🔴 ${token.nickname} vom Feld nehmen / zurückrufen
@@ -2631,6 +3077,23 @@
         </div>
       </div>
     `;
+
+    // Bind Reaction & Turn toggle
+    elements.dmSelectedTokenContent.querySelector('.btn-token-toggle-reaction')?.addEventListener('click', () => {
+      token.hasReaction = (token.hasReaction === false);
+      sendAction('BATTLE_TOGGLE_REACTION', { tokenId: token.id, hasReaction: token.hasReaction });
+      showToast(`⚡ Reaktion für "${token.nickname}": ${token.hasReaction ? 'Bereit (1/1)' : 'Verbraucht (0/1)'}`);
+      renderSelectedTokenBox();
+      renderBattleMapView();
+    });
+
+    elements.dmSelectedTokenContent.querySelector('.btn-token-toggle-turn')?.addEventListener('click', () => {
+      token.turnEnded = !token.turnEnded;
+      sendAction('BATTLE_TOKEN_END_TURN', { tokenId: token.id });
+      showToast(`🏁 Zug für "${token.nickname}": ${token.turnEnded ? 'Beendet' : 'Aktiv'}`);
+      renderSelectedTokenBox();
+      renderBattleMapView();
+    });
 
     // Bind Status buttons for DM
     elements.dmSelectedTokenContent.querySelectorAll('.btn-token-status-set').forEach(btn => {
@@ -2671,6 +3134,16 @@
       showToast(`Statuswerte-Stufen von "${token.nickname}" auf 0 zurückgesetzt.`);
     });
 
+    // Bind P&P Quick Items
+    elements.dmSelectedTokenContent.querySelectorAll('.btn-dm-quick-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const itemId = btn.dataset.item;
+        sendAction('BATTLE_USE_ITEM', { tokenId: token.id, itemId });
+        showToast(`🎒 Item eingesetzt!`);
+        fetchGameState();
+      });
+    });
+
     // Bind Healing buttons
     elements.dmSelectedTokenContent.querySelectorAll('.btn-heal-amount').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -2696,6 +3169,38 @@
       });
       showToast(`✨ ${token.nickname} vollständig geheilt!`);
       token.currentHp = token.maxHp;
+      renderBattleMapView();
+    });
+
+    // Custom Heal / Custom Damage buttons
+    elements.dmSelectedTokenContent.querySelector('#btnDmCustomHeal')?.addEventListener('click', () => {
+      const inp = elements.dmSelectedTokenContent.querySelector('#dmCustomHealInput');
+      const amt = parseInt(inp?.value, 10);
+      if (!amt || amt <= 0) return;
+      sendAction('HEAL_POKEMON', {
+        tokenId: token.id,
+        trainerId: token.trainerId,
+        pokemonUid: token.pokemonUid,
+        amount: amt
+      });
+      showToast(`❤️ ${token.nickname} um +${amt} KP geheilt!`);
+      token.currentHp = Math.min(token.maxHp, token.currentHp + amt);
+      if (inp) inp.value = '';
+      renderBattleMapView();
+    });
+
+    elements.dmSelectedTokenContent.querySelector('#btnDmCustomDamage')?.addEventListener('click', () => {
+      const inp = elements.dmSelectedTokenContent.querySelector('#dmCustomHealInput');
+      const amt = parseInt(inp?.value, 10);
+      if (!amt || amt <= 0) return;
+      token.currentHp = Math.max(0, token.currentHp - amt);
+      sendAction('BATTLE_APPLY_DAMAGE', {
+        hits: [{ tokenId: token.id, damage: amt, text: ' (DM-Schaden)' }],
+        moveName: 'DM-Schaden',
+        attackerName: 'Spielleiter'
+      });
+      showToast(`💥 ${token.nickname} hat -${amt} KP Schaden erhalten!`);
+      if (inp) inp.value = '';
       renderBattleMapView();
     });
 
@@ -2802,7 +3307,7 @@
       });
     });
 
-    // Remove Token buttons (top & bottom)
+    // Remove / Recall Token buttons (top & bottom)
     elements.dmSelectedTokenContent.querySelectorAll('.btn-remove-token').forEach(btn => {
       btn.addEventListener('click', () => {
         sendAction('BATTLE_REMOVE_TOKEN', { tokenId: token.id });
@@ -2810,7 +3315,7 @@
         state.selectedTokenId = null;
         renderBattleMapView();
         fetchGameState();
-        showToast(`Token "${token.nickname}" vom Feld genommen.`);
+        showToast(`🔴 "${token.nickname}" vom Feld zurückgerufen & gespeichert.`);
       });
     });
   }

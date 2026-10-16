@@ -2598,3 +2598,178 @@ body.theme-light .move-tab-btn.active {
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
+/* ==========================================================================
+   INITIATIVE TRACKER BAR
+   ========================================================================== */
+.initiative-tracker-bar {
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+.initiative-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.45rem;
+  font-size: 0.75rem;
+}
+
+.initiative-track {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  scrollbar-width: thin;
+}
+
+.initiative-card {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-tertiary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  min-width: 145px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.initiative-card:hover {
+  background: var(--bg-card);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.initiative-card.active-selected {
+  border-color: #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.18) !important;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+}
+
+.initiative-card.turn-ended {
+  opacity: 0.55;
+  filter: grayscale(25%);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.initiative-card.is-enemy {
+  border-left: 3.5px solid #ef4444;
+}
+
+.initiative-card.is-player {
+  border-left: 3.5px solid #10b981;
+}
+
+.initiative-rank-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: var(--text-muted);
+}
+
+.reaction-pill {
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+.reaction-pill.ready {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+.reaction-pill.used {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ==========================================================================
+   DM ATTACK RESOLUTION MODAL
+   ========================================================================== */
+.dm-attack-dialog {
+  max-width: 620px;
+  width: 95%;
+  background: var(--bg-card);
+  border: 1.5px solid rgba(220, 38, 38, 0.5);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.attack-result-btn {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.attack-result-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.attack-result-btn.selected-hit {
+  background: #2563eb;
+  border-color: #3b82f6;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+}
+
+.attack-result-btn.selected-crit {
+  background: linear-gradient(135deg, #d97706, #ef4444);
+  border-color: #f59e0b;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.5);
+}
+
+.attack-result-btn.selected-miss {
+  background: #475569;
+  border-color: #64748b;
+  color: #fff;
+}
+
+.status-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+  transition: all 0.12s ease;
+}
+
+.status-checkbox-label:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.status-checkbox-label input[type="checkbox"] {
+  accent-color: #ef4444;
+  cursor: pointer;
+}
+

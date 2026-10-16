@@ -887,6 +887,18 @@ function calculatePokemonDamage(attacker, defender, move) {
   return { damage: finalDamage, text: effectText, effectiveness: typeMult, stab, A, D, power, baseDmg, debuff, buff };
 }
 
+function calculateTokenInitiative(token) {
+  if (!token) return 50;
+  const pData = POKEDEX_DATA?.pokemon?.find(p => p.id === token.pokemonId);
+  const baseSpe = token.spe || pData?.base_stats?.spe || 50;
+  const speStage = token.statStages?.spe || 0;
+  let effSpe = Math.max(1, Math.floor(baseSpe * getStatStageMultiplier(speStage)));
+  if (token.status === 'paralysis') {
+    effSpe = Math.floor(effSpe / 2);
+  }
+  return effSpe;
+}
+
 function executeBattleRoundReset(initiatorName = 'Spielleiter') {
   if (!gameState.battleState) return;
   gameState.battleState.tokens = gameState.battleState.tokens || [];
@@ -894,6 +906,10 @@ function executeBattleRoundReset(initiatorName = 'Spielleiter') {
   const roundLogs = [];
 
   gameState.battleState.tokens.forEach(t => {
+    // Reset round turn flag & reaction (1 Reaction per combatant per round)
+    t.turnEnded = false;
+    t.hasReaction = true;
+
     // Schutzschild, Ausdauer und Konter laufen am Rundenende aus
     t.isProtected = false;
     t.isEnduring = false;
@@ -982,6 +998,9 @@ function executeBattleRoundReset(initiatorName = 'Spielleiter') {
     } else {
       t.remainingMovement = effectiveMov;
     }
+
+    // Initiative für die neue Runde aktualisieren (Buffs / Tempostufen berücksichtigen)
+    t.initiative = calculateTokenInitiative(t);
   });
 
   saveState();
@@ -1295,6 +1314,7 @@ function handleAction(action) {
       const defaultAbility = getPokemonDefaultAbility(payload.token.pokemonId);
       const chosenAbility = payload.token.ability || defaultAbility;
       const isHumanToken = (payload.token.pokemonId === 0 || payload.token.isHuman || payload.token.name_de === 'Mensch');
+      const tokenInit = payload.token.initiative || calculateTokenInitiative(payload.token);
       const newToken = {
         id: payload.token.id || 'token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         maxMovement: payload.token.maxMovement || 5,
@@ -1305,7 +1325,10 @@ function handleAction(action) {
         ...payload.token,
         currentHp: isHumanToken ? (payload.token.currentHp !== undefined ? payload.token.currentHp : 50) : payload.token.currentHp,
         maxHp: isHumanToken ? (payload.token.maxHp !== undefined ? payload.token.maxHp : 50) : payload.token.maxHp,
-        isHuman: isHumanToken
+        isHuman: isHumanToken,
+        turnEnded: payload.token.turnEnded || false,
+        hasReaction: payload.token.hasReaction !== undefined ? payload.token.hasReaction : true,
+        initiative: tokenInit
       };
       gameState.battleState.tokens = gameState.battleState.tokens.filter(t => t.id !== newToken.id);
       gameState.battleState.tokens.push(newToken);
@@ -1357,6 +1380,31 @@ function handleAction(action) {
           if (payload.presetId && t.presetId === payload.presetId) return true;
           return false;
         });
+
+        // Sync HP, Status und Move-APs zurück zu Trainer-Pokémon oder Gegner-Preset
+        removedTokens.forEach(t => {
+          if (t.trainerId && t.pokemonUid) {
+            const tr = gameState.trainers.find(trainer => trainer.id === t.trainerId);
+            const pk = tr?.pokemon?.find(p => p.uid === t.pokemonUid);
+            if (pk) {
+              pk.currentHp = t.currentHp;
+              pk.status = t.status;
+              pk.isConfused = t.isConfused;
+              if (t.moveAps) pk.moveAps = t.moveAps;
+            }
+          }
+          const recallLog = {
+            time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            character: payload.initiator || 'Spielleiter',
+            sides: 'Zurückrufen',
+            roll: `🔴 ${t.nickname} wurde während des Kampfs vom Feld genommen / zurückgerufen.`
+          };
+          gameState.diceHistory = gameState.diceHistory || [];
+          gameState.diceHistory.unshift(recallLog);
+          if (gameState.diceHistory.length > 50) gameState.diceHistory.pop();
+          broadcastEvent('DICE_ROLLED', recallLog);
+        });
+
         const removedIds = new Set(removedTokens.map(t => t.id));
         const removedPokes = new Set(removedTokens.map(t => t.pokemonUid).filter(Boolean));
         gameState.battleState.tokens = gameState.battleState.tokens.filter(t => !removedTokens.includes(t));
@@ -1383,7 +1431,176 @@ function handleAction(action) {
       break;
 
     case 'BATTLE_RESET_ROUND':
-      executeBattleRoundReset('Spielleiter');
+      executeBattleRoundReset(payload?.initiator || 'Spielleiter');
+      break;
+
+    case 'BATTLE_TOKEN_END_TURN':
+      if (gameState.battleState && gameState.battleState.tokens) {
+        const t = gameState.battleState.tokens.find(tok => tok.id === payload.tokenId);
+        if (t) {
+          t.turnEnded = true;
+          const endEntry = {
+            time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            character: t.nickname,
+            sides: 'Zug beendet',
+            roll: `🏁 ${t.nickname} hat den Zug für Runde ${gameState.battleState.turnNumber || 1} beendet.`
+          };
+          gameState.diceHistory = gameState.diceHistory || [];
+          gameState.diceHistory.unshift(endEntry);
+          if (gameState.diceHistory.length > 50) gameState.diceHistory.pop();
+          broadcastEvent('DICE_ROLLED', endEntry);
+
+          // Prüfen, ob alle aktiven Einheiten auf dem Feld ihren Zug beendet haben
+          const allEnded = gameState.battleState.tokens.length > 0 && gameState.battleState.tokens.every(tok => tok.turnEnded);
+          if (allEnded) {
+            const allEndLog = {
+              time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+              character: 'Kampfsystem',
+              sides: 'Runde ' + (gameState.battleState.turnNumber || 1),
+              roll: `✨ Alle Einheiten haben ihren Zug beendet! Runde bereit zum Abschließen.`
+            };
+            gameState.diceHistory.unshift(allEndLog);
+            if (gameState.diceHistory.length > 50) gameState.diceHistory.pop();
+            broadcastEvent('DICE_ROLLED', allEndLog);
+          }
+
+          saveState();
+          broadcastEvent('STATE_UPDATED', gameState);
+        }
+      }
+      break;
+
+    case 'BATTLE_TOGGLE_REACTION':
+      if (gameState.battleState && gameState.battleState.tokens) {
+        const t = gameState.battleState.tokens.find(tok => tok.id === payload.tokenId);
+        if (t) {
+          t.hasReaction = (payload.hasReaction !== undefined) ? payload.hasReaction : !t.hasReaction;
+          saveState();
+          broadcastEvent('STATE_UPDATED', gameState);
+        }
+      }
+      break;
+
+    case 'BATTLE_SET_STAT_STAGE':
+      if (gameState.battleState && gameState.battleState.tokens) {
+        const t = gameState.battleState.tokens.find(tok => tok.id === payload.tokenId);
+        if (t && payload.stat) {
+          t.statStages = t.statStages || { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0 };
+          if (payload.setValue !== undefined) {
+            t.statStages[payload.stat] = Math.max(-6, Math.min(6, payload.setValue));
+          } else {
+            const d = payload.delta || 0;
+            t.statStages[payload.stat] = Math.max(-6, Math.min(6, (t.statStages[payload.stat] || 0) + d));
+          }
+          if (t.trainerId && t.pokemonUid) {
+            const tr = gameState.trainers.find(tr => tr.id === t.trainerId);
+            const pk = tr?.pokemon?.find(p => p.uid === t.pokemonUid);
+            if (pk) pk.statStages = t.statStages;
+          }
+          saveState();
+          broadcastEvent('STATE_UPDATED', gameState);
+        }
+      }
+      break;
+
+    case 'BATTLE_APPLY_HEAL':
+      if (gameState.battleState && gameState.battleState.tokens) {
+        const t = gameState.battleState.tokens.find(tok => tok.id === payload.tokenId);
+        if (t) {
+          const maxHp = t.maxHp || 50;
+          const prevHp = t.currentHp;
+          if (payload.full) {
+            t.currentHp = maxHp;
+          } else {
+            const amt = Number(payload.amount) || 0;
+            t.currentHp = Math.min(maxHp, Math.max(0, t.currentHp + amt));
+          }
+          const diff = t.currentHp - prevHp;
+          if (t.trainerId && t.pokemonUid) {
+            const tr = gameState.trainers.find(tr => tr.id === t.trainerId);
+            const pk = tr?.pokemon?.find(p => p.uid === t.pokemonUid);
+            if (pk) pk.currentHp = t.currentHp;
+          }
+          const healEntry = {
+            time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            character: payload.initiator || 'Spielleiter',
+            sides: 'Heilung',
+            roll: `💚 ${t.nickname} um ${diff >= 0 ? '+' : ''}${diff} KP geheilt (${t.currentHp}/${maxHp} KP).`
+          };
+          gameState.diceHistory = gameState.diceHistory || [];
+          gameState.diceHistory.unshift(healEntry);
+          if (gameState.diceHistory.length > 50) gameState.diceHistory.pop();
+          broadcastEvent('DICE_ROLLED', healEntry);
+          saveState();
+          broadcastEvent('STATE_UPDATED', gameState);
+        }
+      }
+      break;
+
+    case 'BATTLE_USE_ITEM':
+      if (gameState.battleState && gameState.battleState.tokens) {
+        const t = gameState.battleState.tokens.find(tok => tok.id === payload.tokenId);
+        if (t) {
+          const itemId = payload.itemId;
+          let logMsg = '';
+          if (itemId === 'potion') {
+            t.currentHp = Math.min(t.maxHp, t.currentHp + 20);
+            logMsg = `🧪 Trank eingesetzt: ${t.nickname} erhält +20 KP (${t.currentHp}/${t.maxHp})!`;
+          } else if (itemId === 'super_potion') {
+            t.currentHp = Math.min(t.maxHp, t.currentHp + 50);
+            logMsg = `🧪 Supertrank eingesetzt: ${t.nickname} erhält +50 KP (${t.currentHp}/${t.maxHp})!`;
+          } else if (itemId === 'hyper_potion') {
+            t.currentHp = Math.min(t.maxHp, t.currentHp + 120);
+            logMsg = `🧪 Hypertrank eingesetzt: ${t.nickname} erhält +120 KP (${t.currentHp}/${t.maxHp})!`;
+          } else if (itemId === 'max_potion') {
+            t.currentHp = t.maxHp;
+            logMsg = `🧪 Top-Trank eingesetzt: ${t.nickname} vollständig geheilt (${t.currentHp}/${t.maxHp})!`;
+          } else if (itemId === 'revive') {
+            t.currentHp = Math.max(1, Math.floor(t.maxHp / 2));
+            t.status = 'none';
+            logMsg = `🌟 Beleber eingesetzt: ${t.nickname} wurde belebt mit ${t.currentHp} KP!`;
+          } else if (itemId === 'antidote') {
+            if (t.status === 'poison' || t.status === 'toxic') t.status = 'none';
+            logMsg = `💊 Gegengift eingesetzt: ${t.nickname} wurde von Gift geheilt!`;
+          } else if (itemId === 'full_heal') {
+            t.status = 'none';
+            t.isConfused = false;
+            logMsg = `💊 Hyperheiler eingesetzt: Alle Statusprobleme von ${t.nickname} wurden geheilt!`;
+          } else if (itemId === 'ether') {
+            t.moveAps = t.moveAps || {};
+            (t.moves || []).forEach(m => {
+              const maxPp = m.pp || 20;
+              const cur = (typeof t.moveAps[String(m.id)] === 'number') ? t.moveAps[String(m.id)] : maxPp;
+              t.moveAps[String(m.id)] = Math.min(maxPp, cur + 10);
+            });
+            logMsg = `🔵 Äther eingesetzt: +10 AP für alle Attacken von ${t.nickname}!`;
+          }
+
+          if (t.trainerId && t.pokemonUid) {
+            const tr = gameState.trainers.find(tr => tr.id === t.trainerId);
+            const pk = tr?.pokemon?.find(p => p.uid === t.pokemonUid);
+            if (pk) {
+              pk.currentHp = t.currentHp;
+              pk.status = t.status;
+              pk.isConfused = t.isConfused;
+              if (t.moveAps) pk.moveAps = t.moveAps;
+            }
+          }
+
+          const itemEntry = {
+            time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            character: payload.initiator || 'Spielleiter',
+            sides: 'Item-Einsatz',
+            roll: logMsg
+          };
+          gameState.diceHistory = gameState.diceHistory || [];
+          gameState.diceHistory.unshift(itemEntry);
+          if (gameState.diceHistory.length > 50) gameState.diceHistory.pop();
+          broadcastEvent('DICE_ROLLED', itemEntry);
+          saveState();
+          broadcastEvent('STATE_UPDATED', gameState);
+        }
+      }
       break;
 
     case 'BATTLE_RESET_TOKEN_MOVEMENT':

@@ -553,6 +553,7 @@
     trainerRoundNumber: document.getElementById('trainerRoundNumber'),
     btnTrainerEndTurn: document.getElementById('btnTrainerEndTurn'),
     trainerBattleTokensBadge: document.getElementById('trainerBattleTokensBadge'),
+    trainerInitiativeBar: document.getElementById('trainerInitiativeBar'),
     trainerBattleGrid: document.getElementById('trainerBattleGrid'),
     trainerSelectedTokenBox: document.getElementById('trainerSelectedTokenBox'),
     trainerSelectedTokenContent: document.getElementById('trainerSelectedTokenContent'),
@@ -2079,6 +2080,84 @@
   const GRID_ROWS = 14;
   const COL_LABELS = 'ABCDEFGHIJKLMNOPQRST'.split('');
 
+  function renderInitiativeTracker(container) {
+    if (!container) return;
+    const tokens = (state.battleState && state.battleState.tokens) || [];
+    if (tokens.length === 0) {
+      container.innerHTML = `
+        <div style="font-size:0.75rem; color:var(--text-muted); font-style:italic; text-align:center; padding:0.25rem;">
+          ⚔️ Keine Einheiten auf dem Feld – Initiative wird bei Kampfbeginn ermittelt.
+        </div>
+      `;
+      return;
+    }
+
+    // Sort tokens by initiative descending
+    const sorted = [...tokens].sort((a, b) => {
+      const initA = (typeof a.initiative === 'number') ? a.initiative : 50;
+      const initB = (typeof b.initiative === 'number') ? b.initiative : 50;
+      return initB - initA;
+    });
+
+    const activeCount = sorted.filter(t => !t.turnEnded).length;
+
+    container.innerHTML = `
+      <div class="initiative-header-row">
+        <span style="font-weight:900; color:#93c5fd; display:flex; align-items:center; gap:0.4rem;">
+          <span>⏱️ INITIATIVE-REIHENFOLGE</span>
+          <span style="font-size:0.68rem; color:var(--text-muted); font-weight:700;">(${activeCount} / ${sorted.length} aktiv)</span>
+        </span>
+        <span style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">
+          Runde ${(state.battleState?.turnNumber || 1)}
+        </span>
+      </div>
+      <div class="initiative-track">
+        ${sorted.map((t, idx) => {
+          const isSelected = (t.id === state.selectedBattleTokenId);
+          const pData = ALL_POKEMON.find(p => p.id === t.pokemonId);
+          const sprite = t.sprite || (pData ? pData.sprites.front_default : '');
+          const isMine = (!t.isEnemy && t.trainerId === state.activeTrainerId);
+          const isEnemy = !!t.isEnemy;
+          const cardClass = `initiative-card ${isSelected ? 'active-selected' : ''} ${t.turnEnded ? 'turn-ended' : ''} ${isEnemy ? 'is-enemy' : 'is-player'}`;
+          const reactionHtml = (t.hasReaction !== false) 
+            ? '<span class="reaction-pill ready" title="Reaktion verfügbar">⚡ 1/1</span>'
+            : '<span class="reaction-pill used" title="Reaktion verbraucht">⚡ 0/1</span>';
+          const turnStatusHtml = t.turnEnded 
+            ? '<span style="color:#10b981; font-weight:800; font-size:0.65rem;">✅ Fertig</span>'
+            : '<span style="color:#60a5fa; font-weight:800; font-size:0.65rem;">⏳ Am Zug</span>';
+
+          return `
+            <div class="${cardClass}" data-tokenid="${t.id}" title="Klicken zum Auswählen">
+              <span class="initiative-rank-badge">#${idx + 1}</span>
+              <img src="${sprite}" alt="" style="width:26px; height:26px;" class="pixelated" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
+              <div style="display:flex; flex-direction:column; line-height:1.2; overflow:hidden;">
+                <div style="font-size:0.75rem; font-weight:800; color:${isEnemy ? '#fca5a5' : (isMine ? '#86efac' : '#93c5fd')}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; max-width:85px;">
+                  ${t.nickname}
+                </div>
+                <div style="display:flex; align-items:center; gap:0.3rem; font-size:0.65rem; color:var(--text-muted); font-family:var(--font-mono);">
+                  <span>Init: <strong>${t.initiative || 50}</strong></span>
+                  ${reactionHtml}
+                </div>
+              </div>
+              <div style="margin-left:auto; text-align:right;">
+                ${turnStatusHtml}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    container.querySelectorAll('.initiative-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const tid = card.dataset.tokenid;
+        state.selectedBattleTokenId = tid;
+        state.selectedBattleMoveIndex = null;
+        renderTrainerBattleGrid();
+      });
+    });
+  }
+
   function renderTrainerBattleGrid() {
     if (!elements.trainerBattleGrid) return;
     const tokens = (state.battleState && state.battleState.tokens) || [];
@@ -2090,6 +2169,8 @@
     if (elements.trainerBattleTokensBadge) {
       elements.trainerBattleTokensBadge.textContent = `${tokens.length} Einheiten`;
     }
+
+    renderInitiativeTracker(elements.trainerInitiativeBar);
 
     // Grid Zellen einmalig erzeugen (20x14)
     if (elements.trainerBattleGrid.children.length === 0) {
@@ -2441,8 +2522,8 @@
       </div>
       ${isMine ? `
         <div style="margin-bottom:0.6rem;">
-          <button class="btn-primary btn-trainer-end-turn-token" style="width:100%; font-size:0.75rem; padding:0.35rem 0.5rem; background:#2563eb; border-color:#1d4ed8; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.35rem; box-shadow:0 2px 8px rgba(37,99,235,0.3);">
-            🏁 Runde beenden (Bewegung zurückbekommen)
+          <button class="btn-primary btn-trainer-end-turn-token" style="width:100%; font-size:0.75rem; padding:0.35rem 0.5rem; background:${token.turnEnded ? '#475569' : '#2563eb'}; border-color:${token.turnEnded ? '#64748b' : '#1d4ed8'}; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.35rem; box-shadow:0 2px 8px rgba(37,99,235,0.3);">
+            ${token.turnEnded ? '✅ Zug für diese Runde beendet' : '🏁 Zug beenden'}
           </button>
         </div>
       ` : ''}
@@ -2457,132 +2538,27 @@
           const curAp = getMoveAp(token, m);
           const isMoveActive = (state.selectedBattleMoveIndex === idx);
           const isCone = (m.range_type === 'cone');
-          const isCircle = (m.range_type === 'circle');
           const isPriority = (m.range_type === 'priority' || m.priority > 0);
 
           let actionControlsHtml = '';
-
-          if (isMoveActive && isMine) {
-            if (curAp <= 0) {
-              actionControlsHtml = `
-                <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08); font-size:0.72rem; color:#ef4444; font-weight:700;">
-                  ⚠️ Keine AP mehr für diese Attacke verfügbar!
+          if (isMoveActive) {
+            actionControlsHtml = `
+              <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08);">
+                ${isCone ? `
+                  <div style="display:flex; align-items:center; gap:0.3rem; margin-bottom:0.4rem;">
+                    <span style="font-size:0.68rem; font-weight:700; color:var(--accent-gold);">Kegel-Richtung:</span>
+                    <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'N' ? 'active' : ''}" data-dir="N">⬆️ N</button>
+                    <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'E' ? 'active' : ''}" data-dir="E">➡️ O</button>
+                    <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'S' ? 'active' : ''}" data-dir="S">⬇️ S</button>
+                    <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'W' ? 'active' : ''}" data-dir="W">⬅️ W</button>
+                  </div>
+                ` : ''}
+                <div style="font-size:0.72rem; color:#fbbf24; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.25); border-radius:4px; padding:0.4rem 0.55rem; font-weight:600; line-height:1.4;">
+                  🎲 <strong>Spieltisch-Angriff (Pen &amp; Paper):</strong><br>
+                  Sag deine Attacke <strong>${m.name_de}</strong> dem Spielleiter an und würfle am Tisch. Reichweite &amp; Trefferzone sind auf der Karte markiert. Der Spielleiter entscheidet den Treffer und führt die Attacke in der App aus!
                 </div>
-              `;
-            } else if (isProtectMove(m)) {
-              const currentTurn = state.battleState?.turnNumber || 1;
-              const canUseProtect = (token.lastProtectRound === undefined || (currentTurn - token.lastProtectRound >= 2));
-              if (token.isProtected) {
-                actionControlsHtml = `
-                  <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08); background:rgba(16,185,129,0.15); border-radius:4px; padding:0.4rem; text-align:center; color:#34d399; font-size:0.75rem; font-weight:800;">
-                    🛡️ Schutzschild ist in Runde ${currentTurn} AKTIV!
-                  </div>
-                `;
-              } else if (!canUseProtect) {
-                actionControlsHtml = `
-                  <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08);">
-                    <button disabled class="btn-secondary" style="width:100%; opacity:0.65; font-size:0.72rem; padding:0.35rem 0.5rem; color:#ef4444; border-color:rgba(239,68,68,0.4);">
-                      ⏳ Schutzschild Abklingzeit (nur alle 2 Runden – bereit ab Runde ${(token.lastProtectRound || 1) + 2})
-                    </button>
-                  </div>
-                `;
-              } else {
-                actionControlsHtml = `
-                  <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08);">
-                    <button class="btn-primary btn-submit-protect-req" data-midx="${idx}" style="width:100%; font-size:0.75rem; background:#10b981; border-color:#059669; font-weight:800; padding:0.4rem; box-shadow:0 2px 8px rgba(16,185,129,0.3); display:flex; justify-content:center; align-items:center; gap:0.35rem;">
-                      🛡️ Schutzschild einsetzen (Anfrage an DM)
-                    </button>
-                  </div>
-                `;
-              }
-            } else if (isEndureMove(m)) {
-              if (token.isEnduring) {
-                actionControlsHtml = `
-                  <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08); background:rgba(245,158,11,0.15); border-radius:4px; padding:0.4rem; text-align:center; color:#fbbf24; font-size:0.75rem; font-weight:800;">
-                    💪 Ausdauer ist AKTIV! (Überlebt mit 1 KP)
-                  </div>
-                `;
-              } else {
-                actionControlsHtml = `
-                  <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08);">
-                    <button class="btn-primary btn-submit-endure-req" data-midx="${idx}" style="width:100%; font-size:0.75rem; background:#f59e0b; border-color:#d97706; font-weight:800; padding:0.4rem; box-shadow:0 2px 8px rgba(245,158,11,0.3); display:flex; justify-content:center; align-items:center; gap:0.35rem;">
-                      💪 Ausdauer einsetzen (Anfrage an DM)
-                    </button>
-                  </div>
-                `;
-              }
-            } else if (isCounterMove(m)) {
-              if (token.isCountering) {
-                actionControlsHtml = `
-                  <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08); background:rgba(239,68,68,0.15); border-radius:4px; padding:0.4rem; text-align:center; color:#fca5a5; font-size:0.75rem; font-weight:800;">
-                    ⚔️ Konter ist AKTIV! (Greift nächsten Angreifer automatisch mit 2× Schaden an)
-                  </div>
-                `;
-              } else {
-                actionControlsHtml = `
-                  <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08);">
-                    <button class="btn-primary btn-submit-counter-req" data-midx="${idx}" style="width:100%; font-size:0.75rem; background:#dc2626; border-color:#b91c1c; font-weight:800; padding:0.4rem; box-shadow:0 2px 8px rgba(220,38,38,0.3); display:flex; justify-content:center; align-items:center; gap:0.35rem;">
-                      ⚔️ Konter aktivieren (Kontert nächsten Angreifer mit 2× Schaden)
-                    </button>
-                  </div>
-                `;
-              }
-            } else {
-              const targetCells = getAttackCells(token.x, token.y, m, state.coneDirection);
-              const enemiesInRange = state.battleState.tokens.filter(t => t.isEnemy && targetCells.some(c => c.x === t.x && c.y === t.y));
-
-              if (isCone) {
-                actionControlsHtml = `
-                  <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08);">
-                    <div style="display:flex; align-items:center; gap:0.3rem; margin-bottom:0.4rem;">
-                      <span style="font-size:0.68rem; font-weight:700; color:var(--accent-gold);">Richtung:</span>
-                      <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'N' ? 'active' : ''}" data-dir="N">⬆️ N</button>
-                      <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'E' ? 'active' : ''}" data-dir="E">➡️ O</button>
-                      <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'S' ? 'active' : ''}" data-dir="S">⬇️ S</button>
-                      <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'W' ? 'active' : ''}" data-dir="W">⬅️ W</button>
-                    </div>
-                    <button class="btn-primary btn-submit-cone-req" data-midx="${idx}" ${enemiesInRange.length === 0 ? 'disabled style="opacity:0.6; width:100%; font-size:0.75rem;"' : 'style="width:100%; font-size:0.75rem; background:#ef4444; border-color:#dc2626;"'}>
-                      ⚔️ Kegel-Angriff anfragen (${enemiesInRange.length} Ziele im Kegel)
-                    </button>
-                  </div>
-                `;
-              } else if (isCircle) {
-                actionControlsHtml = `
-                  <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08);">
-                    <button class="btn-primary btn-submit-circle-req" data-midx="${idx}" ${enemiesInRange.length === 0 ? 'disabled style="opacity:0.6; width:100%; font-size:0.75rem;"' : 'style="width:100%; font-size:0.75rem; background:#ef4444; border-color:#dc2626;"'}>
-                      ⚔️ Rundum-Angriff anfragen (${enemiesInRange.length} Ziele)
-                    </button>
-                  </div>
-                `;
-              } else {
-                // Single target
-                actionControlsHtml = `
-                  <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08);">
-                    <div style="font-size:0.68rem; color:var(--text-secondary); margin-bottom:0.25rem;">
-                      Ziel wählen (oder direkt auf Token tippen):
-                    </div>
-                    ${enemiesInRange.length > 0 ? `
-                      <div style="display:flex; flex-direction:column; gap:0.25rem;">
-                        ${enemiesInRange.map(e => {
-                          const eff = getMoveEffectivenessAgainstTarget(m, e);
-                          return `
-                            <button class="btn-secondary btn-submit-single-req" data-midx="${idx}" data-targetid="${e.id}" style="justify-content:space-between; display:flex; align-items:center; font-size:0.72rem; padding:0.3rem 0.5rem; border-color:#ef4444; color:#fca5a5;">
-                              <span>⚔️ <strong>${e.nickname}</strong> (Lv.${e.level})</span>
-                              <div style="display:flex; align-items:center; gap:0.35rem;">
-                                <span class="matchup-multiplier ${eff.badgeClass}" style="font-size:0.62rem; padding:0.08rem 0.3rem;">${eff.text}</span>
-                                <span style="font-family:var(--font-mono); font-size:0.68rem;">${e.currentHp}/${e.maxHp} KP</span>
-                              </div>
-                            </button>
-                          `;
-                        }).join('')}
-                      </div>
-                    ` : `
-                      <div style="font-size:0.68rem; color:var(--text-muted); font-style:italic;">Kein Gegner in Reichweite (${m.range_desc || '2 Felder'}).</div>
-                    `}
-                  </div>
-                `;
-              }
-            }
+              </div>
+            `;
           }
 
           return `
@@ -2605,7 +2581,7 @@
                   ${m.range_desc || 'Reichweite: 2 Felder'} • Stärke: <strong style="color:#93c5fd;">${getMovePowerDisplay(m)}</strong>
                 </span>
                 <button class="btn-primary btn-token-move-range" data-midx="${idx}" style="padding:0.2rem 0.5rem; font-size:0.68rem; background:${curAp === 0 ? '#64748b' : (isMoveActive ? '#f59e0b' : 'var(--accent-blue)')};">
-                  ${isMoveActive ? 'Aktiv (Aus)' : (curAp === 0 ? 'Leer' : '🎯 Reichweite / Angriff')}
+                  ${isMoveActive ? 'Aktiv (Aus)' : '🎯 Reichweite anzeigen'}
                 </button>
               </div>
 
@@ -2635,11 +2611,6 @@
     elements.trainerSelectedTokenContent.querySelectorAll('.btn-token-move-range').forEach(btn => {
       btn.addEventListener('click', () => {
         const midx = parseInt(btn.dataset.midx, 10);
-        const m = token.moves?.[midx];
-        if (state.selectedBattleMoveIndex !== midx && m && getMoveAp(token, m) <= 0) {
-          showToast(`⚠️ Keine AP mehr für ${m.name_de}!`);
-          return;
-        }
         state.selectedBattleMoveIndex = (state.selectedBattleMoveIndex === midx) ? null : midx;
         renderTrainerBattleGrid();
       });
@@ -2650,70 +2621,6 @@
       btn.addEventListener('click', () => {
         state.coneDirection = btn.dataset.dir;
         renderTrainerBattleGrid();
-      });
-    });
-
-    // Event listeners for self-buff requests (Schutzschild, Ausdauer)
-    elements.trainerSelectedTokenContent.querySelectorAll('.btn-submit-protect-req').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const midx = parseInt(btn.dataset.midx, 10);
-        const m = token.moves[midx];
-        if (m) requestSelfBuff(token, m, 'protect');
-      });
-    });
-
-    elements.trainerSelectedTokenContent.querySelectorAll('.btn-submit-endure-req').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const midx = parseInt(btn.dataset.midx, 10);
-        const m = token.moves[midx];
-        if (m) requestSelfBuff(token, m, 'endure');
-      });
-    });
-
-    elements.trainerSelectedTokenContent.querySelectorAll('.btn-submit-counter-req').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const midx = parseInt(btn.dataset.midx, 10);
-        const m = token.moves[midx];
-        if (m) requestSelfBuff(token, m, 'counter');
-      });
-    });
-
-    // Event listeners for single attack requests
-    elements.trainerSelectedTokenContent.querySelectorAll('.btn-submit-single-req').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const midx = parseInt(btn.dataset.midx, 10);
-        const targetId = btn.dataset.targetid;
-        const targetToken = state.battleState?.tokens?.find(t => t.id === targetId);
-        const move = token.moves[midx];
-        if (targetToken && move) {
-          requestAttackOnTarget(token, targetToken, move);
-        }
-      });
-    });
-
-    // Event listeners for cone attack request
-    elements.trainerSelectedTokenContent.querySelectorAll('.btn-submit-cone-req').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const midx = parseInt(btn.dataset.midx, 10);
-        const move = token.moves[midx];
-        if (move) {
-          const targetCells = getAttackCells(token.x, token.y, move, state.coneDirection);
-          const enemiesInCone = state.battleState.tokens.filter(t => t.isEnemy && targetCells.some(c => c.x === t.x && c.y === t.y));
-          requestAoEAttack(token, move, enemiesInCone);
-        }
-      });
-    });
-
-    // Event listeners for circle attack request
-    elements.trainerSelectedTokenContent.querySelectorAll('.btn-submit-circle-req').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const midx = parseInt(btn.dataset.midx, 10);
-        const move = token.moves[midx];
-        if (move) {
-          const targetCells = getAttackCells(token.x, token.y, move, state.coneDirection);
-          const enemiesInCircle = state.battleState.tokens.filter(t => t.isEnemy && targetCells.some(c => c.x === t.x && c.y === t.y));
-          requestAoEAttack(token, move, enemiesInCircle);
-        }
       });
     });
 
@@ -2749,17 +2656,16 @@
       showToast('Kein aktiver Trainer ausgewählt!');
       return;
     }
-    const currentTrainer = state.trainers.find(t => t.id === state.activeTrainerId);
-    if (!confirm('Möchtest du die Runde beenden? (Sendet eine Anfrage an den Spielleiter, um eine neue Runde zu starten und die Bewegungspunkte aller Pokémon wieder aufzufüllen)')) {
-      return;
+    const selectedToken = state.battleState?.tokens?.find(t => t.id === state.selectedBattleTokenId && t.trainerId === state.activeTrainerId);
+    const targetToken = selectedToken || state.battleState?.tokens?.find(t => t.trainerId === state.activeTrainerId && !t.turnEnded);
+    if (targetToken) {
+      sendAction('BATTLE_TOKEN_END_TURN', { tokenId: targetToken.id });
+      targetToken.turnEnded = true;
+      renderTrainerBattleGrid();
+      showToast(`🏁 Zug für "${targetToken.nickname}" beendet!`);
+    } else {
+      showToast('Kein aktives Pokémon auf dem Kampffeld ausgewählt!');
     }
-    sendAction('SUBMIT_ACTION_REQUEST', {
-      type: 'END_TURN',
-      trainerId: state.activeTrainerId,
-      trainerName: currentTrainer?.name || 'Trainer',
-      details: `${currentTrainer?.name || 'Trainer'} hat den Zug beendet und bittet um eine neue Runde.`
-    });
-    showToast('🏁 Anfrage "Runde beenden" an den DM gesendet!');
   }
 
   function getAttackCells(originX, originY, move, coneDir) {
