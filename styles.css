@@ -2424,6 +2424,32 @@ body.theme-light .move-tab-btn.active {
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.55);
 }
 
+.map-token.is-fainted {
+  background: radial-gradient(circle, #334155 20%, #0f172a 90%) !important;
+  border-color: #64748b !important;
+  box-shadow: 0 0 6px rgba(100, 116, 139, 0.4) !important;
+  opacity: 0.65;
+}
+
+.map-token.is-fainted img,
+.map-token img.is-fainted {
+  filter: grayscale(100%) contrast(0.7) opacity(0.45) !important;
+}
+
+.map-token.is-fainted .token-label {
+  color: #94a3b8 !important;
+  text-decoration: line-through;
+}
+
+.initiative-card.is-fainted {
+  opacity: 0.55;
+  border-color: #475569 !important;
+}
+
+.initiative-card.is-fainted img {
+  filter: grayscale(100%) opacity(0.45) !important;
+}
+
 .map-token.selected {
   border-color: #fbbf24 !important;
   box-shadow: 0 0 14px #fbbf24, 0 0 4px #fff !important;

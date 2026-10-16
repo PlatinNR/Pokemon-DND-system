@@ -1729,20 +1729,23 @@
           const pData = ALL_POKEMON.find(p => p.id === t.pokemonId);
           const sprite = t.sprite || (pData ? pData.sprites.front_default : '');
           const isEnemy = !!t.isEnemy;
-          const cardClass = `initiative-card ${isSelected ? 'active-selected' : ''} ${t.turnEnded ? 'turn-ended' : ''} ${isEnemy ? 'is-enemy' : 'is-player'}`;
+          const isFainted = Number(t.currentHp) <= 0;
+          const cardClass = `initiative-card ${isSelected ? 'active-selected' : ''} ${t.turnEnded ? 'turn-ended' : ''} ${isEnemy ? 'is-enemy' : 'is-player'} ${isFainted ? 'is-fainted' : ''}`;
           const reactionHtml = (t.hasReaction !== false) 
             ? '<span class="reaction-pill ready btn-toggle-react-pill" title="Reaktion: 1/1 Bereit (Klick zum Umschalten)">⚡ 1/1</span>'
             : '<span class="reaction-pill used btn-toggle-react-pill" title="Reaktion: 0/1 Verbraucht (Klick zum Wiederherstellen)">⚡ 0/1</span>';
-          const turnStatusHtml = t.turnEnded 
-            ? '<span class="btn-toggle-turn-pill" style="color:#10b981; font-weight:800; font-size:0.65rem; cursor:pointer;" title="Klick: Zug wieder aktivieren">✅ Fertig</span>'
-            : '<span class="btn-toggle-turn-pill" style="color:#60a5fa; font-weight:800; font-size:0.65rem; cursor:pointer;" title="Klick: Zug beenden">⏳ Am Zug</span>';
+          const turnStatusHtml = isFainted
+            ? '<span style="color:#94a3b8; font-weight:800; font-size:0.65rem;">💀 0 KP</span>'
+            : (t.turnEnded 
+              ? '<span class="btn-toggle-turn-pill" style="color:#10b981; font-weight:800; font-size:0.65rem; cursor:pointer;" title="Klick: Zug wieder aktivieren">✅ Fertig</span>'
+              : '<span class="btn-toggle-turn-pill" style="color:#60a5fa; font-weight:800; font-size:0.65rem; cursor:pointer;" title="Klick: Zug beenden">⏳ Am Zug</span>');
 
           return `
             <div class="${cardClass}" data-tokenid="${t.id}" title="Klicken zum Auswählen auf Karte">
               <span class="initiative-rank-badge">#${idx + 1}</span>
-              <img src="${sprite}" alt="" style="width:28px; height:28px;" class="pixelated" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
+              <img src="${sprite}" alt="" style="width:28px; height:28px; ${isFainted ? 'filter: grayscale(100%) opacity(0.45);' : ''}" class="pixelated" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
               <div style="display:flex; flex-direction:column; line-height:1.2; overflow:hidden;">
-                <div style="font-size:0.75rem; font-weight:800; color:${isEnemy ? '#fca5a5' : '#86efac'}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; max-width:85px;">
+                <div style="font-size:0.75rem; font-weight:800; color:${isFainted ? '#94a3b8' : (isEnemy ? '#fca5a5' : '#86efac')}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; max-width:85px; ${isFainted ? 'text-decoration:line-through;' : ''}">
                   ${t.nickname}
                 </div>
                 <div style="display:flex; align-items:center; gap:0.3rem; font-size:0.65rem; color:var(--text-muted); font-family:var(--font-mono);">
@@ -1899,8 +1902,9 @@
       if (hpPercent <= 20) hpColor = '#ef4444';
       else if (hpPercent <= 50) hpColor = '#f59e0b';
 
+      const isFainted = Number(token.currentHp) <= 0;
       const tokenEl = document.createElement('div');
-      tokenEl.className = `map-token ${token.isEnemy ? 'is-enemy' : 'is-player'} ${token.id === state.selectedTokenId ? 'selected' : ''} ${token.isProtected ? 'is-protected' : ''} ${token.isEnduring ? 'is-enduring' : ''} ${token.isCountering ? 'is-countering' : ''}`;
+      tokenEl.className = `map-token ${token.isEnemy ? 'is-enemy' : 'is-player'} ${token.id === state.selectedTokenId ? 'selected' : ''} ${token.isProtected ? 'is-protected' : ''} ${token.isEnduring ? 'is-enduring' : ''} ${token.isCountering ? 'is-countering' : ''} ${isFainted ? 'is-fainted' : ''}`;
       tokenEl.dataset.tid = token.id;
       tokenEl.draggable = true;
 
@@ -1909,8 +1913,8 @@
           <div class="token-hp-fill" style="width:${hpPercent}%; background-color:${hpColor};"></div>
         </div>
         ${renderTokenStatusIconsHtml(token)}
-        <img src="${spriteUrl}" alt="" class="pixelated">
-        <div class="token-label">${token.nickname} (Lv.${token.level})</div>
+        <img src="${spriteUrl}" alt="" class="pixelated" style="${isFainted ? 'filter: grayscale(100%) opacity(0.5);' : ''}">
+        <div class="token-label">${token.nickname} (Lv.${token.level})${isFainted ? ' 💀' : ''}</div>
       `;
 
       tokenEl.addEventListener('dragstart', (e) => {
@@ -2902,6 +2906,7 @@
 
     const pData = ALL_POKEMON.find(p => p.id === token.pokemonId);
     const spriteUrl = token.sprite || (pData ? pData.sprites.front_default : '');
+    const isFainted = Number(token.currentHp) <= 0;
     const hpPercent = Math.max(0, Math.min(100, Math.round((token.currentHp / token.maxHp) * 100)));
     let hpColor = '#10b981';
     if (hpPercent <= 20) hpColor = '#ef4444';
@@ -2911,11 +2916,12 @@
       <!-- Token Header -->
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
         <div style="display:flex; align-items:center; gap:0.5rem;">
-          <img src="${spriteUrl}" alt="" style="width:48px; height:48px;" class="pixelated" onerror="this.src='https://play.pokemonshowdown.com/sprites/trainers/acetrainer.png'">
+          <img src="${spriteUrl}" alt="" style="width:48px; height:48px; ${isFainted ? 'filter: grayscale(100%) opacity(0.5);' : ''}" class="pixelated" onerror="this.src='https://play.pokemonshowdown.com/sprites/trainers/acetrainer.png'">
           <div>
             <div style="display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap;">
-              <span style="font-weight:900; font-size:1.05rem; color:var(--text-highlight);">${token.nickname}</span>
+              <span style="font-weight:900; font-size:1.05rem; color:var(--text-highlight); ${isFainted ? 'text-decoration: line-through; color:#94a3b8;' : ''}">${token.nickname}</span>
               ${getStatusDisplayBadge(token)}
+              ${isFainted ? '<span class="status-badge" style="background:#475569; color:#f1f5f9; font-size:0.65rem;">💀 0 KP (Besiegt)</span>' : ''}
             </div>
             <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.15rem;">
               ${(token.isHuman || token.pokemonId === 0 || token.name_de === 'Mensch') ? '👤 Mensch (Pen & Paper NPC)' : (token.isEnemy ? '🔴 Gegner' : '🔵 Spieler')} • Lv. ${token.level} (${token.name_de || (pData ? pData.name_de : '')})
@@ -2930,166 +2936,24 @@
         </button>
       </div>
 
-      <!-- Turn & Reaction Quick Bar -->
-      <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:0.4rem 0.55rem; margin-bottom:0.6rem; display:flex; gap:0.4rem; justify-content:space-between; align-items:center;">
-        <button class="btn-token-toggle-reaction" style="flex:1; padding:0.35rem 0.45rem; font-size:0.74rem; font-weight:800; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.3rem; ${token.hasReaction !== false ? 'background:rgba(245,158,11,0.2); border:1px solid #f59e0b; color:#fbbf24;' : 'background:rgba(255,255,255,0.05); border:1px solid var(--border-color); color:var(--text-muted);'}">
-          ⚡ Reaktion: <strong>${token.hasReaction !== false ? 'Bereit (1/1)' : 'Verbraucht (0/1)'}</strong>
-        </button>
-        <button class="btn-token-toggle-turn" style="flex:1; padding:0.35rem 0.45rem; font-size:0.74rem; font-weight:800; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.3rem; ${token.turnEnded ? 'background:rgba(100,116,139,0.25); border:1px solid #64748b; color:#94a3b8;' : 'background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399;'}">
-          🏁 Zug: <strong>${token.turnEnded ? 'Beendet ✅' : 'Am Zug ⏳'}</strong>
-        </button>
-      </div>
-
-      ${(token.isHuman || token.pokemonId === 0 || token.name_de === 'Mensch') ? `
-        <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.3); border-radius:6px; padding:0.35rem 0.55rem; margin-bottom:0.5rem; font-size:0.72rem; display:flex; justify-content:space-between; align-items:center;">
-          <span style="color:#93c5fd; font-weight:800;">👤 Pen &amp; Paper Mensch:</span>
-          <span style="color:#fff; font-weight:700;">50 KP • Basiswerte: 70 überall</span>
-        </div>
-      ` : ''}
-
-      <!-- Type Weaknesses & Resistances Card -->
-      ${renderTypeWeaknessesHtml(pData)}
-
-      <!-- Ability Info -->
-      ${(() => {
-        const ab = getPokemonAbility(token);
-        if (!ab) return '';
-        return `
-          <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.3); border-radius:6px; padding:0.45rem 0.6rem; margin-top:0.5rem; display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:0.4rem;">
-              <span style="font-size:0.7rem; font-weight:800; color:#93c5fd; text-transform:uppercase;">⚡ Fähigkeit:</span>
-              <strong style="font-size:0.82rem; color:#fff;">${ab.name_de || ab.name_en}</strong>
-            </div>
-            ${ab.desc_de ? `<span style="font-size:0.68rem; color:var(--text-secondary); max-width:240px; text-align:right;" title="${ab.desc_de}">${ab.desc_de}</span>` : ''}
-          </div>
-        `;
-      })()}
-
-      <!-- Stat Stages & P&P Modifiers (DM) -->
-      <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:6px; padding:0.5rem; margin-top:0.5rem;">
-        <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.35rem; display:flex; justify-content:space-between; align-items:center;">
-          <span>🎲 P&amp;P MODIFIKATOREN &amp; WERTE (-6 bis +6):</span>
-          <button class="btn-token-reset-stages" style="background:transparent; border:none; color:#f87171; font-size:0.68rem; cursor:pointer; font-weight:700;">🔄 Reset (Alle 0)</button>
-        </div>
-        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.3rem;">
-          ${[
-            { key: 'acc', label: 'Genauigkeit (acc)' },
-            { key: 'atk', label: 'Angriff (atk)' },
-            { key: 'def', label: 'Verteidigung (def)' },
-            { key: 'spe', label: 'Initiative (spe)' },
-            { key: 'spa', label: 'Sp.-Angriff (spa)' },
-            { key: 'spd', label: 'Sp.-Vert. (spd)' }
-          ].map(({ key, label }) => {
-            const stage = (token.statStages && token.statStages[key]) || 0;
-            const sign = stage > 0 ? `+${stage}` : `${stage}`;
-            const color = stage < 0 ? '#f87171' : (stage > 0 ? '#34d399' : 'var(--text-secondary)');
-            return `
-              <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:0.25rem 0.35rem; display:flex; justify-content:space-between; align-items:center; font-size:0.68rem;">
-                <span style="font-weight:700;" title="${label}">${label.split(' ')[0]}:</span>
-                <div style="display:flex; align-items:center; gap:0.2rem;">
-                  <button class="btn-stat-stage-mod" data-stat="${key}" data-delta="-1" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; border-radius:3px; padding:0 4px; font-weight:900; cursor:pointer;">-</button>
-                  <span style="font-weight:900; min-width:18px; text-align:center; font-family:var(--font-mono); color:${color};">${sign}</span>
-                  <button class="btn-stat-stage-mod" data-stat="${key}" data-delta="1" style="background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.4); color:#86efac; border-radius:3px; padding:0 4px; font-weight:900; cursor:pointer;">+</button>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-        <div style="font-size:0.62rem; color:var(--text-muted); margin-top:0.3rem;">
-          acc = Trefferchance am Spieltisch • def = Schadensreduktion • spe = Initiative am Rundenende
-        </div>
-      </div>
-
-      <!-- Status Controls for DM -->
-      <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.5rem; margin:0.6rem 0;">
-        <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.3rem; display:flex; justify-content:space-between; align-items:center;">
-          <span>STATUS-VERWALTUNG (DM):</span>
-          <span>${getStatusDisplayBadge(token)}</span>
-        </div>
-        <div style="display:flex; gap:0.25rem; flex-wrap:wrap; margin-bottom:0.35rem;">
-          <button class="hp-btn btn-token-status-set ${(!token.status || token.status === 'none') ? 'active' : ''}" data-status="none" style="padding:0.2rem 0.45rem; font-size:0.68rem;">💚 Normal</button>
-          <button class="hp-btn btn-token-status-set ${token.status === 'burn' ? 'active' : ''}" data-status="burn" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#ef4444; color:#fff;">🔥 BRN</button>
-          <button class="hp-btn btn-token-status-set ${token.status === 'poison' ? 'active' : ''}" data-status="poison" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#a855f7; color:#fff;">🟣 PSN</button>
-          <button class="hp-btn btn-token-status-set ${token.status === 'toxic' ? 'active' : ''}" data-status="toxic" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#7e22ce; color:#fff;">☠️ TOX</button>
-          <button class="hp-btn btn-token-status-set ${token.status === 'paralysis' ? 'active' : ''}" data-status="paralysis" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#eab308; color:#000;">⚡ PAR</button>
-          <button class="hp-btn btn-token-status-set ${token.status === 'sleep' ? 'active' : ''}" data-status="sleep" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#64748b; color:#fff;">💤 SLP</button>
-          <button class="hp-btn btn-token-status-set ${token.status === 'freeze' ? 'active' : ''}" data-status="freeze" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#38bdf8; color:#000;">❄️ FRZ</button>
-        </div>
-        <button class="btn-token-confusion-toggle" style="width:100%; padding:0.25rem 0.5rem; font-size:0.72rem; font-weight:800; border-radius:4px; ${token.isConfused ? 'background:#ec4899; color:#fff; border:1px solid #f472b6;' : 'background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid var(--border-color);'}">
-          🌀 Verwirrung: ${token.isConfused ? 'AKTIV (Klick zum Beenden)' : 'Inaktiv (Klick zum Verwirren)'}
-        </button>
-      </div>
-
-      <!-- Quick Items for Pen & Paper DM -->
-      <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.5rem; margin:0.6rem 0;">
-        <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.35rem;">
-          🎒 P&amp;P SCHNELL-ITEMS FÜR DIESES POKÉMON:
-        </div>
-        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.3rem;">
-          <button class="btn-dm-quick-item" data-item="potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; border-radius:4px; cursor:pointer;" title="Heilt 20 KP">🧪 Trank (+20)</button>
-          <button class="btn-dm-quick-item" data-item="super_potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; border-radius:4px; cursor:pointer;" title="Heilt 50 KP">🧪 Super (+50)</button>
-          <button class="btn-dm-quick-item" data-item="hyper_potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; border-radius:4px; cursor:pointer;" title="Heilt 120 KP">🧪 Hyper (+120)</button>
-          <button class="btn-dm-quick-item" data-item="max_potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#86efac; border-radius:4px; cursor:pointer;" title="Heilt alle KP">💊 Top-Trank</button>
-          <button class="btn-dm-quick-item" data-item="revive" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); color:#fde047; border-radius:4px; cursor:pointer;" title="Belebt mit 50% KP">🌟 Beleber</button>
-          <button class="btn-dm-quick-item" data-item="antidote" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(168,85,247,0.15); border:1px solid rgba(168,85,247,0.3); color:#d8b4fe; border-radius:4px; cursor:pointer;" title="Heilt Vergiftung">🌿 Gegengift</button>
-          <button class="btn-dm-quick-item" data-item="full_heal" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(236,72,153,0.15); border:1px solid rgba(236,72,153,0.3); color:#f472b6; border-radius:4px; cursor:pointer;" title="Heilt alle Statusprobleme">✨ Hyperheiler</button>
-          <button class="btn-dm-quick-item" data-item="ether" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(14,165,233,0.15); border:1px solid rgba(14,165,233,0.3); color:#7dd3fc; border-radius:4px; cursor:pointer;" title="+10 AP für alle Attacken">🔵 Äther (+10)</button>
-        </div>
-      </div>
-
-      <!-- Live HP Bar & Movement -->
-      <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.5rem; margin-bottom:0.75rem;">
+      <!-- Quick HP Bar right under Header -->
+      <div style="background:rgba(0,0,0,0.25); border-radius:6px; padding:0.4rem 0.55rem; margin-bottom:0.55rem;">
         <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:800; margin-bottom:0.25rem;">
           <span>KP:</span>
           <span style="font-family:var(--font-mono); color:${hpColor};">${token.currentHp} / ${token.maxHp}</span>
         </div>
-        <div class="hp-bar-track" style="height:8px; margin-bottom:0.4rem;">
+        <div class="hp-bar-track" style="height:7px;">
           <div class="hp-bar-fill" style="width:${hpPercent}%; background-color:${hpColor};"></div>
-        </div>
-        ${(() => {
-          const effMov = Math.max(1, (token.maxMovement || 5) + (token.statStages?.spe || 0));
-          const curMov = token.remainingMovement !== undefined ? token.remainingMovement : effMov;
-          return `
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; font-weight:800; color:#93c5fd; margin-bottom:0.35rem; background:rgba(59,130,246,0.12); padding:0.25rem 0.5rem; border-radius:4px;">
-              <span>🏃 Bewegung:</span>
-              <span style="font-family:var(--font-mono); font-weight:900;">${curMov} / ${effMov} Felder ${token.statStages?.spe ? `(Init: ${token.statStages.spe > 0 ? '+' : ''}${token.statStages.spe})` : ''}</span>
-            </div>
-          `;
-        })()}
-        <div style="display:flex; gap:0.35rem; margin-bottom:0.6rem;">
-          <button class="btn-secondary btn-token-reset-movement" style="flex:1; font-size:0.68rem; padding:0.25rem 0.4rem; color:#60a5fa; border-color:rgba(59,130,246,0.4); font-weight:700;">
-            🏃 Bewegung auffüllen (+5)
-          </button>
-          <button class="btn-primary btn-round-reset-quick" style="flex:1; font-size:0.68rem; padding:0.25rem 0.4rem; background:#2563eb; font-weight:700;">
-            🔄 Runde beenden (Alle)
-          </button>
-        </div>
-
-        <!-- DM Quick Healing Buttons & Custom Input (IMMER VERFÜGBAR) -->
-        <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.25rem;">
-          ❤️ DM HEILUNG (IMMER VERFÜGBAR):
-        </div>
-        <div style="display:flex; gap:0.3rem; flex-wrap:wrap; margin-bottom:0.4rem;">
-          <button class="btn-heal btn-heal-amount" data-amt="10">+10 KP</button>
-          <button class="btn-heal btn-heal-amount" data-amt="20">+20 KP</button>
-          <button class="btn-heal btn-heal-amount" data-amt="50">+50 KP</button>
-          <button class="btn-heal btn-heal-amount" data-amt="100">+100 KP</button>
-          <button class="btn-heal btn-heal-full" style="background:linear-gradient(135deg, #047857, #10b981);">Voll (Max)</button>
-        </div>
-        <div style="display:flex; gap:0.35rem; align-items:center;">
-          <input type="number" id="dmCustomHealInput" class="search-input" placeholder="KP..." style="width:70px; padding:0.22rem 0.35rem; font-size:0.75rem; text-align:center;" min="1" max="999" />
-          <button id="btnDmCustomHeal" class="btn-heal" style="font-size:0.7rem; padding:0.25rem 0.55rem; font-weight:700;">+ Heilen</button>
-          <button id="btnDmCustomDamage" class="btn-secondary" style="font-size:0.7rem; padding:0.25rem 0.55rem; color:#ef4444; border-color:rgba(239,68,68,0.4); font-weight:700;">- Schaden</button>
         </div>
       </div>
 
-      <!-- Attacks & AP Restore -->
-      <div style="margin-bottom:0.5rem;">
+      <!-- 1. ATTACKEN & REICHWEITEN (GANZ NACH OBEN) -->
+      <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:0.55rem; margin-bottom:0.65rem;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-          <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">
-            ATTACKEN &amp; REICHWEITEN:
+          <div style="font-size:0.72rem; font-weight:900; color:#93c5fd; text-transform:uppercase; display:flex; align-items:center; gap:0.35rem;">
+            <span>⚔️ ATTACKEN &amp; REICHWEITEN:</span>
           </div>
-          <button class="btn-secondary btn-restore-all-ap" style="padding:0.2rem 0.45rem; font-size:0.68rem; font-weight:700;">
+          <button class="btn-secondary btn-restore-all-ap" style="padding:0.15rem 0.45rem; font-size:0.65rem; font-weight:700;">
             ✨ Alle AP voll
           </button>
         </div>
@@ -3229,13 +3093,159 @@
             `;
           }).join('')}
         </div>
+      </div>
 
-        <!-- Big Recall / Remove Button at Bottom -->
-        <div style="margin-top:0.75rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.08);">
-          <button class="btn-secondary btn-remove-token" style="width:100%; color:#ef4444; border-color:rgba(239,68,68,0.5); font-size:0.78rem; padding:0.45rem 0.8rem; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.4rem; background:rgba(239,68,68,0.08);">
-            🔴 ${token.nickname} vom Feld nehmen / zurückrufen
-          </button>
+      <!-- 2. Turn & Reaction Quick Bar & Movement -->
+      <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:0.4rem 0.55rem; margin-bottom:0.55rem; display:flex; gap:0.4rem; justify-content:space-between; align-items:center;">
+        <button class="btn-token-toggle-reaction" style="flex:1; padding:0.35rem 0.45rem; font-size:0.74rem; font-weight:800; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.3rem; ${token.hasReaction !== false ? 'background:rgba(245,158,11,0.2); border:1px solid #f59e0b; color:#fbbf24;' : 'background:rgba(255,255,255,0.05); border:1px solid var(--border-color); color:var(--text-muted);'}">
+          ⚡ Reaktion: <strong>${token.hasReaction !== false ? 'Bereit (1/1)' : 'Verbraucht (0/1)'}</strong>
+        </button>
+        <button class="btn-token-toggle-turn" style="flex:1; padding:0.35rem 0.45rem; font-size:0.74rem; font-weight:800; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.3rem; ${token.turnEnded ? 'background:rgba(100,116,139,0.25); border:1px solid #64748b; color:#94a3b8;' : 'background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399;'}">
+          🏁 Zug: <strong>${token.turnEnded ? 'Beendet ✅' : 'Am Zug ⏳'}</strong>
+        </button>
+      </div>
+
+      <!-- Movement Bar -->
+      ${(() => {
+        const effMov = Math.max(1, (token.maxMovement || 5) + (token.statStages?.spe || 0));
+        const curMov = token.remainingMovement !== undefined ? token.remainingMovement : effMov;
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; font-weight:800; color:#93c5fd; margin-bottom:0.35rem; background:rgba(59,130,246,0.12); padding:0.25rem 0.5rem; border-radius:4px;">
+            <span>🏃 Bewegung:</span>
+            <span style="font-family:var(--font-mono); font-weight:900;">${curMov} / ${effMov} Felder ${token.statStages?.spe ? `(Init: ${token.statStages.spe > 0 ? '+' : ''}${token.statStages.spe})` : ''}</span>
+          </div>
+        `;
+      })()}
+      <div style="display:flex; gap:0.35rem; margin-bottom:0.55rem;">
+        <button class="btn-secondary btn-token-reset-movement" style="flex:1; font-size:0.68rem; padding:0.25rem 0.4rem; color:#60a5fa; border-color:rgba(59,130,246,0.4); font-weight:700;">
+          🏃 Bewegung auffüllen (+5)
+        </button>
+        <button class="btn-primary btn-round-reset-quick" style="flex:1; font-size:0.68rem; padding:0.25rem 0.4rem; background:#2563eb; font-weight:700;">
+          🔄 Runde beenden (Alle)
+        </button>
+      </div>
+
+      <!-- 3. DM Quick Healing & Custom Damage -->
+      <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.5rem; margin-bottom:0.55rem;">
+        <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.25rem;">
+          ❤️ DM HEILUNG &amp; SCHADEN (IMMER VERFÜGBAR):
         </div>
+        <div style="display:flex; gap:0.3rem; flex-wrap:wrap; margin-bottom:0.4rem;">
+          <button class="btn-heal btn-heal-amount" data-amt="10">+10 KP</button>
+          <button class="btn-heal btn-heal-amount" data-amt="20">+20 KP</button>
+          <button class="btn-heal btn-heal-amount" data-amt="50">+50 KP</button>
+          <button class="btn-heal btn-heal-amount" data-amt="100">+100 KP</button>
+          <button class="btn-heal btn-heal-full" style="background:linear-gradient(135deg, #047857, #10b981);">Voll (Max)</button>
+        </div>
+        <div style="display:flex; gap:0.35rem; align-items:center;">
+          <input type="number" id="dmCustomHealInput" class="search-input" placeholder="KP..." style="width:70px; padding:0.22rem 0.35rem; font-size:0.75rem; text-align:center;" min="1" max="999" />
+          <button id="btnDmCustomHeal" class="btn-heal" style="font-size:0.7rem; padding:0.25rem 0.55rem; font-weight:700;">+ Heilen</button>
+          <button id="btnDmCustomDamage" class="btn-secondary" style="font-size:0.7rem; padding:0.25rem 0.55rem; color:#ef4444; border-color:rgba(239,68,68,0.4); font-weight:700;">- Schaden</button>
+        </div>
+      </div>
+
+      <!-- 4. Status Controls for DM -->
+      <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.5rem; margin-bottom:0.55rem;">
+        <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.3rem; display:flex; justify-content:space-between; align-items:center;">
+          <span>STATUS-VERWALTUNG (DM):</span>
+          <span>${getStatusDisplayBadge(token)}</span>
+        </div>
+        <div style="display:flex; gap:0.25rem; flex-wrap:wrap; margin-bottom:0.35rem;">
+          <button class="hp-btn btn-token-status-set ${(!token.status || token.status === 'none') ? 'active' : ''}" data-status="none" style="padding:0.2rem 0.45rem; font-size:0.68rem;">💚 Normal</button>
+          <button class="hp-btn btn-token-status-set ${token.status === 'burn' ? 'active' : ''}" data-status="burn" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#ef4444; color:#fff;">🔥 BRN</button>
+          <button class="hp-btn btn-token-status-set ${token.status === 'poison' ? 'active' : ''}" data-status="poison" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#a855f7; color:#fff;">🟣 PSN</button>
+          <button class="hp-btn btn-token-status-set ${token.status === 'toxic' ? 'active' : ''}" data-status="toxic" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#7e22ce; color:#fff;">☠️ TOX</button>
+          <button class="hp-btn btn-token-status-set ${token.status === 'paralysis' ? 'active' : ''}" data-status="paralysis" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#eab308; color:#000;">⚡ PAR</button>
+          <button class="hp-btn btn-token-status-set ${token.status === 'sleep' ? 'active' : ''}" data-status="sleep" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#64748b; color:#fff;">💤 SLP</button>
+          <button class="hp-btn btn-token-status-set ${token.status === 'freeze' ? 'active' : ''}" data-status="freeze" style="padding:0.2rem 0.45rem; font-size:0.68rem; background:#38bdf8; color:#000;">❄️ FRZ</button>
+        </div>
+        <button class="btn-token-confusion-toggle" style="width:100%; padding:0.25rem 0.5rem; font-size:0.72rem; font-weight:800; border-radius:4px; ${token.isConfused ? 'background:#ec4899; color:#fff; border:1px solid #f472b6;' : 'background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid var(--border-color);'}">
+          🌀 Verwirrung: ${token.isConfused ? 'AKTIV (Klick zum Beenden)' : 'Inaktiv (Klick zum Verwirren)'}
+        </button>
+      </div>
+
+      <!-- 5. Quick Items for Pen & Paper DM -->
+      <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.5rem; margin-bottom:0.55rem;">
+        <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.35rem;">
+          🎒 P&amp;P SCHNELL-ITEMS FÜR DIESES POKÉMON:
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.3rem;">
+          <button class="btn-dm-quick-item" data-item="potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; border-radius:4px; cursor:pointer;" title="Heilt 20 KP">🧪 Trank (+20)</button>
+          <button class="btn-dm-quick-item" data-item="super_potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; border-radius:4px; cursor:pointer;" title="Heilt 50 KP">🧪 Super (+50)</button>
+          <button class="btn-dm-quick-item" data-item="hyper_potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; border-radius:4px; cursor:pointer;" title="Heilt 120 KP">🧪 Hyper (+120)</button>
+          <button class="btn-dm-quick-item" data-item="max_potion" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#86efac; border-radius:4px; cursor:pointer;" title="Heilt alle KP">💊 Top-Trank</button>
+          <button class="btn-dm-quick-item" data-item="revive" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); color:#fde047; border-radius:4px; cursor:pointer;" title="Belebt mit 50% KP">🌟 Beleber</button>
+          <button class="btn-dm-quick-item" data-item="antidote" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(168,85,247,0.15); border:1px solid rgba(168,85,247,0.3); color:#d8b4fe; border-radius:4px; cursor:pointer;" title="Heilt Vergiftung">🌿 Gegengift</button>
+          <button class="btn-dm-quick-item" data-item="full_heal" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(236,72,153,0.15); border:1px solid rgba(236,72,153,0.3); color:#f472b6; border-radius:4px; cursor:pointer;" title="Heilt alle Statusprobleme">✨ Hyperheiler</button>
+          <button class="btn-dm-quick-item" data-item="ether" style="font-size:0.68rem; padding:0.25rem 0.2rem; font-weight:700; background:rgba(14,165,233,0.15); border:1px solid rgba(14,165,233,0.3); color:#7dd3fc; border-radius:4px; cursor:pointer;" title="+10 AP für alle Attacken">🔵 Äther (+10)</button>
+        </div>
+      </div>
+
+      <!-- 6. Stat Stages & P&P Modifiers (DM) -->
+      <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:6px; padding:0.5rem; margin-bottom:0.55rem;">
+        <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.35rem; display:flex; justify-content:space-between; align-items:center;">
+          <span>🎲 P&amp;P MODIFIKATOREN &amp; WERTE (-6 bis +6):</span>
+          <button class="btn-token-reset-stages" style="background:transparent; border:none; color:#f87171; font-size:0.68rem; cursor:pointer; font-weight:700;">🔄 Reset (Alle 0)</button>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.3rem;">
+          ${[
+            { key: 'acc', label: 'Genauigkeit (acc)' },
+            { key: 'atk', label: 'Angriff (atk)' },
+            { key: 'def', label: 'Verteidigung (def)' },
+            { key: 'spe', label: 'Initiative (spe)' },
+            { key: 'spa', label: 'Sp.-Angriff (spa)' },
+            { key: 'spd', label: 'Sp.-Vert. (spd)' }
+          ].map(({ key, label }) => {
+            const stage = (token.statStages && token.statStages[key]) || 0;
+            const sign = stage > 0 ? `+${stage}` : `${stage}`;
+            const color = stage < 0 ? '#f87171' : (stage > 0 ? '#34d399' : 'var(--text-secondary)');
+            return `
+              <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:0.25rem 0.35rem; display:flex; justify-content:space-between; align-items:center; font-size:0.68rem;">
+                <span style="font-weight:700;" title="${label}">${label.split(' ')[0]}:</span>
+                <div style="display:flex; align-items:center; gap:0.2rem;">
+                  <button class="btn-stat-stage-mod" data-stat="${key}" data-delta="-1" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; border-radius:3px; padding:0 4px; font-weight:900; cursor:pointer;">-</button>
+                  <span style="font-weight:900; min-width:18px; text-align:center; font-family:var(--font-mono); color:${color};">${sign}</span>
+                  <button class="btn-stat-stage-mod" data-stat="${key}" data-delta="1" style="background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.4); color:#86efac; border-radius:3px; padding:0 4px; font-weight:900; cursor:pointer;">+</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div style="font-size:0.62rem; color:var(--text-muted); margin-top:0.3rem;">
+          acc = Trefferchance am Spieltisch • def = Schadensreduktion • spe = Initiative am Rundenende
+        </div>
+      </div>
+
+      <!-- 7. Ability & NPC Info & Weaknesses -->
+      ${(() => {
+        const ab = getPokemonAbility(token);
+        if (!ab) return '';
+        return `
+          <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.3); border-radius:6px; padding:0.45rem 0.6rem; margin-bottom:0.55rem; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <span style="font-size:0.7rem; font-weight:800; color:#93c5fd; text-transform:uppercase;">⚡ Fähigkeit:</span>
+              <strong style="font-size:0.82rem; color:#fff;">${ab.name_de || ab.name_en}</strong>
+            </div>
+            ${ab.desc_de ? `<span style="font-size:0.68rem; color:var(--text-secondary); max-width:240px; text-align:right;" title="${ab.desc_de}">${ab.desc_de}</span>` : ''}
+          </div>
+        `;
+      })()}
+
+      ${(token.isHuman || token.pokemonId === 0 || token.name_de === 'Mensch') ? `
+        <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.3); border-radius:6px; padding:0.35rem 0.55rem; margin-bottom:0.55rem; font-size:0.72rem; display:flex; justify-content:space-between; align-items:center;">
+          <span style="color:#93c5fd; font-weight:800;">👤 Pen &amp; Paper Mensch:</span>
+          <span style="color:#fff; font-weight:700;">50 KP • Basiswerte: 70 überall</span>
+        </div>
+      ` : ''}
+
+      <!-- Type Weaknesses & Resistances Card -->
+      ${renderTypeWeaknessesHtml(pData)}
+
+      <!-- Big Recall / Remove Button at Bottom -->
+      <div style="margin-top:0.75rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.08);">
+        <button class="btn-secondary btn-remove-token" style="width:100%; color:#ef4444; border-color:rgba(239,68,68,0.5); font-size:0.78rem; padding:0.45rem 0.8rem; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.4rem; background:rgba(239,68,68,0.08);">
+          🔴 ${token.nickname} vom Feld nehmen / zurückrufen
+        </button>
       </div>
     `;
 

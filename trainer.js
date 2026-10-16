@@ -2190,20 +2190,23 @@
           const sprite = t.sprite || (pData ? pData.sprites.front_default : '');
           const isMine = (!t.isEnemy && t.trainerId === state.activeTrainerId);
           const isEnemy = !!t.isEnemy;
-          const cardClass = `initiative-card ${isSelected ? 'active-selected' : ''} ${t.turnEnded ? 'turn-ended' : ''} ${isEnemy ? 'is-enemy' : 'is-player'}`;
+          const isFainted = Number(t.currentHp) <= 0;
+          const cardClass = `initiative-card ${isSelected ? 'active-selected' : ''} ${t.turnEnded ? 'turn-ended' : ''} ${isEnemy ? 'is-enemy' : 'is-player'} ${isFainted ? 'is-fainted' : ''}`;
           const reactionHtml = (t.hasReaction !== false) 
             ? '<span class="reaction-pill ready" title="Reaktion verfügbar">⚡ 1/1</span>'
             : '<span class="reaction-pill used" title="Reaktion verbraucht">⚡ 0/1</span>';
-          const turnStatusHtml = t.turnEnded 
-            ? '<span style="color:#10b981; font-weight:800; font-size:0.65rem;">✅ Fertig</span>'
-            : '<span style="color:#60a5fa; font-weight:800; font-size:0.65rem;">⏳ Am Zug</span>';
+          const turnStatusHtml = isFainted
+            ? '<span style="color:#94a3b8; font-weight:800; font-size:0.65rem;">💀 0 KP</span>'
+            : (t.turnEnded 
+              ? '<span style="color:#10b981; font-weight:800; font-size:0.65rem;">✅ Fertig</span>'
+              : '<span style="color:#60a5fa; font-weight:800; font-size:0.65rem;">⏳ Am Zug</span>');
 
           return `
             <div class="${cardClass}" data-tokenid="${t.id}" title="Klicken zum Auswählen">
               <span class="initiative-rank-badge">#${idx + 1}</span>
-              <img src="${sprite}" alt="" style="width:26px; height:26px;" class="pixelated" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
+              <img src="${sprite}" alt="" style="width:26px; height:26px; ${isFainted ? 'filter: grayscale(100%) opacity(0.45);' : ''}" class="pixelated" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
               <div style="display:flex; flex-direction:column; line-height:1.2; overflow:hidden;">
-                <div style="font-size:0.75rem; font-weight:800; color:${isEnemy ? '#fca5a5' : (isMine ? '#86efac' : '#93c5fd')}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; max-width:85px;">
+                <div style="font-size:0.75rem; font-weight:800; color:${isFainted ? '#94a3b8' : (isEnemy ? '#fca5a5' : (isMine ? '#86efac' : '#93c5fd'))}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; max-width:85px; ${isFainted ? 'text-decoration:line-through;' : ''}">
                   ${t.nickname}
                 </div>
                 <div style="display:flex; align-items:center; gap:0.3rem; font-size:0.65rem; color:var(--text-muted); font-family:var(--font-mono);">
@@ -2276,8 +2279,9 @@
       const pData = ALL_POKEMON.find(p => p.id === token.pokemonId);
       const spriteUrl = token.sprite || (pData ? pData.sprites.front_default : '');
 
+      const isFainted = Number(token.currentHp) <= 0;
       const tokenEl = document.createElement('div');
-      tokenEl.className = `map-token ${token.isEnemy ? 'is-enemy' : 'is-player'} ${token.id === state.selectedBattleTokenId ? 'selected' : ''} ${token.isProtected ? 'is-protected' : ''} ${token.isEnduring ? 'is-enduring' : ''} ${token.isCountering ? 'is-countering' : ''}`;
+      tokenEl.className = `map-token ${token.isEnemy ? 'is-enemy' : 'is-player'} ${token.id === state.selectedBattleTokenId ? 'selected' : ''} ${token.isProtected ? 'is-protected' : ''} ${token.isEnduring ? 'is-enduring' : ''} ${token.isCountering ? 'is-countering' : ''} ${isFainted ? 'is-fainted' : ''}`;
       tokenEl.dataset.tokenId = token.id;
 
       const hpPercent = Math.max(0, Math.min(100, Math.round((token.currentHp / token.maxHp) * 100)));
@@ -2288,8 +2292,8 @@
       tokenEl.innerHTML = `
         <div class="token-hp-bar"><div class="token-hp-fill" style="width:${hpPercent}%; background:${hpColor};"></div></div>
         ${renderTokenStatusIconsHtml(token)}
-        <img src="${spriteUrl}" alt="" class="token-sprite pixelated" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
-        <div class="token-label">${token.nickname || (pData ? pData.name_de : 'Token')}</div>
+        <img src="${spriteUrl}" alt="" class="token-sprite pixelated" style="${isFainted ? 'filter: grayscale(100%) opacity(0.5);' : ''}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
+        <div class="token-label">${token.nickname || (pData ? pData.name_de : 'Token')}${isFainted ? ' 💀' : ''}</div>
       `;
 
       tokenEl.addEventListener('click', (e) => {
@@ -2525,6 +2529,7 @@
 
     const pData = ALL_POKEMON.find(p => p.id === token.pokemonId);
     const spriteUrl = token.sprite || (pData ? pData.sprites.front_default : '');
+    const isFainted = Number(token.currentHp) <= 0;
     const hpPercent = Math.max(0, Math.min(100, Math.round((token.currentHp / token.maxHp) * 100)));
     let hpColor = '#10b981';
     if (hpPercent <= 20) hpColor = '#ef4444';
@@ -2537,11 +2542,12 @@
     elements.trainerSelectedTokenContent.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.6rem;">
         <div style="display:flex; align-items:center; gap:0.5rem;">
-          <img src="${spriteUrl}" alt="" style="width:44px; height:44px;" class="pixelated" onerror="this.src='https://play.pokemonshowdown.com/sprites/trainers/acetrainer.png'">
+          <img src="${spriteUrl}" alt="" style="width:44px; height:44px; ${isFainted ? 'filter: grayscale(100%) opacity(0.5);' : ''}" class="pixelated" onerror="this.src='https://play.pokemonshowdown.com/sprites/trainers/acetrainer.png'">
           <div>
             <div style="display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap;">
-              <span style="font-weight:900; font-size:1rem; color:var(--text-highlight);">${token.nickname}</span>
+              <span style="font-weight:900; font-size:1rem; color:var(--text-highlight); ${isFainted ? 'text-decoration: line-through; color:#94a3b8;' : ''}">${token.nickname}</span>
               ${getStatusDisplayBadge(token)}
+              ${isFainted ? '<span class="status-badge" style="background:#475569; color:#f1f5f9; font-size:0.65rem;">💀 0 KP (Besiegt)</span>' : ''}
             </div>
             <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.15rem;">
               ${(token.isHuman || token.pokemonId === 0 || token.name_de === 'Mensch') ? '👤 Mensch (NPC)' : (token.isEnemy ? '🔴 Gegner' : (isMine ? '🟢 Dein Pokémon' : '🔵 Verbündeter'))} • Lv. ${token.level} (${token.name_de || (pData ? pData.name_de : '')})
@@ -2566,33 +2572,86 @@
         </div>
       </div>
 
-      <!-- Type Weaknesses & Resistances -->
-      ${renderTypeWeaknessesHtml(pData)}
+      <!-- 1. Attacken & Reichweiten (GANZ NACH OBEN) -->
+      <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:0.5rem; margin-bottom:0.6rem;">
+        <div style="font-size:0.72rem; font-weight:900; color:#93c5fd; text-transform:uppercase; margin-bottom:0.4rem; display:flex; align-items:center; gap:0.35rem;">
+          <span>⚔️ ATTACKEN &amp; TAKTISCHE REICHWEITEN:</span>
+        </div>
 
-      ${(token.isHuman || token.pokemonId === 0 || token.name_de === 'Mensch') ? `
-        <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.3); border-radius:6px; padding:0.35rem 0.5rem; margin-top:0.45rem; font-size:0.72rem; display:flex; justify-content:space-between; align-items:center;">
-          <span style="color:#93c5fd; font-weight:800;">👤 Standard-Mensch:</span>
-          <span style="color:#fff; font-weight:700;">50 KP • Basiswerte 70 überall</span>
+        <div style="display:flex; flex-direction:column; gap:0.4rem;">
+          ${(token.moves || []).map((m, idx) => {
+            const curAp = getMoveAp(token, m);
+            const isMoveActive = (state.selectedBattleMoveIndex === idx);
+            const isCone = (m.range_type === 'cone');
+            const isPriority = (m.range_type === 'priority' || m.priority > 0);
+
+            let actionControlsHtml = '';
+            if (isMoveActive) {
+              actionControlsHtml = `
+                <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08);">
+                  ${isCone ? `
+                    <div style="display:flex; align-items:center; gap:0.3rem; margin-bottom:0.4rem;">
+                      <span style="font-size:0.68rem; font-weight:700; color:var(--accent-gold);">Kegel-Richtung:</span>
+                      <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'N' ? 'active' : ''}" data-dir="N">⬆️ N</button>
+                      <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'E' ? 'active' : ''}" data-dir="E">➡️ O</button>
+                      <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'S' ? 'active' : ''}" data-dir="S">⬇️ S</button>
+                      <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'W' ? 'active' : ''}" data-dir="W">⬅️ W</button>
+                    </div>
+                  ` : ''}
+                  <div style="font-size:0.72rem; color:#fbbf24; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.25); border-radius:4px; padding:0.4rem 0.55rem; font-weight:600; line-height:1.4;">
+                    🎲 <strong>Spieltisch-Angriff (Pen &amp; Paper):</strong><br>
+                    Sag deine Attacke <strong>${m.name_de}</strong> dem Spielleiter an und würfle am Tisch. Reichweite &amp; Trefferzone sind auf der Karte markiert. Der Spielleiter entscheidet den Treffer und führt die Attacke in der App aus!
+                  </div>
+                </div>
+              `;
+            }
+
+            return `
+              <div style="background:var(--bg-tertiary); border:1px solid ${isMoveActive ? 'var(--accent-blue)' : 'var(--border-color)'}; border-radius:6px; padding:0.45rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="display:flex; align-items:center; gap:0.35rem;">
+                    <strong style="font-size:0.85rem; color:var(--text-highlight);">${m.name_de}</strong>
+                    ${getTypeBadgeHtml(m.type_name, m.type_de)}
+                    ${isPriority ? '<span class="status-badge" style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:0.58rem; margin-left:0.25rem;">⚡ Hit &amp; Run</span>' : ''}
+                  </div>
+                  <div style="display:flex; align-items:center; gap:0.35rem;">
+                    <span style="font-size:0.72rem; font-family:var(--font-mono); color:${curAp === 0 ? '#ef4444' : 'var(--text-secondary)'}; font-weight:700;">
+                      AP: ${curAp}/${m.pp || 20}
+                    </span>
+                  </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.3rem;">
+                  <span style="font-size:0.68rem; color:var(--text-muted);">
+                    ${m.range_desc || 'Reichweite: 2 Felder'} • Stärke: <strong style="color:#93c5fd;">${getMovePowerDisplay(m)}</strong>
+                  </span>
+                  <button class="btn-primary btn-token-move-range" data-midx="${idx}" style="padding:0.2rem 0.5rem; font-size:0.68rem; background:${curAp === 0 ? '#64748b' : (isMoveActive ? '#f59e0b' : 'var(--accent-blue)')};">
+                    ${isMoveActive ? 'Aktiv (Aus)' : '🎯 Reichweite anzeigen'}
+                  </button>
+                </div>
+
+                ${actionControlsHtml}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- 2. Movement Points Bar & Zug beenden -->
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; font-weight:800; color:#93c5fd; background:rgba(59,130,246,0.12); padding:0.3rem 0.5rem; border-radius:4px; margin-bottom:0.45rem;">
+        <span>🏃 Verbleibende Bewegung:</span>
+        <span style="font-family:var(--font-mono); font-weight:900; color:${remMove > 0 ? '#60a5fa' : '#ef4444'};">${remMove} / ${effectiveMaxMove} Felder ${token.statStages?.spe ? `(Init: ${token.statStages.spe > 0 ? '+' : ''}${token.statStages.spe})` : ''}</span>
+      </div>
+      ${isMine ? `
+        <div style="margin-bottom:0.6rem;">
+          <button class="btn-primary btn-trainer-end-turn-token" style="width:100%; font-size:0.75rem; padding:0.35rem 0.5rem; background:${token.turnEnded ? '#475569' : '#2563eb'}; border-color:${token.turnEnded ? '#64748b' : '#1d4ed8'}; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.35rem; box-shadow:0 2px 8px rgba(37,99,235,0.3);">
+            ${token.turnEnded ? '✅ Zug für diese Runde beendet' : '🏁 Zug beenden'}
+          </button>
         </div>
       ` : ''}
 
-      <!-- Ability Info -->
-      ${(() => {
-        const ab = getPokemonAbility(token);
-        if (!ab) return '';
-        return `
-          <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.3); border-radius:6px; padding:0.4rem 0.6rem; margin-top:0.45rem; display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:0.35rem;">
-              <span style="font-size:0.7rem; font-weight:800; color:#93c5fd; text-transform:uppercase;">⚡ Fähigkeit:</span>
-              <strong style="font-size:0.8rem; color:#fff;">${ab.name_de || ab.name_en}</strong>
-            </div>
-            ${ab.desc_de ? `<span style="font-size:0.68rem; color:var(--text-secondary); max-width:220px; text-align:right;" title="${ab.desc_de}">${ab.desc_de}</span>` : ''}
-          </div>
-        `;
-      })()}
-
-      <!-- Stat Stages Overview -->
-      <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:6px; padding:0.4rem 0.5rem; margin-top:0.45rem;">
+      <!-- 3. Stat Stages Overview -->
+      <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:6px; padding:0.4rem 0.5rem; margin-bottom:0.55rem;">
         <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.25rem;">
           STATUSWERTE-STUFEN (-6 bis +6):
         </div>
@@ -2618,81 +2677,30 @@
         </div>
       </div>
 
-      <!-- Movement Points Bar -->
-      <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; font-weight:800; color:#93c5fd; background:rgba(59,130,246,0.12); padding:0.3rem 0.5rem; border-radius:4px; margin-top:0.45rem; margin-bottom:0.35rem;">
-        <span>🏃 Verbleibende Bewegung:</span>
-        <span style="font-family:var(--font-mono); font-weight:900; color:${remMove > 0 ? '#60a5fa' : '#ef4444'};">${remMove} / ${effectiveMaxMove} Felder ${token.statStages?.spe ? `(Init: ${token.statStages.spe > 0 ? '+' : ''}${token.statStages.spe})` : ''}</span>
-      </div>
-      ${isMine ? `
-        <div style="margin-bottom:0.6rem;">
-          <button class="btn-primary btn-trainer-end-turn-token" style="width:100%; font-size:0.75rem; padding:0.35rem 0.5rem; background:${token.turnEnded ? '#475569' : '#2563eb'}; border-color:${token.turnEnded ? '#64748b' : '#1d4ed8'}; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.35rem; box-shadow:0 2px 8px rgba(37,99,235,0.3);">
-            ${token.turnEnded ? '✅ Zug für diese Runde beendet' : '🏁 Zug beenden'}
-          </button>
+      <!-- 4. Ability Info & Human Info & Weaknesses -->
+      ${(() => {
+        const ab = getPokemonAbility(token);
+        if (!ab) return '';
+        return `
+          <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.3); border-radius:6px; padding:0.4rem 0.6rem; margin-bottom:0.55rem; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:0.35rem;">
+              <span style="font-size:0.7rem; font-weight:800; color:#93c5fd; text-transform:uppercase;">⚡ Fähigkeit:</span>
+              <strong style="font-size:0.8rem; color:#fff;">${ab.name_de || ab.name_en}</strong>
+            </div>
+            ${ab.desc_de ? `<span style="font-size:0.68rem; color:var(--text-secondary); max-width:220px; text-align:right;" title="${ab.desc_de}">${ab.desc_de}</span>` : ''}
+          </div>
+        `;
+      })()}
+
+      ${(token.isHuman || token.pokemonId === 0 || token.name_de === 'Mensch') ? `
+        <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.3); border-radius:6px; padding:0.35rem 0.5rem; margin-bottom:0.55rem; font-size:0.72rem; display:flex; justify-content:space-between; align-items:center;">
+          <span style="color:#93c5fd; font-weight:800;">👤 Standard-Mensch:</span>
+          <span style="color:#fff; font-weight:700;">50 KP • Basiswerte 70 überall</span>
         </div>
       ` : ''}
 
-      <!-- Attacken & Reichweiten -->
-      <div style="font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.35rem;">
-        ATTACKEN &amp; TAKTISCHE REICHWEITEN:
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:0.4rem;">
-        ${(token.moves || []).map((m, idx) => {
-          const curAp = getMoveAp(token, m);
-          const isMoveActive = (state.selectedBattleMoveIndex === idx);
-          const isCone = (m.range_type === 'cone');
-          const isPriority = (m.range_type === 'priority' || m.priority > 0);
-
-          let actionControlsHtml = '';
-          if (isMoveActive) {
-            actionControlsHtml = `
-              <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(255,255,255,0.08);">
-                ${isCone ? `
-                  <div style="display:flex; align-items:center; gap:0.3rem; margin-bottom:0.4rem;">
-                    <span style="font-size:0.68rem; font-weight:700; color:var(--accent-gold);">Kegel-Richtung:</span>
-                    <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'N' ? 'active' : ''}" data-dir="N">⬆️ N</button>
-                    <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'E' ? 'active' : ''}" data-dir="E">➡️ O</button>
-                    <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'S' ? 'active' : ''}" data-dir="S">⬇️ S</button>
-                    <button class="hp-btn btn-cone-dir-trainer ${state.coneDirection === 'W' ? 'active' : ''}" data-dir="W">⬅️ W</button>
-                  </div>
-                ` : ''}
-                <div style="font-size:0.72rem; color:#fbbf24; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.25); border-radius:4px; padding:0.4rem 0.55rem; font-weight:600; line-height:1.4;">
-                  🎲 <strong>Spieltisch-Angriff (Pen &amp; Paper):</strong><br>
-                  Sag deine Attacke <strong>${m.name_de}</strong> dem Spielleiter an und würfle am Tisch. Reichweite &amp; Trefferzone sind auf der Karte markiert. Der Spielleiter entscheidet den Treffer und führt die Attacke in der App aus!
-                </div>
-              </div>
-            `;
-          }
-
-          return `
-            <div style="background:var(--bg-tertiary); border:1px solid ${isMoveActive ? 'var(--accent-blue)' : 'var(--border-color)'}; border-radius:6px; padding:0.45rem;">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; align-items:center; gap:0.35rem;">
-                  <strong style="font-size:0.85rem; color:var(--text-highlight);">${m.name_de}</strong>
-                  ${getTypeBadgeHtml(m.type_name, m.type_de)}
-                  ${isPriority ? '<span class="status-badge" style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:0.58rem; margin-left:0.25rem;">⚡ Hit &amp; Run</span>' : ''}
-                </div>
-                <div style="display:flex; align-items:center; gap:0.35rem;">
-                  <span style="font-size:0.72rem; font-family:var(--font-mono); color:${curAp === 0 ? '#ef4444' : 'var(--text-secondary)'}; font-weight:700;">
-                    AP: ${curAp}/${m.pp || 20}
-                  </span>
-                </div>
-              </div>
-
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.3rem;">
-                <span style="font-size:0.68rem; color:var(--text-muted);">
-                  ${m.range_desc || 'Reichweite: 2 Felder'} • Stärke: <strong style="color:#93c5fd;">${getMovePowerDisplay(m)}</strong>
-                </span>
-                <button class="btn-primary btn-token-move-range" data-midx="${idx}" style="padding:0.2rem 0.5rem; font-size:0.68rem; background:${curAp === 0 ? '#64748b' : (isMoveActive ? '#f59e0b' : 'var(--accent-blue)')};">
-                  ${isMoveActive ? 'Aktiv (Aus)' : '🎯 Reichweite anzeigen'}
-                </button>
-              </div>
-
-              ${actionControlsHtml}
-            </div>
-          `;
-        }).join('')}
-      </div>
+      <!-- Type Weaknesses & Resistances -->
+      ${renderTypeWeaknessesHtml(pData)}
 
       ${isMine ? `
         <div style="margin-top:0.75rem; padding-top:0.6rem; border-top:1px solid var(--border-color);">
