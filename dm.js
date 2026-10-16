@@ -740,8 +740,15 @@
     switch (type) {
       case 'STATE_UPDATED':
         if (payload.trainers) state.trainers = payload.trainers;
-        if (payload.battleState) state.battleState = payload.battleState;
-        if (payload.enemyPresets) state.enemyPresets = payload.enemyPresets;
+        if (payload.battleState) {
+          if (Array.isArray(payload.battleState.tokens)) {
+            payload.battleState.tokens = payload.battleState.tokens.filter(t => t.id !== 'token_enemy_1791407444606_512a' && t.nickname !== 'Standard-Mensch' && t.pokemonId !== 0);
+          }
+          state.battleState = payload.battleState;
+        }
+        if (payload.enemyPresets) {
+          state.enemyPresets = payload.enemyPresets.filter(p => p.id !== 'enemy_human_standard' && p.nickname !== 'Standard-Mensch');
+        }
         if (payload.pendingRequests) state.pendingRequests = payload.pendingRequests;
         renderTrainersView();
         renderEvolutionsView();
@@ -795,6 +802,12 @@
 
   function applyGameState(gameState) {
     if (!gameState) return;
+    if (gameState.battleState && Array.isArray(gameState.battleState.tokens)) {
+      gameState.battleState.tokens = gameState.battleState.tokens.filter(t => t.id !== 'token_enemy_1791407444606_512a' && t.nickname !== 'Standard-Mensch' && t.pokemonId !== 0);
+    }
+    if (Array.isArray(gameState.enemyPresets)) {
+      gameState.enemyPresets = gameState.enemyPresets.filter(p => p.id !== 'enemy_human_standard' && p.nickname !== 'Standard-Mensch');
+    }
     if (gameState.version) {
       try { localStorage.setItem('pnp_saved_gamestate', JSON.stringify(gameState)); } catch (e) {}
     }

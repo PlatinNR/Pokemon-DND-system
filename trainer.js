@@ -701,6 +701,13 @@
   function handleStateUpdate(newState) {
     if (!newState) return;
 
+    if (newState.battleState && Array.isArray(newState.battleState.tokens)) {
+      newState.battleState.tokens = newState.battleState.tokens.filter(t => t.id !== 'token_enemy_1791407444606_512a' && t.nickname !== 'Standard-Mensch' && t.pokemonId !== 0);
+    }
+    if (Array.isArray(newState.enemyPresets)) {
+      newState.enemyPresets = newState.enemyPresets.filter(p => p.id !== 'enemy_human_standard' && p.nickname !== 'Standard-Mensch');
+    }
+
     if (newState.version) {
       try { localStorage.setItem('pnp_saved_gamestate', JSON.stringify(newState)); } catch (e) {}
     }

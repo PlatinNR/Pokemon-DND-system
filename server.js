@@ -53,6 +53,12 @@ function loadState() {
         const parsed = JSON.parse(raw);
         if (parsed && (!gameState.version || (parsed.version && parsed.version >= gameState.version))) {
           gameState = parsed;
+          if (gameState.battleState && Array.isArray(gameState.battleState.tokens)) {
+            gameState.battleState.tokens = gameState.battleState.tokens.filter(t => t.id !== 'token_enemy_1791407444606_512a' && t.nickname !== 'Standard-Mensch' && t.pokemonId !== 0);
+          }
+          if (Array.isArray(gameState.enemyPresets)) {
+            gameState.enemyPresets = gameState.enemyPresets.filter(p => p.id !== 'enemy_human_standard' && p.nickname !== 'Standard-Mensch');
+          }
         }
       } catch (e) {}
     }
@@ -84,6 +90,12 @@ function loadState() {
             });
           }
         });
+      }
+      if (gameState.battleState && Array.isArray(gameState.battleState.tokens)) {
+        gameState.battleState.tokens = gameState.battleState.tokens.filter(t => t.id !== 'token_enemy_1791407444606_512a' && t.nickname !== 'Standard-Mensch' && t.pokemonId !== 0);
+      }
+      if (Array.isArray(gameState.enemyPresets)) {
+        gameState.enemyPresets = gameState.enemyPresets.filter(p => p.id !== 'enemy_human_standard' && p.nickname !== 'Standard-Mensch');
       }
       isStateLoaded = true;
     } catch (e) {
@@ -1036,7 +1048,12 @@ function handleAction(action) {
           }
         });
       }
-      if (payload.battleState) gameState.battleState = payload.battleState;
+      if (payload.battleState) {
+        gameState.battleState = payload.battleState;
+        if (Array.isArray(gameState.battleState.tokens)) {
+          gameState.battleState.tokens = gameState.battleState.tokens.filter(t => t.id !== 'token_enemy_1791407444606_512a' && t.nickname !== 'Standard-Mensch' && t.pokemonId !== 0);
+        }
+      }
       if (payload.version) gameState.version = Math.max(gameState.version || 0, payload.version);
       saveState();
       broadcastEvent('STATE_UPDATED', gameState);

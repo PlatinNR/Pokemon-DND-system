@@ -1,38 +1,5 @@
 [
   {
-    "id": "enemy_human_standard",
-    "pokemonId": 0,
-    "name_de": "Mensch",
-    "nickname": "Standard-Mensch",
-    "level": 15,
-    "nature": "Neutral",
-    "category": "Menschen & NPCs",
-    "currentHp": 50,
-    "maxHp": 50,
-    "selectedMoves": [
-      5,
-      33,
-      98,
-      182
-    ],
-    "sprite": "https://play.pokemonshowdown.com/sprites/trainers/acetrainer.png",
-    "ability": {
-      "id": 0,
-      "name_de": "Menschlicher Wille",
-      "name_en": "Human Spirit",
-      "desc_de": "Standhafter Geist: 50 KP und alle Basis-Statuswerte auf 70.",
-      "is_hidden": false
-    },
-    "stats": {
-      "hp": 50,
-      "atk": 70,
-      "def": 70,
-      "spa": 70,
-      "spd": 70,
-      "spe": 70
-    }
-  },
-  {
     "id": "enemy_zubat_1",
     "pokemonId": 41,
     "name_de": "Zubat",
